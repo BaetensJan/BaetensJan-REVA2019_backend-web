@@ -1,0 +1,10 @@
+version: '2'
+
+services:
+  reva2019:
+    image: reva2019
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "5000:5000"

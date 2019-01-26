@@ -4,7 +4,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace Web.Migrations
 {
-    public partial class init : Migration
+    public partial class Init : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
@@ -23,7 +23,7 @@ namespace Web.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Categories",
+                name: "Category",
                 columns: table => new
                 {
                     Id = table.Column<int>(nullable: false)
@@ -34,7 +34,7 @@ namespace Web.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Categories", x => x.Id);
+                    table.PrimaryKey("PK_Category", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -46,7 +46,8 @@ namespace Web.Migrations
                     Name = table.Column<string>(maxLength: 30, nullable: false),
                     X = table.Column<double>(nullable: false),
                     Y = table.Column<double>(nullable: false),
-                    GroupsAtExhibitor = table.Column<int>(nullable: false)
+                    GroupsAtExhibitor = table.Column<int>(nullable: false),
+                    ExhibitorNumber = table.Column<string>(nullable: true)
                 },
                 constraints: table =>
                 {
@@ -100,9 +101,9 @@ namespace Web.Migrations
                 {
                     table.PrimaryKey("PK_CategoryExhibitor", x => new { x.CategoryId, x.ExhibitorId });
                     table.ForeignKey(
-                        name: "FK_CategoryExhibitor_Categories_CategoryId",
+                        name: "FK_CategoryExhibitor_Category_CategoryId",
                         column: x => x.CategoryId,
-                        principalTable: "Categories",
+                        principalTable: "Category",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
@@ -280,21 +281,16 @@ namespace Web.Migrations
                     Id = table.Column<int>(nullable: false)
                         .Annotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn),
                     Notes = table.Column<string>(nullable: true),
-                    ExhibitorId = table.Column<int>(nullable: true),
                     Photo = table.Column<string>(nullable: true),
                     QuestionId = table.Column<int>(nullable: true),
-                    Answers = table.Column<string>(nullable: true),
+                    Answer = table.Column<string>(nullable: true),
+                    Submitted = table.Column<bool>(nullable: false),
+                    Extra = table.Column<bool>(nullable: false),
                     GroupId = table.Column<int>(nullable: true)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Assignment", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_Assignment_Exhibitor_ExhibitorId",
-                        column: x => x.ExhibitorId,
-                        principalTable: "Exhibitor",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
                         name: "FK_Assignment_Group_GroupId",
                         column: x => x.GroupId,
@@ -352,11 +348,6 @@ namespace Web.Migrations
                 name: "IX_AspNetUsers_SchoolId",
                 table: "AspNetUsers",
                 column: "SchoolId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Assignment_ExhibitorId",
-                table: "Assignment",
-                column: "ExhibitorId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Assignment_GroupId",
@@ -423,7 +414,7 @@ namespace Web.Migrations
                 name: "CategoryExhibitor");
 
             migrationBuilder.DropTable(
-                name: "Categories");
+                name: "Category");
 
             migrationBuilder.DropTable(
                 name: "Exhibitor");
