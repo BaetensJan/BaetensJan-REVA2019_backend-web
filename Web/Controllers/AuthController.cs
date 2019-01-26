@@ -79,12 +79,12 @@ namespace Web.Controllers
             {
                 // creating the school
                 var school = new School(model.SchoolName, GetRandomString(6));
-                school = _schoolRepository.Add(school);
+                _schoolRepository.Add(school);
 
                 // creating teacher consisting of his school
                 var user = _authenticationManager.CreateApplicationUserObject(model.Email, model.Username,
                     model.Password);
-                user.School = school;
+                user.School = await _schoolRepository.GetByName(model.SchoolName);
 
                 var result = await _userManager.CreateAsync(user, model.Password);
 
@@ -100,7 +100,7 @@ namespace Web.Controllers
                     claim = _authenticationManager.AddClaim(claim.ToList(), "school", school.Id.ToString()).ToArray();
 
                     var token = GetToken(claim);
-                    
+
                     return Ok(
                         new
                         {
@@ -172,7 +172,7 @@ namespace Web.Controllers
                 {
                     claim = _authenticationManager.AddClaim(claim.ToList(), "school", user.School.Id.ToString())
                         .ToArray();
-                    
+
                     // check if userlogin is from a group. (groupLogin is a concat of schoolName + groupName)
                     var schoolName = user.School.Name;
                     if (schoolName.Length < model.Username.Length)
