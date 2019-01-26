@@ -1,0 +1,15 @@
+#header + div {
+  margin-top: 2em;
+}
+
+.glyphicon-trash:hover {
+  color: red;
+}
+
+.glyphicon {
+  cursor: pointer;
+}
+
+.glyphicon-pencil:hover {
+  color: springgreen;
+}

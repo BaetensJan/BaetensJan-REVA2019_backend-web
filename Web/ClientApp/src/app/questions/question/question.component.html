@@ -1,0 +1,52 @@
+<div *ngIf="question && question.value.exhibitor && question.value.category">
+  <div id="header">
+    <h1>Vraag en Antwoord van een Opdracht</h1>
+  </div>
+
+  <!--Body-->
+  <form [formGroup]='question'>
+    <div>
+      <!--Terug knop-->
+      <button class="btn btn-primary" type="button"
+              [routerLink]='["/questions"]'
+              style="margin-bottom: 2em;"><span class="glyphicon glyphicon-arrow-left"></span> Terug
+      </button>
+
+      <!--Opslaan knop-->
+      <button class="btn btn-success pull-right" (click)="onSubmit()"
+              [disabled]="!question.valid">
+        <span class="glyphicon glyphicon-floppy-disk"></span> Opslaan
+      </button>
+    </div>
+
+    <!--Category select-->
+    <div class="form-group">
+    <label for="category">Selecteer categorie</label>
+    <select class="form-control" formControlName="category" id="category">
+      <option *ngFor="let category of categories" [ngValue]="category">
+        {{category.name}}
+      </option>
+    </select>
+    </div>
+
+    <!--Exhibitor select-->
+    <div class="form-group">
+    <label for="exhibitor">Selecteer exposant</label>
+    <select class="form-control" formControlName="exhibitor" id="exhibitor">
+      <option *ngFor="let exhibitor of exhibitors" [ngValue]="exhibitor">
+        {{exhibitor.name}}
+      </option>
+    </select>
+    </div>
+
+
+      <div class="form-group">
+        <label for="question">Vraag</label>
+        <input type="text" class="form-control" id="question" formControlName='questionText'>
+      </div>
+      <div class="form-group">
+        <label for="answer">Antwoord</label>
+        <input type="text" class="form-control" id="answer" formControlName='answerText'>
+      </div>
+  </form>
+</div> <!--END OF PAGE-->

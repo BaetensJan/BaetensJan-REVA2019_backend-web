@@ -1,0 +1,23 @@
+<div id="header">
+  <h1>Categorie</h1>
+</div>
+
+<div *ngIf="heeftWaarde">
+
+  <!--Terug knop-->
+  <button class="btn btn-primary"
+          [routerLink]='["/categorieen"]'
+          style="margin-bottom: 2em;"><span class="glyphicon glyphicon-arrow-left"></span> Terug
+  </button>
+
+  <!--Opslaan knop-->
+  <button class="btn btn-success pull-right" (click)="onOpslaan()">
+    Opslaan
+  </button>
+  <div class="form-container">
+    <input class="form-control" [(ngModel)]="selectedCategorie.name" placeholder="Categorie naam">
+<br><br>
+
+    <textarea class="form-control" [(ngModel)]="selectedCategorie.description" placeholder="Beschrijving"></textarea>
+  </div>
+</div>

@@ -1,0 +1,757 @@
+<!doctype html>
+<html class="no-js" lang="">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="x-ua-compatible" content="ie=edge">
+        <title>REVA documentation</title>
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+
+        <link rel="icon" type="image/x-icon" href="../images/favicon.ico">
+	      <link rel="stylesheet" href="../styles/style.css">
+    </head>
+    <body>
+
+        <div class="navbar navbar-default navbar-fixed-top visible-xs">
+            <a href="../" class="navbar-brand">REVA documentation</a>
+            <button type="button" class="btn btn-default btn-menu ion-ios-menu" id="btn-menu"></button>
+        </div>
+
+        <div class="xs-menu menu" id="mobile-menu">
+                <div id="book-search-input" role="search"><input type="text" placeholder="Type to search"></div>            <compodoc-menu></compodoc-menu>
+        </div>
+
+        <div class="container-fluid main">
+           <div class="row main">
+               <div class="hidden-xs menu">
+                   <compodoc-menu mode="normal"></compodoc-menu>
+               </div>
+               <!-- START CONTENT -->
+               <div class="content component">
+                   <div class="content-data">
+
+
+
+
+<ol class="breadcrumb">
+  <li>Components</li>
+  <li>AntwoordenComponent</li>
+</ol>
+
+<ul class="nav nav-tabs" role="tablist">
+        <li class="active">
+            <a href="#info" role="tab" id="info-tab" data-toggle="tab" data-link="info">Info</a>
+        </li>
+        <li >
+            <a href="#source" role="tab" id="source-tab" data-toggle="tab" data-link="source">Source</a>
+        </li>
+        <li >
+            <a href="#templateData" role="tab" id="templateData-tab" data-toggle="tab" data-link="template">Template</a>
+        </li>
+        <li >
+            <a href="#styleData" role="tab" id="styleData-tab" data-toggle="tab" data-link="style">Styles</a>
+        </li>
+        <li >
+            <a href="#tree" role="tab" id="tree-tab" data-toggle="tab" data-link="dom-tree">DOM Tree</a>
+        </li>
+</ul>
+
+<div class="tab-content">
+    <div class="tab-pane fade active in" id="c-info"><p class="comment">
+    <h3>File</h3>
+</p>
+<p class="comment">
+    <code>src/app/antwoorden/antwoorden.component.ts</code>
+</p>
+
+
+
+
+
+<section>
+    <h3>Metadata</h3>
+    <table class="table table-sm table-hover">
+        <tbody>
+
+
+
+
+
+
+
+
+
+
+
+            <tr>
+                <td class="col-md-3">selector</td>
+                <td class="col-md-9"><code>app-antwoorden</code></td>
+            </tr>
+
+            <tr>
+                <td class="col-md-3">styleUrls</td>
+                <td class="col-md-9"><code>./antwoorden.component.css</code></td>
+            </tr>
+
+
+
+            <tr>
+                <td class="col-md-3">templateUrl</td>
+                <td class="col-md-9"><code>./antwoorden.component.html</code></td>
+            </tr>
+
+
+
+
+
+
+
+
+        </tbody>
+    </table>
+</section>
+
+    <section>
+    <h3 id="index">Index</h3>
+    <table class="table table-sm table-bordered index-table">
+        <tbody>
+                <tr>
+                    <td class="col-md-4">
+                        <h6><b>Properties</b></h6>
+                    </td>
+                </tr>
+                <tr>
+                    <td class="col-md-4">
+                        <ul class="index-list">
+                            <li>
+                                <a href="#displayedColumns">displayedColumns</a>
+                            </li>
+                        </ul>
+                    </td>
+                </tr>
+
+                <tr>
+                    <td class="col-md-4">
+                        <h6><b>Methods</b></h6>
+                    </td>
+                </tr>
+                <tr>
+                    <td class="col-md-4">
+                        <ul class="index-list">
+                            <li>
+                                <a href="#groups">groups</a>
+                            </li>
+                            <li>
+                                <a href="#pdfDownload">pdfDownload</a>
+                            </li>
+                        </ul>
+                    </td>
+                </tr>
+
+
+
+
+
+        </tbody>
+    </table>
+</section>
+
+    <section>
+    <h3 id="constructor">Constructor</h3>
+        <table class="table table-sm table-bordered">
+            <tbody>
+                <tr>
+                    <td class="col-md-4">
+<code>constructor(_AntwoordenDataService: <a href="../injectables/AntwoordenDataService.html">AntwoordenDataService</a>, modalService: BsModalService)</code>
+                    </td>
+                </tr>
+                        <tr>
+                            <td class="col-md-4">
+                                <div class="io-line">Defined in <a href="" data-line="38" class="link-to-prism">src/app/antwoorden/antwoorden.component.ts:38</a></div>
+                            </td>
+                        </tr>
+
+                <tr>
+                    <td class="col-md-4">
+                            <div class="io-description"><p>Constructor</p>
+</div>
+                            <div>
+                                    <b>Parameters :</b>
+                                    <table class="params">
+                                        <thead>
+                                            <tr>
+                                                <td>Name</td>
+                                                    <td>Type</td>
+                                                <td>Optional</td>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                                <tr>
+                                                        <td>_AntwoordenDataService</td>
+                                                  
+                                                        <td>
+                                                                    <code><a href="../injectables/AntwoordenDataService.html" target="_self" >AntwoordenDataService</a></code>
+                                                        </td>
+                                                  
+                                                    <td>
+                                                            No
+                                                    </td>
+                                                    
+                                                </tr>
+                                                <tr>
+                                                        <td>modalService</td>
+                                                  
+                                                        <td>
+                                                                    <code>BsModalService</code>
+                                                        </td>
+                                                  
+                                                    <td>
+                                                            No
+                                                    </td>
+                                                    
+                                                </tr>
+                                        </tbody>
+                                    </table>
+                            </div>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+</section>
+
+
+
+
+
+    <section>
+    
+        <h3 id="methods">
+            Methods
+        </h3>
+        <table class="table table-sm table-bordered">
+            <tbody>
+                <tr>
+                    <td class="col-md-4">
+                        <a name="groups"></a>
+                        <span class="name">
+                            <b>
+                            groups
+                            </b>
+                            <a href="#groups"><span class="icon ion-ios-link"></span></a>
+                        </span>
+                    </td>
+                </tr>
+                <tr>
+                    <td class="col-md-4">
+<code>groups()</code>
+                    </td>
+                </tr>
+
+
+                        <tr>
+                            <td class="col-md-4">
+                                    <div class="io-line">Defined in <a href="" data-line="56" class="link-to-prism">src/app/antwoorden/antwoorden.component.ts:56</a></div>
+                            </td>
+                        </tr>
+
+
+                <tr>
+                    <td class="col-md-4">
+                            <div class="io-description"><p>Gets all finished assignments from the backend for each group and adds this to the table</p>
+</div>
+
+                            <div class="io-description">
+                                <b>Returns : </b>    <code><a href="https://www.typescriptlang.org/docs/handbook/basic-types.html" target="_blank" >void</a></code>
+
+                            </div>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+        <table class="table table-sm table-bordered">
+            <tbody>
+                <tr>
+                    <td class="col-md-4">
+                        <a name="pdfDownload"></a>
+                        <span class="name">
+                            <b>
+                            pdfDownload
+                            </b>
+                            <a href="#pdfDownload"><span class="icon ion-ios-link"></span></a>
+                        </span>
+                    </td>
+                </tr>
+                <tr>
+                    <td class="col-md-4">
+<code>pdfDownload(row: <a href="../classes/Group.html">Group</a>)</code>
+                    </td>
+                </tr>
+
+
+                        <tr>
+                            <td class="col-md-4">
+                                    <div class="io-line">Defined in <a href="" data-line="68" class="link-to-prism">src/app/antwoorden/antwoorden.component.ts:68</a></div>
+                            </td>
+                        </tr>
+
+
+                <tr>
+                    <td class="col-md-4">
+                            <div class="io-description"><p>Generates pdf file for group and downloads pdf</p>
+</div>
+
+                            <div class="io-description">
+                                    <b>Parameters :</b>
+                                    <table class="params">
+                                        <thead>
+                                            <tr>
+                                                <td>Name</td>
+                                                    <td>Type</td>
+                                                <td>Optional</td>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                                <tr>
+                                                        <td>row</td>
+                                                        <td>
+                                                                    <code><a href="../classes/Group.html" target="_self" >Group</a></code>
+                                                        </td>
+                                                    
+                                                    <td>
+                                                            No
+                                                    </td>
+                                                    
+
+                                                </tr>
+                                        </tbody>
+                                    </table>
+                            </div>
+                            <div>
+                            </div>
+                            <div class="io-description">
+                                <b>Returns : </b>    <code><a href="https://www.typescriptlang.org/docs/handbook/basic-types.html" target="_blank" >void</a></code>
+
+                            </div>
+                                <div class="io-description">
+                                    
+                                </div>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+</section>
+
+    <section>
+    
+        <h3 id="inputs">
+            Properties
+        </h3>
+        <table class="table table-sm table-bordered">
+            <tbody>
+                <tr>
+                    <td class="col-md-4">
+                        <a name="displayedColumns"></a>
+                        <span class="name">
+                            <b>
+                            displayedColumns
+                            </b>
+                            <a href="#displayedColumns"><span class="icon ion-ios-link"></span></a>
+                        </span>
+                    </td>
+                </tr>
+                <tr>
+                    <td class="col-md-4">
+                        <code>displayedColumns:     <code>[]</code>
+</code>
+                    </td>
+                </tr>
+                    <tr>
+                        <td class="col-md-4">
+                            <i>Type : </i>    <code>[]</code>
+
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="col-md-4">
+                            <i>Default value : </i><code>[&#x27;Groepsnaam&#x27;, &#x27;Download&#x27;]</code>
+                        </td>
+                    </tr>
+                        <tr>
+                            <td class="col-md-4">
+                                    <div class="io-line">Defined in <a href="" data-line="38" class="link-to-prism">src/app/antwoorden/antwoorden.component.ts:38</a></div>
+                            </td>
+                        </tr>
+
+                <tr>
+                    <td class="col-md-4">
+                        <div class="io-description"><p>Columns displayed in the table. Columns IDs can be added, removed, or reordered. </p>
+</div>
+                    </td>
+                </tr>
+
+            </tbody>
+        </table>
+</section>
+
+</div>
+
+
+    <div class="tab-pane fade  tab-source-code" id="c-source">
+        <pre class="line-numbers compodoc-sourcecode"><code class="language-typescript">import {Component, ElementRef, ViewChild} from &#x27;@angular/core&#x27;;
+import * as jsPDF from &#x27;jspdf&#x27;;
+import {Group} from &quot;../models/group.model&quot;;
+import {MatPaginator, MatSort} from &quot;@angular/material&quot;;
+import {AntwoordenDataSource} from &quot;./antwoorden-datasource&quot;;
+import {BsModalService} from &quot;ngx-bootstrap&quot;;
+
+import {AntwoordenDataService} from &quot;./antwoorden-data.service&quot;;
+
+@Component({
+  selector: &#x27;app-antwoorden&#x27;,
+  templateUrl: &#x27;./antwoorden.component.html&#x27;,
+  styleUrls: [&#x27;./antwoorden.component.css&#x27;]
+})
+export class AntwoordenComponent {
+  /**
+   * @ignore
+   */
+  @ViewChild(MatPaginator) paginator: MatPaginator;
+  /**
+   * @ignore
+   */
+  @ViewChild(MatSort) sort: MatSort;
+  /**
+   * @ignore
+   */
+  @ViewChild(&#x27;modal&#x27;) modal: ElementRef;
+  /**
+   * @ignore
+   */
+  dataSource: AntwoordenDataSource;
+  /**
+   * @ignore
+   */
+  data: Group[];
+
+  /** Columns displayed in the table. Columns IDs can be added, removed, or reordered. */
+  displayedColumns &#x3D; [&#x27;Groepsnaam&#x27;, &#x27;Download&#x27;];
+
+  /**
+   * Constructor
+   *
+   * @param _AntwoordenDataService
+   * @param modalService
+   */
+  constructor(
+    private _AntwoordenDataService: AntwoordenDataService,
+    private modalService: BsModalService
+  ) {
+    this.groups();
+  }
+
+  /**
+   * Gets all finished assignments from the backend for each group and adds this to the table
+   */
+  groups() {
+    this._AntwoordenDataService.antwoorden.subscribe(antwoorden &#x3D;&gt; {
+      this.data &#x3D; antwoorden as Group[];
+      this.dataSource &#x3D; new AntwoordenDataSource(this.data, this.paginator, this.sort);
+    });
+  }
+
+  /**
+   * Generates pdf file for group and downloads pdf
+   *
+   * @param row
+   */
+  pdfDownload(row: Group) {
+    const doc &#x3D; new jsPDF();
+    doc.text(&quot;Groep: &quot; + row.name, 10, 10);
+    doc.text(&quot;aantal bezochte standen: &quot; + row.finishedAssignments.length, 10, 20);
+    let i &#x3D; 0;
+    // item.finishedAssignments.forEach(f &#x3D;&gt; {
+    row.finishedAssignments.forEach(f &#x3D;&gt; {
+      if (i &#x3D;&#x3D; 0) {
+        if (i &gt; 0) {
+          doc.addPage();
+        }
+        doc.text(&quot;stand &quot; + (i + 1) + &quot; :&quot; + f.exhibitor.name, 10, 40);
+        doc.text(&quot;categorie: &quot; + f.exhibitor.category.name, 10, 50)
+        doc.text(f.questions, 10, 60);
+        doc.text(f.answers, 10, 70);
+        doc.text(&quot;notities: &quot; + f.notes, 10, 80);
+        doc.addImage(&quot;../../assets/&quot; + f.photo, &quot;JPEG&quot;, 10, 90, 100, 100);
+        i++;
+      } else {
+        if (i &gt; 0) {
+          doc.addPage();
+        }
+        doc.text(&quot;stand &quot; + (i + 1) + &quot; :&quot; + f.exhibitor.name, 10, 10);
+        doc.text(&quot;categorie: &quot; + f.exhibitor.category.name, 10, 20)
+        doc.text(f.questions, 10, 30);
+        doc.text(f.answers, 10, 40);
+        doc.text(&quot;notities: &quot; + f.notes, 10, 50);
+        doc.addImage(&quot;../../assets/&quot; + f.photo, &quot;JPEG&quot;, 10, 60, 100, 100);
+        i++;
+      }
+    });
+    doc.save(row.name + &quot;_antwoorden.pdf&quot;);
+  }
+
+  /*
+    public errorMsg: string;
+
+    _groups: Group[];
+    _foto &#x3D; &#x27;data:image/jpeg;base64,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&#x3D;&#x27;;
+
+    constructor(private _groupDataService: GroepenDataService) {
+    }
+
+    ngOnInit(): void {
+      this._groupDataService.groups.subscribe(
+        groups &#x3D;&gt; {
+          this._groups &#x3D; groups;
+          console.log(this._groups);
+        },
+        (error: HttpErrorResponse) &#x3D;&gt; {
+          this.errorMsg &#x3D; &#x60;Error ${
+            error.status
+            } while trying to retrieve recipes: ${error.error}&#x60;;
+        }
+      );
+    }
+   pdfDownload(item) {
+      const doc &#x3D; new jsPDF();
+      doc.text(&quot;Groep: &quot; + item.name, 10, 10);
+      doc.text(&quot;aantal bezochte standen: &quot; + item.finishedAssignments.length, 10, 20);
+      let i &#x3D; 0;
+      item.finishedAssignments.forEach(f &#x3D;&gt; {
+        if (i &#x3D;&#x3D; 0) {
+          if (i &gt; 0) {
+            doc.addPage();
+          }
+          doc.text(&quot;stand &quot; + (i + 1) + &quot; :&quot; + f.exhibitor.name, 10, 40);
+          doc.text(&quot;categorie: &quot; + f.exhibitor.category.name, 10, 50)
+          doc.text(f.questions, 10, 60);
+          doc.text(f.answers, 10, 70);
+          doc.text(&quot;notities: &quot; + f.notes, 10, 80);
+          doc.addImage(&quot;../../assets/&quot; + f.photo, &quot;JPEG&quot;, 10, 90, 100, 100);
+          i++;
+        } else {
+          if (i &gt; 0) {
+            doc.addPage();
+          }
+          doc.text(&quot;stand &quot; + (i + 1) + &quot; :&quot; + f.exhibitor.name, 10, 10);
+          doc.text(&quot;categorie: &quot; + f.exhibitor.category.name, 10, 20)
+          doc.text(f.questions, 10, 30);
+          doc.text(f.answers, 10, 40);
+          doc.text(&quot;notities: &quot; + f.notes, 10, 50);
+          doc.addImage(&quot;../../assets/&quot; + f.photo, &quot;JPEG&quot;, 10, 60, 100, 100);
+          i++;
+        }
+      });
+      doc.save(item.name + &quot;_antwoorden.pdf&quot;);
+    }
+
+  */
+}
+</code></pre>
+    </div>
+
+    <div class="tab-pane fade " id="c-templateData">
+        <pre class="line-numbers"><code class="language-html">&lt;!--
+&lt;table class&#x3D;&quot;table&quot;&gt;
+  &lt;tr&gt;
+  &lt;th&gt;
+    groep
+  &lt;/th&gt;
+  &lt;th&gt;
+    antwoordformulier
+  &lt;/th&gt;
+    &lt;th&gt;
+      Download
+    &lt;/th&gt;
+  &lt;/tr&gt;
+  &lt;tr *ngFor&#x3D;&quot;let item of _groups; let i &#x3D; index&quot;&gt;
+    &lt;td&gt;{{i +1}}&lt;/td&gt;
+    &lt;td&gt;{{i + 1}}&lt;/td&gt;
+    &lt;td&gt;
+      &lt;a class&#x3D;&quot;btn btn-default&quot; target&#x3D;&quot;_self&quot; (click)&#x3D;&quot;pdfDownload(item)&quot; &gt;Download PDF&lt;/a&gt;
+    &lt;/td&gt;
+  &lt;/tr&gt;
+&lt;/table&gt;
+--&gt;
+&lt;div class&#x3D;&quot;mat-elevation-z8&quot;&gt;
+  &lt;table mat-table class&#x3D;&quot;full-width-table&quot; [dataSource]&#x3D;&quot;dataSource&quot; matSort
+         aria-label&#x3D;&quot;Elements&quot;&gt;
+    &lt;!-- Name Column --&gt;
+    &lt;ng-container matColumnDef&#x3D;&quot;Groepsnaam&quot;&gt;
+      &lt;th mat-header-cell *matHeaderCellDef mat-sort-header&gt;Groepsnaam&lt;/th&gt;
+      &lt;td mat-cell *matCellDef&#x3D;&quot;let row&quot;&gt;
+        {{row.name}}
+      &lt;/td&gt;
+    &lt;/ng-container&gt;
+    &lt;ng-container matColumnDef&#x3D;&quot;Download&quot;&gt;
+      &lt;th mat-header *matHeaderCellDef mat-sort-header&gt;Download overzicht&lt;/th&gt;
+      &lt;td mat-cel *matCellDef&#x3D;&quot;let row&quot;&gt;
+        &lt;a target&#x3D;&quot;_self&quot; class&#x3D;&quot;btn btn-default glyphicon glyphicon-download-alt&quot; aria-hidden&#x3D;&quot;true&quot;
+           (click)&#x3D;&quot;pdfDownload(row)&quot; &gt;Download PDF&lt;/a&gt;
+      &lt;/td&gt;
+    &lt;/ng-container&gt;
+
+    &lt;tr mat-header-row *matHeaderRowDef&#x3D;&quot;displayedColumns&quot;&gt;&lt;/tr&gt;
+    &lt;tr mat-row *matRowDef&#x3D;&quot;let row; columns: displayedColumns;&quot;&gt;&lt;/tr&gt;
+  &lt;/table&gt;
+
+  &lt;mat-paginator #paginator
+                 [length]&#x3D;&quot;dataSource.data.length&quot;
+                 [pageIndex]&#x3D;&quot;0&quot;
+                 [pageSize]&#x3D;&quot;50&quot;
+                 [pageSizeOptions]&#x3D;&quot;[25, 50, 100, 250]&quot;&gt;
+  &lt;/mat-paginator&gt;
+  &lt;!--
+  &lt;button class&#x3D;&quot;btn btn-default m-sm&quot; (click)&#x3D;&quot;onToevoegenCategorie()&quot;&gt;Categorie Toevoegen&lt;/button&gt;
+  &lt;ng-template #modal&gt;
+    &lt;div class&#x3D;&quot;modal-header&quot;&gt;
+      &lt;button type&#x3D;&quot;button&quot; class&#x3D;&quot;close pull-right&quot; aria-label&#x3D;&quot;Close&quot; (click)&#x3D;&quot;hideModal()&quot;&gt;
+        &lt;span aria-hidden&#x3D;&quot;true&quot;&gt;&amp;times;&lt;/span&gt;
+      &lt;/button&gt;
+    &lt;/div&gt;
+    &lt;div class&#x3D;&quot;modal-body&quot;&gt;
+      Bent u zeker dat u &quot;{{clickedItem.name}}&quot; wilt verwijderen?
+    &lt;/div&gt;
+    &lt;div class&#x3D;&quot;modal-footer&quot;&gt;
+      &lt;button class&#x3D;&quot;btn btn-danger pull-left&quot; (click)&#x3D;&quot;hideModal()&quot;&gt;
+        Nee
+      &lt;/button&gt;
+      &lt;button class&#x3D;&quot;btn btn-success pull-right&quot; (click)&#x3D;&quot;verwijderenBevestigd()&quot;&gt;
+        Ja
+      &lt;/button&gt;
+    &lt;/div&gt;
+  &lt;/ng-template&gt;
+  --&gt;
+&lt;/div&gt;
+</code></pre>
+    </div>
+
+    <div class="tab-pane fade " id="c-styleData">
+                <p class="comment">
+                    <code>./antwoorden.component.css</code>
+                </p>
+                <pre class="line-numbers"><code class="language-scss">.full-width-table {
+  width: 100%;
+}
+
+.table-buttons {
+  margin-right: 10px;
+  padding: 5px;
+}
+
+.glyphicon-trash:hover {
+  color: red;
+}
+
+.glyphicon {
+  cursor: pointer;
+}
+
+.glyphicon-pencil:hover {
+  color: springgreen;
+}
+</code></pre>
+    </div>
+
+    <div class="tab-pane fade " id="c-tree">
+        <div id="tree-container"></div>
+        <div class="tree-legend">
+            <div class="title">
+                <b>Legend</b>
+            </div>
+            <div>
+                <div class="color htmlelement"></div><span>Html element</span>
+            </div>
+            <div>
+                <div class="color component"></div><span>Component</span>
+            </div>
+            <div>
+                <div class="color directive"></div><span>Html element with directive</span>
+            </div>
+        </div>
+    </div>
+
+    
+</div>
+
+<script src="../js/libs/vis.min.js"></script>
+<script src="../js/libs/htmlparser.js"></script>
+<script src="../js/libs/deep-iterator.js"></script>
+<script>
+        var COMPONENT_TEMPLATE = '<div><!--<table class="table">  <tr>  <th>    groep  </th>  <th>    antwoordformulier  </th>    <th>      Download    </th>  </tr>  <tr *ngFor="let item of _groups; let i = index">    <td>{{i +1}}</td>    <td>{{i + 1}}</td>    <td>      <a class="btn btn-default" target="_self" (click)="pdfDownload(item)" >Download PDF</a>    </td>  </tr></table>--><div class="mat-elevation-z8">  <table mat-table class="full-width-table" [dataSource]="dataSource" matSort         aria-label="Elements">    <!-- Name Column -->    <ng-container matColumnDef="Groepsnaam">      <th mat-header-cell *matHeaderCellDef mat-sort-header>Groepsnaam</th>      <td mat-cell *matCellDef="let row">        {{row.name}}      </td>    </ng-container>    <ng-container matColumnDef="Download">      <th mat-header *matHeaderCellDef mat-sort-header>Download overzicht</th>      <td mat-cel *matCellDef="let row">        <a target="_self" class="btn btn-default glyphicon glyphicon-download-alt" aria-hidden="true"           (click)="pdfDownload(row)" >Download PDF</a>      </td>    </ng-container>    <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>    <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>  </table>  <mat-paginator #paginator                 [length]="dataSource.data.length"                 [pageIndex]="0"                 [pageSize]="50"                 [pageSizeOptions]="[25, 50, 100, 250]">  </mat-paginator>  <!--  <button class="btn btn-default m-sm" (click)="onToevoegenCategorie()">Categorie Toevoegen</button>  <ng-template #modal>    <div class="modal-header">      <button type="button" class="close pull-right" aria-label="Close" (click)="hideModal()">        <span aria-hidden="true">&times;</span>      </button>    </div>    <div class="modal-body">      Bent u zeker dat u "{{clickedItem.name}}" wilt verwijderen?    </div>    <div class="modal-footer">      <button class="btn btn-danger pull-left" (click)="hideModal()">        Nee      </button>      <button class="btn btn-success pull-right" (click)="verwijderenBevestigd()">        Ja      </button>    </div>  </ng-template>  --></div></div>'
+    var COMPONENTS = [{'name': 'AntwoordenComponent', 'selector': 'app-antwoorden'},{'name': 'AppComponent', 'selector': 'app-root'},{'name': 'CategorieComponent', 'selector': 'app-categorie'},{'name': 'CategorieenComponent', 'selector': 'app-categorieen'},{'name': 'ExposantComponent', 'selector': 'app-exposant'},{'name': 'ExposantenComponent', 'selector': 'app-exposanten'},{'name': 'GroepComponent', 'selector': 'app-groep'},{'name': 'GroepenComponent', 'selector': 'groepen'},{'name': 'InformatieschermComponent', 'selector': 'app-informatiescherm'},{'name': 'LoginComponent', 'selector': 'app-login'},{'name': 'NavMenuComponent', 'selector': 'app-nav-menu'},{'name': 'RegisterComponent', 'selector': 'app-register'}];
+    var DIRECTIVES = [];
+    var ACTUAL_COMPONENT = {'name': 'AntwoordenComponent'};
+</script>
+<script src="../js/tree.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                   </div><div class="search-results">
+    <div class="has-results">
+        <h1 class="search-results-title"><span class='search-results-count'></span> result-matching "<span class='search-query'></span>"</h1>
+        <ul class="search-results-list"></ul>
+    </div>
+    <div class="no-results">
+        <h1 class="search-results-title">No results matching "<span class='search-query'></span>"</h1>
+    </div>
+</div>
+</div>
+               <!-- END CONTENT -->
+           </div>
+       </div>
+
+       <script>
+            var COMPODOC_CURRENT_PAGE_DEPTH = 1;
+            var COMPODOC_CURRENT_PAGE_CONTEXT = 'component';
+            var COMPODOC_CURRENT_PAGE_URL = 'AntwoordenComponent.html';
+       </script>
+
+       <script src="../js/libs/custom-elements.min.js"></script>
+       <script src="../js/libs/lit-html.js"></script>
+       <!-- Required to polyfill modern browsers as code is ES5 for IE... -->
+       <script src="../js/libs/custom-elements-es5-adapter.js" charset="utf-8" defer></script>
+       <script src="../js/menu-wc.js" defer></script>
+
+       <script src="../js/libs/bootstrap-native.js"></script>
+
+       <script src="../js/libs/es6-shim.min.js"></script>
+       <script src="../js/libs/EventDispatcher.js"></script>
+       <script src="../js/libs/promise.min.js"></script>
+       <script src="../js/libs/zepto.min.js"></script>
+
+       <script src="../js/compodoc.js"></script>
+
+       <script src="../js/tabs.js"></script>
+       <script src="../js/menu.js"></script>
+       <script src="../js/libs/clipboard.min.js"></script>
+       <script src="../js/libs/prism.js"></script>
+       <script src="../js/sourceCode.js"></script>
+          <script src="../js/search/search.js"></script>
+          <script src="../js/search/lunr.min.js"></script>
+          <script src="../js/search/search-lunr.js"></script>
+          <script src="../js/search/search_index.js"></script>
+       <script src="../js/lazy-load-graphs.js"></script>
+
+
+    </body>
+</html>

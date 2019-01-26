@@ -1,0 +1,19 @@
+#header + div {
+  margin-top: 2.5em;
+}
+
+#app-credentials {
+  margin-bottom: 2.5em;
+}
+
+#app-credentials input {
+  margin-left: 1em;
+}
+
+/*#app-credentials label:nth-of-type(1)  {*/
+  /*margin-left: 1em;*/
+/*}*/
+
+#createGroupButton {
+  margin-bottom: 1em;
+}

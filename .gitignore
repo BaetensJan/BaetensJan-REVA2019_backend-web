@@ -1,0 +1,23 @@
+# ignore node modules
+/node_modules
+
+# standard ignores
+.idea/inspectionProfiles/Project_Default.xml
+.vs/REVA/v15/Server/sqlite3/db.lock
+.vs/REVA/v15/Server/sqlite3/storage.ide
+.vs/REVA/DesignTimeBuild/.dtbcache
+.vs/REVA/v15/.suo
+.vs/REVA/v15/Server/sqlite3/storage.ide-wal
+.vs/REVA/v15/Server/sqlite3/storage.ide
+.idea/*
+*.suo
+*.user
+_ReSharper.*
+bin
+obj
+packages
+
+# extra ignores
+.idea/.idea.REVA/.idea/contentModel.xml
+/bin/
+/obj/

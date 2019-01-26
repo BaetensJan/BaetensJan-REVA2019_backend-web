@@ -1,0 +1,27 @@
+#header + div {
+  margin-top: 2em;
+}
+
+.glyphicon-trash:hover {
+  color: red;
+}
+
+.glyphicon, .dropdown-item {
+  cursor: pointer;
+}
+
+.glyphicon-pencil:hover {
+  color: springgreen;
+}
+
+.question:first-letter{
+  text-transform: capitalize
+}
+
+.table>thead>tr>th {
+   vertical-align: unset;
+}
+
+#table-header{
+  border-bottom: 5px solid black;
+}

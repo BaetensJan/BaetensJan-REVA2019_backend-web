@@ -1,0 +1,53 @@
+<div *ngIf="selectedExhibitor" #myContainer>
+  <div id="header">
+    <h1>Exposant</h1>
+  </div>
+
+  <!--Terug knop-->
+  <button class="btn btn-primary"
+          [routerLink]='["/exposanten"]'
+          style="margin-bottom: 2em;"><span class="glyphicon glyphicon-arrow-left"></span> Terug
+  </button>
+
+  <!--Opslaan knop-->
+  <button class="btn btn-success pull-right" (click)="onOpslaan()">
+    <span class="glyphicon glyphicon-floppy-disk"></span> Opslaan
+  </button>
+
+  <!--Body-->
+  <div class="input-group" style="margin-bottom: 2em;">
+    <span class="input-group-addon" id="basic-addon1">Naam</span>
+    <input type="text" class="form-control" [(ngModel)]="selectedExhibitor.name" aria-describedby="basic-addon1">
+  </div>
+  <div class = "input-group">
+    <span class="input-group-addon" id="basic-addon">
+      Standnummer
+    </span>
+    <input type="text" class="form-control" [(ngModel)]="selectedExhibitor.exhibitorNumber" aria-describedby="basic-addon1">
+  </div>
+
+  <!--Category Selection-->
+  <div>
+    <h3>Categorieën van exposant:</h3>
+    <div class="row">
+      <button class="btn"
+              (click)="selectCategory(category)"
+              [ngClass]="isSelected(category)"
+              *ngFor="let category of allCategories">
+        {{category.name}}
+      </button>
+    </div>
+    <!--<p *ngFor="let cat of selectedCategories">{{cat.name}}</p>-->
+  </div>
+
+  <div class="clearfix" style="margin-bottom: 1.5em;"></div>
+
+  <!--Canvas / Routeplan of exhibitors location-->
+  <h3>Selecteer de exposanten plaats op de kaart!</h3>
+  <canvas (click)="onCanvasClick($event)" #myCanvas></canvas>
+
+  <!--Alert message, after e.g. changing exhibitors position on map-->
+  <div *ngFor="let alert of alerts">
+    <alert [type]="alert.type" [dismissOnTimeout]="alert.timeout" (onClosed)="onClosed(alert)">{{ alert.msg }}</alert>
+  </div>
+</div> <!--END OF PAGE-->

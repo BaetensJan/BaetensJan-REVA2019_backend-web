@@ -1,0 +1,111 @@
+<div>
+  <div id="header">
+    <h1>Vragen & Antwoorden van Opdrachten</h1>
+  </div>
+
+  <!--Search Filter Bar-->
+  <div class="row" *ngIf="questions != null && questions.length > 0">
+    <div class="col-md-8">
+      <div class="input-group">
+      <span class="input-group-addon">Zoekfilter
+       </span>
+        <input class="form-control" type="text" placeholder="exposantnaam of categorie" (ngModelChange)="filter($event)" [(ngModel)]="filterValue">
+      </div>
+    </div>
+
+    <!-- Category selection dropdown -->
+    <div class="btn-group col-md-4" dropdown>
+      <button id="button-basic" dropdownToggle type="button" class="btn btn-primary dropdown-toggle"
+              aria-controls="dropdown-basic">
+        <strong> {{selectedCategoryName}} </strong>
+        <span class="caret"></span>
+      </button>
+      <ul id="dropdown-basic" *dropdownMenu class="dropdown-menu"
+          role="menu" aria-labelledby="button-basic">
+        <li role="menuitem">
+          <a class="dropdown-item" (click)="selectedCategoryChanged(null)">alle categorieën</a>
+        </li>
+        <li role="menuitem" *ngFor="let cat of categories">
+          <a class="dropdown-item" (click)="selectedCategoryChanged(cat)">{{cat.name}}</a>
+        </li>
+      </ul>
+    </div>
+  </div>
+
+  <!--Overview of exhibitors-->
+  <div *ngIf="questions" style="margin-top: 4em;">
+    <table class="full-width-table table">
+      <thead id="table-header">
+      <tr>
+        <th class="col-md-2" style="font-size: 1.5em; padding-bottom: 1.4em;">
+          Exposant
+        </th>
+        <th class="col-md-4" style="font-size: 1.5em; padding-bottom: 1.4em;">
+          Vraag
+        </th>
+        <th class="col-md-4" style="font-size: 1.5em; padding-bottom: 1.4em;">
+          Antwoord
+        </th>
+        <th style="padding-bottom: 1.4em;" >
+          <button (click)="addQuestion()" class="btn btn-success">
+            <span class=" glyphicon glyphicon-plus"></span> Vraag toevoegen
+          </button>
+        </th>
+      </tr>
+      </thead>
+    </table>
+
+    <div class="row" style="margin-top: 2em;" *ngFor="let exh of selectedExhibitors; let i = index">
+      <div class="col-xs-12 col-12">
+        <table class="full-width-table table">
+          <thead style="border-bottom: 2px solid black">
+          <tr>
+            <th style="font-size: 1.2em; color: #0c5593; padding-bottom: 1.4em;">{{exh.name}}
+            </th>
+            <!--<th style="padding-bottom: 1.4em;" *ngIf="i == 0">-->
+              <!--<button (click)="addQuestion()" class="btn btn-success">-->
+                <!--<span class=" glyphicon glyphicon-plus"></span> Vraag toevoegen-->
+              <!--</button>-->
+            <!--</th>-->
+          </tr>
+          </thead>
+          <tbody>
+          <ng-container *ngFor="let question of questions">
+            <!-- We use this to sort the questions per exhibitor! -->
+            <tr *ngIf="question.exhibitor.id == exh.id">
+              <td class="col-md-2 question"><strong>{{question.category.name}}</strong></td>
+              <td class="col-md-4 question">{{question.questionText}}</td>
+              <td class="col-md-4 question">{{question.answer}}</td>
+              <td class="">
+          <span class="btn glyphicon glyphicon-pencil" aria-hidden="true"
+                (click)="editQuestion(question)"></span>
+                <span class="btn glyphicon glyphicon-trash" aria-hidden="true"
+                      (click)="openModal(template, question)"></span>
+              </td>
+            </tr>
+          </ng-container>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <ng-template #template>
+    <div class="modal-header">
+      <button type="button" class="close pull-right" aria-label="Close" (click)="hideModal()">
+        <span aria-hidden="true">&times;</span>
+      </button>
+    </div>
+    <div class="modal-body">
+      Bent u zeker dat u {{clickedItemNaam}} wilt verwijderen?
+    </div>
+    <div class="modal-footer">
+      <button type="button" class="btn btn-danger pull-right" (click)="hideModal()">
+        Nee
+      </button>
+      <button type="button" class="btn btn-success pull-left" (click)="deleteConfirmed()">
+        Ja
+      </button>
+    </div>
+  </ng-template>
+</div>

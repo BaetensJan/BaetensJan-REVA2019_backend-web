@@ -1,0 +1,19 @@
+.glyphicon-trash:hover {
+  color: red;
+}
+
+.glyphicon {
+  cursor: pointer;
+}
+
+.glyphicon-pencil:hover {
+  color: springgreen;
+}
+
+#header + div {
+  margin-top: 2em;
+}
+
+#createGroupButton {
+  margin-bottom: 1em;
+}

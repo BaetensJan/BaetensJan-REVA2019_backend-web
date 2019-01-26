@@ -1,0 +1,39 @@
+  <div *ngIf="group">
+    <!--Terug knop-->
+    <button class="btn btn-primary"
+            (click)="BackToAssignment()"
+            style="margin-bottom: 2em"><span class="glyphicon glyphicon-arrow-left"></span> Terug
+    </button>
+    <div id="header" style="margin-bottom: 2.0em">
+      <h1>{{group.name}}</h1>
+    </div>
+
+    <div class="row">
+      <div class="panel panel-default container-fluid">
+        <div class="panel-heading row">
+          <div class="col-md-4">
+            <h3 class="panel-title">Aantal bezochte standen: {{group.assignments.length}}</h3>
+          </div>
+        </div>
+        <br><br>
+
+        <div *ngIf="group.assignments.length == 0">
+          <p>De groep heeft geen ingediende opdrachten.</p>
+        </div>
+
+        <div class="panel-body" *ngFor='let assignment of group.assignments  let i = index'>
+          <h1>Assignment {{i+1}}</h1><br>
+          <ng-container *ngIf="!assignment.extra">
+            <label>Stand: {{assignment.question.exhibitor.name}}</label><br>
+            <label>Aantal bezochte standen: {{assignment.question.exhibitor.getCategoriesAsString}}</label><br>
+            <label>Vraag: {{assignment.question.questionText}}</label><br>
+          </ng-container>
+          <label>Antwoord: {{assignment.answer}}</label><br>
+          <label>Notities: {{assignment.notes}}</label><br>
+          <label>Foto: </label><img [src]="'/images/'+assignment.photo" alt="Smiley face" width="300"
+                                    height="300">
+          <hr style="border-color: #0f0f0f; margin-top: 5em">
+        </div>
+      </div>
+    </div>
+  </div>

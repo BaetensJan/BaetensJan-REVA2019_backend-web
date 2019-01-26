@@ -1,0 +1,72 @@
+<!-- delete member of group modal -->
+<ng-template #template>
+  <div class="modal-body text-center">
+    <p>Bent u zeker dat {{clickedItem.name}} mag verwijderd worden uit de groep?</p>
+    <button type="button" class="btn btn-danger pull-right" (click)="hideModal()">
+      Nee
+    </button>
+    <button type="button" class="btn btn-success pull-left" (click)="verwijderenBevestigd()">
+      Ja
+    </button>
+  </div>
+</ng-template>
+
+<!-- header -->
+<div id="header">
+  <h1>Exposanten</h1>
+</div>
+
+<!--Search Filter Bar-->
+<div class="row" *ngIf="exhibitors != null && exhibitors.length > 0" style="margin-bottom: 2em;">
+  <div class="col-md-10">
+    <div class="input-group">
+      <span class="input-group-addon">Zoekfilter
+       </span>
+      <input class="form-control" type="text" placeholder="filter" [(ngModel)]="selected"
+             [typeahead]="exhibitors"
+             typeaheadOptionField="name"
+             (typeaheadOnSelect)="onSelect($event)"
+             (typeaheadNoResults)="typeaheadNoResults($event)"
+             [typeaheadItemTemplate]="customItemTemplate">
+    </div>
+  </div>
+</div>
+
+<!--Overview of exhibitors-->
+<div class="row">
+  <div class="col-xs-12 col-12">
+    <table class="full-width-table table table-hover">
+      <thead class="thead-light">
+      <tr>
+        <th style="padding-bottom: 1.4em; font-size: 1.2em;">
+          Exposantnaam
+        </th>
+        <th style="padding-bottom: 1.4em;">
+          <button class="btn btn-success"
+                  (click)="onToevoegenExhibitor()">
+            <span class=" glyphicon glyphicon-plus"></span> Exposant toevoegen
+          </button>
+        </th>
+      </tr>
+      </thead>
+      <tbody>
+      <tr *ngFor="let exhibitor of exhibitors">
+        <td>{{exhibitor.name}}</td>
+        <td>
+          <span class="btn glyphicon glyphicon-pencil" aria-hidden="true"
+                (click)="onAanpassenExhibitor(exhibitor)"></span>
+          <span class="btn glyphicon glyphicon-trash" aria-hidden="true"
+                (click)="openModal(template, exhibitor)"></span>
+        </td>
+      </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!--Pagination-->
+<!--
+<pagination [totalItems]="data.length" (pageChanged)="pageChanged($event)"
+            [itemsPerPage]=5></pagination>
+</div>
+-->

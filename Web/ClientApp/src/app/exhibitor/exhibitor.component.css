@@ -1,0 +1,20 @@
+.form-container {
+  display: flex;
+  flex-direction: column;
+}
+
+.form-container > * {
+  width: 100%;
+}
+
+#header + div {
+  margin-top: 2em;
+}
+
+#createGroupButton {
+  margin-bottom: 1em;
+}
+
+#upload-image button {
+  margin-left: 1em;
+}
