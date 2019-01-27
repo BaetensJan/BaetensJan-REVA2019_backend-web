@@ -63,18 +63,17 @@ export class AssignmentsComponent {
         this.groups = value;
         this.maxNumberOfGroupsPerPage = this.groups.length;
         this.contentArray = this.groups;
+        this._filteredGroups = this.groups;
         this.initiateReturnedArray();
       });
     } else {
       this._groupsDataService.groupsBySchoolId(schoolId).subscribe(value => {
-        console.log(value);
-
         this.groups = value;
         this.maxNumberOfGroupsPerPage = this.groups.length;
         this.contentArray = this.groups;
         this.initiateReturnedArray();
+        this._filteredGroups = this.groups;
       });
-      this._filteredGroups = this.groups
     }
   }
 
