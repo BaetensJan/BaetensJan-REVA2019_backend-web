@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
+﻿using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 
@@ -26,6 +24,15 @@ namespace ApplicationCore.Entities
         public Group()
         {
             Assignments = new List<Assignment>();
+        }
+
+        public Assignment AddAssignment(Question question)
+        {
+            
+            var assignment = new Assignment(question);
+            if (Assignments == null) Assignments = new List<Assignment>();
+            Assignments.Add(assignment);
+            return assignment;
         }
 
         /* => school eerst mappen
