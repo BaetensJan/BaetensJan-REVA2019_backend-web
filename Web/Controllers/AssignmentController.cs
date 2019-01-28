@@ -107,8 +107,8 @@ namespace Web.Controllers
 
         private async Task<Question> GetQuestion(Exhibitor exhibitor, int categoryId)
         {
-            exhibitor.GroupsAtExhibitor++;
             var questions = await _questionRepository.GetAll();
+            //Todo: methode in repo maken die via beide id's (als parameter meegegeven) de question ophaalt.
             var question = questions.First(q => q.CategoryExhibitor.CategoryId == categoryId
                                                 && q.CategoryExhibitor.ExhibitorId ==
                                                 exhibitor.Id);
@@ -117,7 +117,8 @@ namespace Web.Controllers
 
         private async Task<Assignment> CreateAssignment(Question question)
         {
-            //Todo: methode in repo maken die via beide id's (als parameter meegegeven) de question ophaalt.
+            question.CategoryExhibitor.Exhibitor.GroupsAtExhibitor++;
+
             // get username from jwt token.
             var username = User.Claims.ElementAt(3).Value;
 
@@ -131,15 +132,12 @@ namespace Web.Controllers
             // get group object via schoolId and groupName
             var group = await _groupRepository.GetBySchoolIdAndGroupName(user.School.Id, groupName);
 
-            // Add assignment to the groups assignments.
-
-//            var assignment = group.AddAssignment(question);
+            // Create assignment and Add to the groups assignments.
             var assignment = new Assignment(question);
-            _assignmentRepository.Add(assignment); //Error want not niet async?? moet nog await hebben.
-            assignment = await _assignmentRepository.GetById(assignment.Id);
-            group.Assignments.Add(assignment);
-
+            group.AddAssignment(assignment);
+            assignment = /*await*/_assignmentRepository.Add(assignment); //TODO nog niet async.
             await _assignmentRepository.SaveChanges();
+            
             return assignment;
         }
 

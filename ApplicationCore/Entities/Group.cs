@@ -26,10 +26,8 @@ namespace ApplicationCore.Entities
             Assignments = new List<Assignment>();
         }
 
-        public Assignment AddAssignment(Question question)
+        public Assignment AddAssignment(Assignment assignment)
         {
-            
-            var assignment = new Assignment(question);
             if (Assignments == null) Assignments = new List<Assignment>();
             Assignments.Add(assignment);
             return assignment;
