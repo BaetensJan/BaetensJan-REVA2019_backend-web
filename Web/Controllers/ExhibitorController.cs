@@ -42,7 +42,7 @@ namespace Web.Controllers
         }
 
         [HttpPost("[action]")]
-        public Exhibitor AddExhibitor([FromBody] ExhibitorDTO exhibitordto)
+        public async Task<Exhibitor> AddExhibitor([FromBody] ExhibitorDTO exhibitordto)
         {
             var exhibitor = new Exhibitor
             {
@@ -54,7 +54,8 @@ namespace Web.Controllers
                 Categories = CreateCategories(exhibitordto.CategoryIds)
             };
 
-            return _exhibitorManager.AddExhibitor(exhibitor);
+            await _exhibitorManager.AddExhibitor(exhibitor);
+            return exhibitor;
         }
 
         [HttpPost("[action]")]

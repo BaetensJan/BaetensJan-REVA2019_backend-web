@@ -171,7 +171,8 @@ namespace Web.Controllers
         [HttpPost("[Action]")]
         public async Task<ActionResult> Login([FromBody] LoginViewModel model)
         {
-            var user = _userManager.Users.Include(u => u.School).SingleOrDefault(u => u.UserName == model.Username);
+            var user = await _userManager.Users.Include(u => u.School)
+                .SingleOrDefaultAsync(u => u.UserName == model.Username);
             if (user != null && await _userManager.CheckPasswordAsync(user, model.Password))
             {
                 var claim = await CreateClaims(user);
