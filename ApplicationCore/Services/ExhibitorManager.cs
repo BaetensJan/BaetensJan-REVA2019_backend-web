@@ -94,7 +94,7 @@ namespace ApplicationCore.Services
 
         public async Task<Exhibitor> AddExhibitor(Exhibitor exhibitor)
         {
-            await _exhibitorRepository.Add(exhibitor); //TODO: test this in web
+            await _exhibitorRepository.Add(exhibitor);
             await _exhibitorRepository.SaveChanges();
             return exhibitor;
         }
