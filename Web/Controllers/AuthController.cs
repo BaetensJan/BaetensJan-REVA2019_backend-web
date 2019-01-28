@@ -81,9 +81,9 @@ namespace Web.Controllers
             {
                 // creating the school
                 var school = new School(model.SchoolName, GetRandomString(6));
-                _schoolRepository.Add(school);
+                await _schoolRepository.Add(school);
                 await _schoolRepository.SaveChanges();
-                
+
                 // creating teacher consisting of his school
                 var user = _authenticationManager.CreateApplicationUserObject(model.Email, model.Username,
                     model.Password);

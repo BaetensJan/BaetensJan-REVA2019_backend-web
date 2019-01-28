@@ -1,7 +1,6 @@
 FROM microsoft/dotnet:aspnetcore-runtime
 WORKDIR /app
 COPY bin/Debug/netcoreapp2.1/publish /app
-ENV ASPNETCORE_URLS http://*:5000
-EXPOSE 5000
+EXPOSE 8080
 
-ENTRYPOINT /bin/bash -c "dotnet Web.dll"
+CMD ASPNETCORE_URLS=http://*:$PORT dotnet Web.dll

@@ -70,9 +70,9 @@ namespace Infrastructure.Repositories
             return school;
         }
 
-        public void Add(School school)
+        public Task Add(School school)
         {
-            _schools.Add(school);
+            return _schools.AddAsync(school);
         }
 
         public School Remove(School school)
