@@ -11,6 +11,7 @@ namespace ApplicationCore.Entities
         public string Answer { get; set; }
         public bool Submitted { get; set; } // if the assignment was submitted or still in progress.
         public bool Extra { get; set; } // if the assignment was created by the group (extra round).
+        
         public Assignment()
         {
             Notes = "";

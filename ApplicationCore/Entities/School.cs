@@ -17,6 +17,7 @@ namespace ApplicationCore.Entities
         {
             Name = name;
             Password = password;
+            Groups = new List<Group>();
         }
     }
 }
