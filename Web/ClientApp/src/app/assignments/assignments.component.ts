@@ -8,6 +8,8 @@ import {School} from "../models/school.model";
 import {GroupsDataService} from "../groups/groups-data.service";
 import * as html2canvas from 'html2canvas';
 import {Observable, Observer} from "rxjs";
+import {Question} from "../models/question.model";
+import {Assignment} from "../models/assignment.model";
 
 function parseJwt(token) {
   if (!token) {
@@ -34,6 +36,9 @@ export class AssignmentsComponent {
   maxNumberOfGroupsPerPage = 5; // amount of groups that will be showed on the current page, to keep the page neat.
   contentArray: Group[]; // array containing the groups that fits the filter.
   returnedArray: Group[]; // array containing the groups (maxNumberOfGroupsPerPage) that are showed on the current page.
+  private _filteredGroups: Group[];
+
+  private filterValue: string = "";
   /**
    * Constructor
    * @param router
@@ -58,16 +63,16 @@ export class AssignmentsComponent {
         this.groups = value;
         this.maxNumberOfGroupsPerPage = this.groups.length;
         this.contentArray = this.groups;
+        this._filteredGroups = this.groups;
         this.initiateReturnedArray();
       });
     } else {
       this._groupsDataService.groupsBySchoolId(schoolId).subscribe(value => {
-        console.log(value);
-
         this.groups = value;
         this.maxNumberOfGroupsPerPage = this.groups.length;
         this.contentArray = this.groups;
         this.initiateReturnedArray();
+        this._filteredGroups = this.groups;
       });
     }
   }
@@ -218,7 +223,7 @@ export class AssignmentsComponent {
   }
 
   public filter(token: string) {
-    this.returnedArray = this.groups.filter((group: Group) => {
+    this._filteredGroups = this.groups.filter((group: Group) => {
       return group.name.toLowerCase().startsWith(token.toLowerCase());
 
       //return question.categoryExhibitor.exhibitor.name.toLowerCase().startsWith(token.toLowerCase()) ||
