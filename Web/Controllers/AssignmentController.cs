@@ -137,7 +137,7 @@ namespace Web.Controllers
             group.AddAssignment(assignment);
             assignment = /*await*/_assignmentRepository.Add(assignment); //TODO nog niet async.
             await _assignmentRepository.SaveChanges();
-            
+
             return assignment;
         }
 
@@ -149,7 +149,7 @@ namespace Web.Controllers
         {
             if (ModelState.IsValid)
             {
-                var assignment = await _assignmentRepository.GetById(model.Id); // TODO met await en createAsync?
+                var assignment = await _assignmentRepository.GetById(model.Id);
                 var answer = model.Answer;
 
                 // assignment of Extra Round
@@ -167,7 +167,7 @@ namespace Web.Controllers
 
                 assignment.Answer = answer;
                 assignment.Notes = model.Notes;
-                assignment.Photo = _imageWriter.WriteBase64ToFile(model.Photo);
+                if (!String.IsNullOrEmpty(model.Photo)) assignment.Photo = _imageWriter.WriteBase64ToFile(model.Photo);
                 assignment.Submitted = true;
                 await _assignmentRepository.SaveChanges();
 
