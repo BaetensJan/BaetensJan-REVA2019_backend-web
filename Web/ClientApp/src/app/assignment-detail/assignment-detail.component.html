@@ -1,39 +1,64 @@
-  <div *ngIf="group">
-    <!--Terug knop-->
-    <button class="btn btn-primary"
-            (click)="BackToAssignment()"
-            style="margin-bottom: 2em"><span class="glyphicon glyphicon-arrow-left"></span> Terug
-    </button>
-    <div id="header" style="margin-bottom: 2.0em">
-      <h1>{{group.name}}</h1>
-    </div>
+<div *ngIf="group">
+  <!--Terug knop-->
+  <button class="btn btn-primary"
+          (click)="BackToAssignment()"
+          style="margin-bottom: 2em"><span class="glyphicon glyphicon-arrow-left"></span> Terug
+  </button>
+  <div id="header" style="margin-bottom: 2.0em">
+    <h1 style="text-transform: capitalize">{{group.name}}</h1>
+    <h2>Aantal bezochte standen: <b>{{group.assignments.length}}</b></h2>
+  </div>
 
-    <div class="row">
-      <div class="panel panel-default container-fluid">
-        <div class="panel-heading row">
-          <div class="col-md-4">
-            <h3 class="panel-title">Aantal bezochte standen: {{group.assignments.length}}</h3>
-          </div>
+  <div *ngFor='let assignment of group.assignments  let i = index'>
+    <div class="panel panel-default container-fluid">
+      <div class="panel-heading row">
+        <div class="col-md-4">
+          <h3 class="panel-title">Opdracht {{i + 1}}<br></h3>
         </div>
-        <br><br>
-
+      </div>
+      <br><br>
+      <div class="panel-body">
         <div *ngIf="group.assignments.length == 0">
           <p>De groep heeft geen ingediende opdrachten.</p>
         </div>
 
-        <div class="panel-body" *ngFor='let assignment of group.assignments  let i = index'>
-          <h1>Assignment {{i+1}}</h1><br>
+        <div class="form-horizontal">
           <ng-container *ngIf="!assignment.extra">
-            <label>Stand: {{assignment.question.exhibitor.name}}</label><br>
-            <label>Aantal bezochte standen: {{assignment.question.exhibitor.getCategoriesAsString}}</label><br>
-            <label>Vraag: {{assignment.question.questionText}}</label><br>
+            <div class="form-group">
+              <label class="col-sm-1" for="stand">Stand</label>
+              <p class="col-sm-10" id="stand">{{assignment.question.exhibitor.name}}</p><br>
+            </div>
+            <div class="form-group">
+              <label class="col-sm-1" for="aantal">Categorie</label>
+              <p class="col-sm-10" id="aantal">{{assignment.question.category.name}}</p><br>
+            </div>
+            <div class="form-group">
+              <label class="col-sm-1" for="question">Vraag</label>
+              <p class="col-sm-10" id="question">{{assignment.question.questionText}}</p><br>
+            </div>
           </ng-container>
-          <label>Antwoord: {{assignment.answer}}</label><br>
-          <label>Notities: {{assignment.notes}}</label><br>
-          <label>Foto: </label><img [src]="'/images/'+assignment.photo" alt="Smiley face" width="300"
-                                    height="300">
-          <hr style="border-color: #0f0f0f; margin-top: 5em">
+
+          <div class="form-group">
+            <label class="col-sm-1" for="answer"> Antwoord</label>
+            <p class="col-sm-10" id="answer">{{assignment.answer}}</p><br>
+          </div>
+          <ng-container *ngIf="assignment.notes">
+            <div class="form-group">
+              <label class="col-sm-1" for="notes"> Notities</label>
+              <p class="col-sm-10" id="notes">{{assignment.notes}}</p>
+            </div>
+          </ng-container>
+          <ng-container *ngIf="assignment.photo">
+            <div class="form-group">
+              <label class="col-sm-1" for="photo">Foto</label>
+              <img id="photo" style="margin-left: 1em;" [src]="'/images/'+assignment.photo" alt="expositie foto"
+                   width="300"
+                   height="300">
+            </div>
+          </ng-container>
+          <!--<hr style="border-color: #0f0f0f; margin-top: 5em">-->
         </div>
       </div>
     </div>
   </div>
+</div>

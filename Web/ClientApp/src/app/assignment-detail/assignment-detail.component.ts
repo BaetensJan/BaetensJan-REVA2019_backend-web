@@ -26,8 +26,7 @@ export class AssignmentDetailComponent implements OnInit {
         this.groupId = params['groupId'] || 0;
         this._groupsDataService.getGroup(this.groupId).subscribe(value => {
           this.group = value;
-          console.log(this.group);
-        })
+        });
       });
   }
 
