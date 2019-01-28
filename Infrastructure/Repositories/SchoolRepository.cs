@@ -53,10 +53,13 @@ namespace Infrastructure.Repositories
                 .SingleOrDefaultAsync(c => c.Id == id);
             return school;
         }
+
         public School GetByIdLight(int id)
         {
-            var school = _schools.Include(a => a.Groups).ThenInclude(g => g.Assignments).ThenInclude(a => a.Question).ThenInclude(q => q.CategoryExhibitor).ThenInclude(ce => ce.Exhibitor)
-                .Include(a => a.Groups).ThenInclude(g => g.Assignments).ThenInclude(a => a.Question).ThenInclude(q => q.CategoryExhibitor).ThenInclude(ce => ce.Category)
+            var school = _schools.Include(a => a.Groups).ThenInclude(g => g.Assignments).ThenInclude(a => a.Question)
+                .ThenInclude(q => q.CategoryExhibitor).ThenInclude(ce => ce.Exhibitor)
+                .Include(a => a.Groups).ThenInclude(g => g.Assignments).ThenInclude(a => a.Question)
+                .ThenInclude(q => q.CategoryExhibitor).ThenInclude(ce => ce.Category)
                 .SingleOrDefault(c => c.Id == id);
             return MapSchool(school);
         }
@@ -67,14 +70,9 @@ namespace Infrastructure.Repositories
             return school;
         }
 
-        public School Add(School school)
+        public Task Add(School school)
         {
-            return _schools.Add(school).Entity;
-        }
-
-        public School EditSchool(School school)
-        {
-            return _schools.Update(school).Entity;
+            return _schools.AddAsync(school);
         }
 
         public School Remove(School school)

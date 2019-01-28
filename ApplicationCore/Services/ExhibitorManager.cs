@@ -46,7 +46,7 @@ namespace ApplicationCore.Services
 
             if (start == null)
             {
-                startX = new Random().NextDouble(); //Center of map
+                startX = new Random().NextDouble();
                 startY = new Random().NextDouble();
             }
             else

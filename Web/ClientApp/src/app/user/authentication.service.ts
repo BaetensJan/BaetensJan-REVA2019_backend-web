@@ -11,7 +11,7 @@ import {Router} from '@angular/router';
  * @param token
  */
 function parseJwt(token) {
-  if (!token) { //TODO
+  if (!token) {
     return null;
   }
   try {
@@ -100,29 +100,22 @@ export class AuthenticationService {
    * @param password
    */
   login(username: string, password: string): Observable<boolean> {
+    //TODO check if token already exist (then api call to backend is unnecessary) => if (localStorage.getItem(this._tokenKey)*/
     return this.http.post(`${this._url}/Login`, {username, password}).pipe(
       map((res: any) => {
         const token = res.token;
         if (token) {
-          return this.setTokenAndUsername(res.token, username);
-        } else {
-          return false;
+          const token = res.token;
+          let parsedToken = parseJwt(token);
+          if (this.checkUserRole(parsedToken)) { // check if user is a teacher
+            this.setTokenAndUsername(res.token, username);
+            return true;
+          }
+          return false; // checkUserRole failed => user is a group
         }
+        else return false;
       })
-    );
-  }
-
-  /**
-   * Removes token to logout user
-   */
-  logout() {
-    if (this.user$.getValue()) {
-      localStorage.removeItem(this._tokenKey);
-
-      setTimeout(() => this._user$.next(null));
-      setTimeout(() => this._isAdmin$.next(null));
-      this.router.navigate(['/']);
-    }
+    )
   }
 
   /**
@@ -138,30 +131,38 @@ export class AuthenticationService {
       map((res: any) => {
         const token = res.token;
         if (token) {
-          return this.setTokenAndUsername(res.token, username);
-        } else {
-          return false;
+          this.setTokenAndUsername(res.token, username);
+          return true;
         }
+        return false;
       })
     );
   }
 
-
-  private setTokenAndUsername(token, username): boolean {
-    let parsedToken = parseJwt(token/*localStorage.getItem(this._tokenKey)*/);
-
-    // check if user is a group. Groups have no access to web.
-    if (parsedToken && parsedToken.group) {
-      return false;
-    }
-
+  private setTokenAndUsername(token, username) {
     localStorage.setItem(this._tokenKey, token);
     this._user$.next(username);
+  }
 
+  private checkUserRole(parsedToken): boolean {
     // check if user is administrator.
     this._isAdmin$ = new BehaviorSubject<boolean>(JSON.parse(parsedToken.isAdmin.toLowerCase()));
 
-    return true;
+    // check if user is a group. Groups have no access to web.
+    return !(parsedToken && parsedToken.group);
+  }
+
+  /**
+   * Removes token to logout user
+   */
+  logout() {
+    if (this.user$.getValue()) {
+      localStorage.removeItem(this._tokenKey);
+
+      setTimeout(() => this._user$.next(null));
+      setTimeout(() => this._isAdmin$.next(null));
+      this.router.navigate(['/']);
+    }
   }
 
   /**

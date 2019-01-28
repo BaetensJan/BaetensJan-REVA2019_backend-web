@@ -10,8 +10,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Web.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20181127092638_categoriesToCategoryMigration")]
-    partial class categoriesToCategoryMigration
+    [Migration("20190126133758_Init")]
+    partial class Init
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -83,9 +83,9 @@ namespace Web.Migrations
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
                     b.Property<string>("Answer")
-                        .HasColumnName("Answers");
+                        .HasColumnName("Answer");
 
-                    b.Property<int?>("ExhibitorId");
+                    b.Property<bool>("Extra");
 
                     b.Property<int?>("GroupId");
 
@@ -96,9 +96,10 @@ namespace Web.Migrations
 
                     b.Property<int?>("QuestionId");
 
-                    b.HasKey("Id");
+                    b.Property<bool>("Submitted")
+                        .HasColumnName("Submitted");
 
-                    b.HasIndex("ExhibitorId");
+                    b.HasKey("Id");
 
                     b.HasIndex("GroupId");
 
@@ -142,6 +143,8 @@ namespace Web.Migrations
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<string>("ExhibitorNumber");
 
                     b.Property<int>("GroupsAtExhibitor");
 
@@ -339,12 +342,8 @@ namespace Web.Migrations
 
             modelBuilder.Entity("ApplicationCore.Entities.Assignment", b =>
                 {
-                    b.HasOne("ApplicationCore.Entities.Exhibitor", "Exhibitor")
-                        .WithMany()
-                        .HasForeignKey("ExhibitorId");
-
                     b.HasOne("ApplicationCore.Entities.Group")
-                        .WithMany("FinishedAssignments")
+                        .WithMany("Assignments")
                         .HasForeignKey("GroupId");
 
                     b.HasOne("ApplicationCore.Entities.Question", "Question")
@@ -355,7 +354,7 @@ namespace Web.Migrations
             modelBuilder.Entity("ApplicationCore.Entities.CategoryExhibitor", b =>
                 {
                     b.HasOne("ApplicationCore.Entities.Category", "Category")
-                        .WithMany("CategoryExhibitors")
+                        .WithMany("Exhibitors")
                         .HasForeignKey("CategoryId")
                         .OnDelete(DeleteBehavior.Cascade);
 

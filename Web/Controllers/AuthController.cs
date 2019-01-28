@@ -10,6 +10,7 @@ using ApplicationCore.Entities;
 using ApplicationCore.Interfaces;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Server.Kestrel.Core.Internal.Http;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
@@ -69,6 +70,7 @@ namespace Web.Controllers
         }
 
         /**
+         * Used when a teacher wants to register in the web platform.
         * Create an ApplicationUser with Role Teacher.
         * Parameter = model: CreateTeacherViewModel
         */
@@ -79,20 +81,26 @@ namespace Web.Controllers
             {
                 // creating the school
                 var school = new School(model.SchoolName, GetRandomString(6));
-                school = _schoolRepository.Add(school);
+                await _schoolRepository.Add(school);
+                await _schoolRepository.SaveChanges();
 
                 // creating teacher consisting of his school
                 var user = _authenticationManager.CreateApplicationUserObject(model.Email, model.Username,
                     model.Password);
-                user.School = school;
-
+                user.School = await _schoolRepository.GetByName(model.SchoolName);
                 var result = await _userManager.CreateAsync(user, model.Password);
 
                 if (result.Succeeded)
                 {
+                    user = _userManager.Users.SingleOrDefault(u => u.Id == user.Id);
+                    if (user.School == null)
+                        return Ok(
+                            new
+                            {
+                                Message = "Something went wrong when creating your account."
+                            });
                     await _userManager.AddToRoleAsync(user, "Teacher");
 
-                    user = _userManager.Users.SingleOrDefault(u => u.Id == user.Id);
 
                     var claim = await CreateClaims(user);
                     //Todo kunnen van CreateClaims in List werken idpv array zodat men niet hoeft de array naar list om te zetten
@@ -100,7 +108,7 @@ namespace Web.Controllers
                     claim = _authenticationManager.AddClaim(claim.ToList(), "school", school.Id.ToString()).ToArray();
 
                     var token = GetToken(claim);
-                    
+
                     return Ok(
                         new
                         {
@@ -172,7 +180,7 @@ namespace Web.Controllers
                 {
                     claim = _authenticationManager.AddClaim(claim.ToList(), "school", user.School.Id.ToString())
                         .ToArray();
-                    
+
                     // check if userlogin is from a group. (groupLogin is a concat of schoolName + groupName)
                     var schoolName = user.School.Name;
                     if (schoolName.Length < model.Username.Length)

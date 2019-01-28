@@ -72,32 +72,14 @@ namespace Web.Controllers
             else
             {
                 var exhibitor = await _exhibitorManager.FindNextExhibitor(previousExhibitorId, categoryId);
-                exhibitor.GroupsAtExhibitor++;
-                var questions = await _questionRepository.GetAll();
-                question = questions.First(q => q.CategoryExhibitor.CategoryId == categoryId
-                                                && q.CategoryExhibitor.ExhibitorId ==
-                                                exhibitor.Id);
-                //Todo: methode in repo maken die via beide id's (als parameter meegegeven) de question ophaalt.
+                question = await GetQuestion(exhibitor, categoryId);
             }
 
-            var assignment = new Assignment(question);
-            _assignmentRepository.Add(assignment);
+            var assignment = await CreateAssignment(question);
+            assignment =
+                await _assignmentRepository
+                    .GetByIdLight(assignment.Id); //Todo temporary, otherwise we have recursive catExh data
 
-            // get username from jwt token.
-            var username = User.Claims.ElementAt(3).Value;
-            // get ApplicationUser via username
-            var user = _userManager.Users.Include(u => u.School).SingleOrDefault(u => u.UserName == username);
-            // get groupName out of the username (username is a concat of schooName + groupName)
-            var groupName = username.Substring(user.School.Name.Length);
-            // get group object via schoolId and groupName
-            var group = await _groupRepository.GetBySchoolIdAndGroupName(user.School.Id, groupName); 
-         
-            // Add assignment to the groups assignments.
-            if (group.Assignments == null) group.Assignments = new List<Assignment>();
-            group.Assignments.Add(assignment);
-
-            await _assignmentRepository.SaveChanges();
-            assignment = await _assignmentRepository.GetByIdLight(assignment.Id); //Todo temporary
             return Ok(assignment);
         }
 
@@ -113,31 +95,50 @@ namespace Web.Controllers
         public async Task<IActionResult> GetAssignmentOfExhibitorAndCategory(int categoryId, int exhibitorId)
         {
             var exhibitor = await _exhibitorRepository.GetById(exhibitorId);
-            exhibitor.GroupsAtExhibitor++;
+            var question = await GetQuestion(exhibitor, categoryId);
+
+            var assignment = await CreateAssignment(question);
+            assignment =
+                await _assignmentRepository
+                    .GetByIdLight(assignment.Id); //Todo temporary, otherwise we have recursive catExh data
+
+            return Ok(assignment);
+        }
+
+        private async Task<Question> GetQuestion(Exhibitor exhibitor, int categoryId)
+        {
             var questions = await _questionRepository.GetAll();
+            //Todo: methode in repo maken die via beide id's (als parameter meegegeven) de question ophaalt.
             var question = questions.First(q => q.CategoryExhibitor.CategoryId == categoryId
                                                 && q.CategoryExhibitor.ExhibitorId ==
                                                 exhibitor.Id);
-            //Todo: methode in repo maken die via beide id's (als parameter meegegeven) de question ophaalt.
+            return question;
+        }
 
-            var assignment = new Assignment(question);
-            _assignmentRepository.Add(assignment);
+        private async Task<Assignment> CreateAssignment(Question question)
+        {
+            question.CategoryExhibitor.Exhibitor.GroupsAtExhibitor++;
 
             // get username from jwt token.
             var username = User.Claims.ElementAt(3).Value;
+
             // get ApplicationUser via username
             var user = _userManager.Users.Include(u => u.School).SingleOrDefault(u => u.UserName == username);
+
             // get groupName out of the username (username is a concat of schooName + groupName)
             var groupName = username.Substring(user.School.Name.Length);
+
+            //TODO user should have a groupId, and get group via user and not as done below:
             // get group object via schoolId and groupName
             var group = await _groupRepository.GetBySchoolIdAndGroupName(user.School.Id, groupName);
 
-            if (group.Assignments == null) group.Assignments = new List<Assignment>();
-            group.Assignments.Add(assignment);
-
+            // Create assignment and Add to the groups assignments.
+            var assignment = new Assignment(question);
+            group.AddAssignment(assignment);
+            assignment = /*await*/_assignmentRepository.Add(assignment); //TODO nog niet async.
             await _assignmentRepository.SaveChanges();
-            assignment = await _assignmentRepository.GetByIdLight(assignment.Id); //Todo temporary
-            return Ok(assignment);
+
+            return assignment;
         }
 
         /**
@@ -148,20 +149,25 @@ namespace Web.Controllers
         {
             if (ModelState.IsValid)
             {
-                var assignment = await _assignmentRepository.GetById(model.Id); // TODO met await en createAsync?
-                if (!assignment.Extra)
+                var assignment = await _assignmentRepository.GetById(model.Id);
+                var answer = model.Answer;
+
+                // assignment of Extra Round
+                if (assignment.Extra)
+                {
+                    answer = $"{model.Answer}. Standnummer van exposant: {model.Question.Exhibitor.ExhibitorNumber}," +
+                             $"Exposantnaam: {model.Question.Exhibitor.Name}";
+                }
+                else // assignment of normal tour
                 {
                     var question = await _questionRepository.GetById(assignment.Question.Id);
                     var exhibitor = await _exhibitorRepository.GetById(question.CategoryExhibitor.ExhibitorId);
                     exhibitor.GroupsAtExhibitor--;
                 }
 
-                assignment.Answer = assignment.Extra
-                    ? $"{model.Answer}. Standnummer van exposant: {model.Question.Exhibitor.ExhibitorNumber}," +
-                      $"Exposantnaam: {model.Question.Exhibitor.Name}"
-                    : model.Answer;
+                assignment.Answer = answer;
                 assignment.Notes = model.Notes;
-                assignment.Photo = _imageWriter.WriteBase64ToFile(model.Photo);
+                if (!String.IsNullOrEmpty(model.Photo)) assignment.Photo = _imageWriter.WriteBase64ToFile(model.Photo);
                 assignment.Submitted = true;
                 await _assignmentRepository.SaveChanges();
 
