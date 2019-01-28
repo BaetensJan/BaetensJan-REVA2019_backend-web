@@ -9,8 +9,8 @@ namespace ApplicationCore.Interfaces
         Task<List<Assignment>> All();
         Task<Assignment> GetById(int id);
         Task<Assignment> GetByIdLight(int id);
-        Assignment Add(Assignment assignment);
-        Assignment Remove(Assignment assignment);
-        Task<int> SaveChanges();
+        Task Add(Assignment assignment);
+        void Remove(Assignment assignment);
+        Task SaveChanges();
     }
 }

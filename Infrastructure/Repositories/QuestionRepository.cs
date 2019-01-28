@@ -101,9 +101,9 @@ namespace Infrastructure.Repositories
             return MapQuestion(question);
         }
 
-        public Question Add(Question question)
+        public Task Add(Question question)
         {
-            return _questions.Add(question).Entity;
+            return _questions.AddAsync(question);
         }
 
         public async Task<Question> EditQuestion(int questionId, string questionText, string answerText,
@@ -117,12 +117,12 @@ namespace Infrastructure.Repositories
             return question;
         }
 
-        public Question Remove(Question question)
+        public void Remove(Question question)
         {
-            return _questions.Remove(question).Entity;
+            _questions.Remove(question);
         }
 
-        public Task<int> SaveChanges()
+        public Task SaveChanges()
         {
             return _dbContext.SaveChangesAsync();
         }

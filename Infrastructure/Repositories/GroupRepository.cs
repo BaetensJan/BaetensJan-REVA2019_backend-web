@@ -125,14 +125,9 @@ namespace Infrastructure.Repositories
 //            return group;
 //        }
 
-        public Group Add(Group group)
+        public Task Add(Group group)
         {
-            return _groups.Add(group).Entity;
-        }
-
-        public Group Update(Group group)
-        {
-            return _groups.Update(group).Entity;
+            return _groups.AddAsync(group);
         }
 
         public async Task<Group> AddMember(int id, string member)
@@ -151,12 +146,12 @@ namespace Infrastructure.Repositories
             return group;
         }
 
-        public Group Remove(Group group)
+        public void Remove(Group group)
         {
-            return _groups.Remove(group).Entity;
+            _groups.Remove(group);
         }
 
-        public Task<int> SaveChanges()
+        public Task SaveChanges()
         {
             return _dbContext.SaveChangesAsync();
         }
@@ -164,7 +159,8 @@ namespace Infrastructure.Repositories
         public Task<Group> GetBySchoolIdAndGroupName(int schoolId, string groupName)
         {
             return _schools.Include(s => s.Groups).Where(s => s.Id == schoolId)
-                .Select(s => s.Groups.SingleOrDefault(g => g.Name.ToLower().Equals(groupName.ToLower()))).SingleOrDefaultAsync();
+                .Select(s => s.Groups.SingleOrDefault(g => g.Name.ToLower().Equals(groupName.ToLower())))
+                .SingleOrDefaultAsync();
         }
     }
 }

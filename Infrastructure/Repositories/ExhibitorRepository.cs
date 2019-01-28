@@ -78,17 +78,17 @@ namespace Infrastructure.Repositories
 //            return _exhibitors.Where(e => e.Category == category); // of op categoryId checken
 //        }
 
-        public Exhibitor Add(Exhibitor Exhibitor)
+        public Task Add(Exhibitor Exhibitor)
         {
-            return _exhibitors.Add(Exhibitor).Entity;
+            return _exhibitors.AddAsync(Exhibitor);
         }
 
-        public Exhibitor Remove(Exhibitor Exhibitor)
+        public void Remove(Exhibitor Exhibitor)
         {
-            return _exhibitors.Remove(Exhibitor).Entity;
+            _exhibitors.Remove(Exhibitor);
         }
 
-        public Task<int> SaveChanges()
+        public Task SaveChanges()
         {
             return _dbContext.SaveChangesAsync();
         }
