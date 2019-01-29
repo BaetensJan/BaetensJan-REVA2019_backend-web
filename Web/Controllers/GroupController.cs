@@ -49,8 +49,8 @@ namespace Web.Controllers
         }
 
         /**
-         * return group with id equal to parameter groupId.
-         */
+        * return group via token -> groepId
+        */
         [HttpGet("[action]")] // /{groupId}
         public async Task<Group> Group( /*int groupId*/)
         {
@@ -58,6 +58,15 @@ namespace Web.Controllers
             var groupId = User.Claims.ElementAt(5).Value;
 
             return await _groupRepository.GetById(Convert.ToInt32(groupId));
+        }
+
+        /**
+         * return group with id equal to parameter groupId.
+         */
+        [HttpGet("[action]/{groupId}")]
+        public async Task<Group> Group(int groupId)
+        {
+            return await _groupRepository.GetById(groupId);
         }
 
         /**
