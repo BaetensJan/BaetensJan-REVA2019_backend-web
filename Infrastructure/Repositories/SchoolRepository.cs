@@ -75,12 +75,12 @@ namespace Infrastructure.Repositories
             return _schools.AddAsync(school);
         }
 
-        public School Remove(School school)
+        public void Remove(School school)
         {
-            return _schools.Remove(school).Entity;
+            _schools.Remove(school);
         }
 
-        public Task<int> SaveChanges()
+        public Task SaveChanges()
         {
             return _dbContext.SaveChangesAsync();
         }

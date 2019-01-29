@@ -43,9 +43,9 @@ namespace Web.Controllers
                 Name = category.Name,
                 Description = category.Description
             };
-            Category returnC = _categoryRepository.Add(c);
+            await _categoryRepository.Add(c);
             await _categoryRepository.SaveChanges();
-            return returnC;
+            return c;
         }
 
         [HttpDelete("[action]/{id}")]

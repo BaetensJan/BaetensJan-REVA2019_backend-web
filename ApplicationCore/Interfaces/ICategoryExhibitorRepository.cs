@@ -10,6 +10,6 @@ namespace ApplicationCore.Interfaces
         Task<List<CategoryExhibitor>> GetByCategoryId(int id);
         Task<List<CategoryExhibitor>> GetByExhibitorId(int id);
         Task<CategoryExhibitor> GetByCategoryAndExhibitorId(int catId, int exhId);
-        Task<int> SaveChanges();
+        Task SaveChanges();
     }
 }

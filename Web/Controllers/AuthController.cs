@@ -181,14 +181,16 @@ namespace Web.Controllers
             if (!await CheckValidPassword(appUser, model.Password)) return Unauthorized();
 
             // check if user is a teacher or admin.
-            if (!await _userManager.IsInRoleAsync(appUser, "Admin") && !await _userManager.IsInRoleAsync(appUser, "Teacher"))
+            if (!await _userManager.IsInRoleAsync(appUser, "Admin") &&
+                !await _userManager.IsInRoleAsync(appUser, "Teacher"))
                 return Unauthorized();
             var claim = await CreateClaims(appUser);
-            
+
             // if user is Teacher, add schoolId to Claims.
-            if (appUser.School != null) claim = _authenticationManager.AddClaim(claim.ToList(), "school", appUser.School.Id.ToString())
-                .ToArray();
-            
+            if (appUser.School != null)
+                claim = _authenticationManager.AddClaim(claim.ToList(), "school", appUser.School.Id.ToString())
+                    .ToArray();
+
             //THIS IS FOR FUTURE POSSABILITY OF A GROUP LOGGING IN IN WEB, remove isInRoleAsync Teacher check above
 //            // check if userLogin is from a group. (groupLogin is a concat of schoolName + groupName)
 //            var schoolName = appUser.School.Name;
@@ -219,7 +221,9 @@ namespace Web.Controllers
         [HttpPost("[Action]")]
         public async Task<ActionResult> LoginAndroidGroup([FromBody] LoginGroupDTO model)
         {
-            var username = model.SchoolName + model.GroupName; //ApplicationUser-username is a concat of both school- and groupname.
+            var username =
+                model.SchoolName +
+                model.GroupName; //ApplicationUser-username is a concat of both school- and groupname.
             var appUser = await GetApplicationUser(username);
             if (appUser == null)
                 return Ok(

@@ -8,9 +8,9 @@ namespace ApplicationCore.Interfaces
     {
         Task<List<Exhibitor>> All();
         Task<IEnumerable<Exhibitor>> AllLight();
-        Task<Exhibitor> GetById(int exhibitorId);
-        Exhibitor Add(Exhibitor Exhibitor);
-        Exhibitor Remove(Exhibitor Exhibitor);
-        Task<int> SaveChanges();
+        Task<Exhibitor> GetById(int id);
+        Task Add(Exhibitor Exhibitor);
+        void Remove(Exhibitor Exhibitor);
+        Task SaveChanges();
     }
 }

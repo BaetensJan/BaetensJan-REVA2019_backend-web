@@ -120,7 +120,8 @@ namespace Web.Controllers
                 var group = await CreateGroup(model);
                 var school = await AddGroupToSchool(schoolId, group);
 
-                var user = await CreateGroupUser(school, model.Name, model.Password); //todo: add column group to appuser table
+                var user = await CreateGroupUser(school, model.Name,
+                    model.Password); //todo: add column group to appuser table
 
                 var token = GetToken(user, group.Id);
                 return
@@ -178,7 +179,7 @@ namespace Web.Controllers
                 Assignments = new List<Assignment>()
             };
 
-            group = _groupRepository.Add(group);
+            await _groupRepository.Add(group);
             await _groupRepository.SaveChanges();
             return group;
         }
@@ -260,7 +261,6 @@ namespace Web.Controllers
                 if (model.Members != null && model.Members.Count > 0)
                     group.Members = model.Members;
 
-                group = _groupRepository.Update(group);
                 await _groupRepository.SaveChanges();
 
                 return Ok(group);
