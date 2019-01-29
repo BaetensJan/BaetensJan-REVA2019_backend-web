@@ -51,10 +51,13 @@ namespace Web.Controllers
         /**
          * return group with id equal to parameter groupId.
          */
-        [HttpGet("[action]/{groupId}")]
-        public async Task<Group> Group(int groupId)
+        [HttpGet("[action]")] // /{groupId}
+        public async Task<Group> Group( /*int groupId*/)
         {
-            return await _groupRepository.GetById(groupId);
+            // get username from jwt token.
+            var groupId = User.Claims.ElementAt(5).Value;
+
+            return await _groupRepository.GetById(Convert.ToInt32(groupId));
         }
 
         /**
@@ -94,17 +97,6 @@ namespace Web.Controllers
         [HttpGet("[action]/{schoolId}/{groupName}")]
         public async Task<Group> GetBySchoolIdAndGroupName(int schoolId, string groupName)
         {
-            if (schoolId == -1)
-            {
-                // get username from jwt token.
-                var username = User.Claims.ElementAt(3).Value;
-                // get ApplicationUser via username
-                var user = _userManager.Users.Include(u => u.School).SingleOrDefault(u => u.UserName == username);
-                schoolId = user.School.Id;
-                // get groupName out of the username (username is a concat of schooName + groupName)
-                groupName = username.Substring(user.School.Name.Length);
-            }
-
             // get group object via schoolId and groupName
             return await _groupRepository.GetBySchoolIdAndGroupName(schoolId, groupName);
         }
