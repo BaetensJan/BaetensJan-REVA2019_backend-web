@@ -130,7 +130,7 @@ namespace Web.Controllers
 
             //TODO user should have a groupId, and get group via user and not as done below:
             // get group object via schoolId and groupName
-            var group = await _groupRepository.GetById(Convert.ToInt32(User.Claims.ElementAt(4).Value));
+            var group = await _groupRepository.GetById(Convert.ToInt32(User.Claims.ElementAt(5).Value));
 
             // Create assignment and Add to the groups assignments.
             var assignment = new Assignment(question);
