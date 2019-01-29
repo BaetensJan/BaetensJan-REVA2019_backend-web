@@ -72,6 +72,12 @@ namespace Infrastructure.Repositories
             return groups;
         }
 
+        
+        public Task<Group> GetBySchoolIdAndGroupName(int schoolId, string groupName)
+        {
+            return _schools.Include(s => s.Groups).ThenInclude(g =>g.Assignments).Where(s => s.Id == schoolId)
+                .Select(s => s.Groups.SingleOrDefault(g => g.Name.ToLower().Equals(groupName.ToLower()))).SingleOrDefaultAsync();
+        }
 
         public Task<Group> GetById(int id)
         {
@@ -112,18 +118,6 @@ namespace Infrastructure.Repositories
             };
             return gr;
         }
-//
-//        public Task<List<Group>> GetGroupsByName(string groupname)
-//        {
-//            var group = _groups.Include(g => g.Assignments).ThenInclude(f => f.Question)
-//                .ThenInclude(q => q.CategoryExhibitor).ThenInclude(ce
-//                    => ce.Exhibitor)
-//                .Include(g => g.Assignments).ThenInclude(f => f.Question).ThenInclude(q => q.CategoryExhibitor)
-//                .ThenInclude(ce
-//                    => ce.Category)
-//                .Where(c => c.Name == groupname);
-//            return group;
-//        }
 
         public Group Add(Group group)
         {
@@ -159,12 +153,6 @@ namespace Infrastructure.Repositories
         public Task<int> SaveChanges()
         {
             return _dbContext.SaveChangesAsync();
-        }
-
-        public Task<Group> GetBySchoolIdAndGroupName(int schoolId, string groupName)
-        {
-            return _schools.Include(s => s.Groups).Where(s => s.Id == schoolId)
-                .Select(s => s.Groups.SingleOrDefault(g => g.Name.ToLower().Equals(groupName.ToLower()))).SingleOrDefaultAsync();
         }
     }
 }

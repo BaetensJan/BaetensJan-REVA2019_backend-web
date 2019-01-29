@@ -117,7 +117,7 @@ namespace Web.Controllers
         {
             if (ModelState.IsValid)
             {
-                var group = await CreateGroup(schoolId, model);
+                var group = await CreateGroup(model);
                 var school = await AddGroupToSchool(schoolId, group);
 
                 var user = await CreateGroupUser(school, model.Name, model.Password); //todo: add column group to appuser table
@@ -149,7 +149,7 @@ namespace Web.Controllers
         {
             if (ModelState.IsValid)
             {
-                var group = await CreateGroup(schoolId, model);
+                var group = await CreateGroup(model);
                 var school = await AddGroupToSchool(schoolId, group);
 
                 await CreateGroupUser(school, model.Name, model.Password); //todo: add column group to appuser table
@@ -168,7 +168,7 @@ namespace Web.Controllers
         /**
          * Sub method, used in Group Creation Methods (CreateGroup and CreateAndReturnGroup).
          */
-        private async Task<Group> CreateGroup(int schoolId, GroupDTO model)
+        private async Task<Group> CreateGroup(GroupDTO model)
         {
             // Creation of Group Entity
             var group = new Group

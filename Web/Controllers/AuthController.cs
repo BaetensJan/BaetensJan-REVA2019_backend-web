@@ -44,7 +44,7 @@ namespace Web.Controllers
          * Parameter = model: CreateUserViewModel
          */
         [HttpPost("[Action]")]
-        public async Task<ActionResult> CreateUser([FromBody] CreateUserViewModel model)
+        public async Task<ActionResult> CreateUser([FromBody] CreateUserDTO model)
         {
             if (ModelState.IsValid)
             {
@@ -75,7 +75,7 @@ namespace Web.Controllers
         * Parameter = model: CreateTeacherViewModel
         */
         [HttpPost("[Action]")]
-        public async Task<ActionResult> CreateTeacher([FromBody] CreateTeacherViewModel model)
+        public async Task<ActionResult> CreateTeacher([FromBody] CreateTeacherDTO model)
         {
             if (ModelState.IsValid)
             {
@@ -165,54 +165,110 @@ namespace Web.Controllers
         }
 
         /**
-         * Teacher or group Login.
-         * Return: JWT Token.
-         */
+        * A Teacher wants to log in via web.
+        * Return: JWT Token.
+        */
         [HttpPost("[Action]")]
-        public async Task<ActionResult> Login([FromBody] LoginViewModel model)
+        public async Task<ActionResult> LoginWebTeacher([FromBody] LoginDTO model)
         {
-            var user = _userManager.Users.Include(u => u.School).SingleOrDefault(u => u.UserName == model.Username);
-            if (user != null && await _userManager.CheckPasswordAsync(user, model.Password))
-            {
-                var claim = await CreateClaims(user);
-                // School / Teacher or Group login
-                if (user.School != null)
-                {
-                    claim = _authenticationManager.AddClaim(claim.ToList(), "school", user.School.Id.ToString())
-                        .ToArray();
-
-                    // check if userlogin is from a group. (groupLogin is a concat of schoolName + groupName)
-                    var schoolName = user.School.Name;
-                    if (schoolName.Length < model.Username.Length)
-                    {
-                        var groupName = model.Username.Substring(schoolName.Length);
-
-                        var group = await _groupRepository.GetBySchoolIdAndGroupName(user.School.Id, groupName);
-                        // Group login
-                        if (group != null)
-                            claim = _authenticationManager
-                                .AddClaim(claim.ToList(), "group", group.Id.ToString()).ToArray();
-                    }
-                }
-
-                var token = GetToken(claim);
+            var appUser = await GetApplicationUser(model.Username);
+            if (appUser == null)
                 return Ok(
                     new
                     {
-                        token = new JwtSecurityTokenHandler().WriteToken(token),
-                        expiration = token.ValidTo
+                        Message = "User not found"
+                    });
+            if (!await CheckValidPassword(appUser, model.Password)) return Unauthorized();
+
+            // check if user is a teacher or admin.
+            if (!await _userManager.IsInRoleAsync(appUser, "Admin") && !await _userManager.IsInRoleAsync(appUser, "Teacher"))
+                return Unauthorized();
+            var claim = await CreateClaims(appUser);
+            
+            // if user is Teacher, add schoolId to Claims.
+            if (appUser.School != null) claim = _authenticationManager.AddClaim(claim.ToList(), "school", appUser.School.Id.ToString())
+                .ToArray();
+            
+            //THIS IS FOR FUTURE POSSABILITY OF A GROUP LOGGING IN IN WEB, remove isInRoleAsync Teacher check above
+//            // check if userLogin is from a group. (groupLogin is a concat of schoolName + groupName)
+//            var schoolName = appUser.School.Name;
+//            if (schoolName.Length < model.Username.Length)
+//            {
+//                var groupName = model.Username.Substring(schoolName.Length);
+//
+//                var group = await _groupRepository.GetBySchoolIdAndGroupName(appUser.School.Id, groupName);
+//                // Group login
+//                if (group != null)
+//                    claim = _authenticationManager
+//                        .AddClaim(claim.ToList(), "group", group.Id.ToString()).ToArray();
+//            }
+
+            var token = GetToken(claim);
+            return Ok(
+                new
+                {
+                    token = new JwtSecurityTokenHandler().WriteToken(token),
+                    expiration = token.ValidTo
+                });
+        }
+
+        /**
+         * A group wants to log in via android app.
+         * Return: JWT Token.
+         */
+        [HttpPost("[Action]")]
+        public async Task<ActionResult> LoginAndroidGroup([FromBody] LoginGroupDTO model)
+        {
+            var username = model.SchoolName + model.GroupName; //ApplicationUser-username is a concat of both school- and groupname.
+            var appUser = await GetApplicationUser(username);
+            if (appUser == null)
+                return Ok(
+                    new
+                    {
+                        Message = "User not found"
+                    });
+            if (!await CheckValidPassword(appUser, model.Password)) return Unauthorized();
+
+
+            var group = await _groupRepository.GetBySchoolIdAndGroupName(appUser.School.Id, model.GroupName);
+
+            if (group == null) // check if group exists
+            {
+                return Ok(
+                    new
+                    {
+                        Message = "Group not found"
                     });
             }
 
-            return Unauthorized();
+            var claim = await CreateClaims(appUser);
+            claim = _authenticationManager.AddClaim(claim.ToList(), "group", group.Id.ToString()).ToArray();
+
+            var token = GetToken(claim);
+            return Ok(
+                new
+                {
+                    token = new JwtSecurityTokenHandler().WriteToken(token),
+                    expiration = token.ValidTo
+                });
+        }
+
+        private async Task<bool> CheckValidPassword(ApplicationUser applicationUser, string password)
+        {
+            return await _userManager.CheckPasswordAsync(applicationUser, password);
+        }
+
+        private async Task<ApplicationUser> GetApplicationUser(string username)
+        {
+            return _userManager.Users.Include(u => u.School).SingleOrDefault(u => u.UserName == username);
         }
 
         /**
          * School Login, via Android app.
-         * Return: schoolId if successfull login, else an Unauthorized error.
+         * Return: schoolId if successful login, else an Unauthorized error.
          */
         [HttpPost("[Action]")]
-        public async Task<ActionResult> LoginSchool([FromBody] LoginViewModel model)
+        public async Task<ActionResult> LoginAndroidSchool([FromBody] LoginDTO model)
         {
             var school = await _schoolRepository.GetByName(model.Username);
             if (school == null)

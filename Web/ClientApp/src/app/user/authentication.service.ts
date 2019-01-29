@@ -101,7 +101,7 @@ export class AuthenticationService {
    */
   login(username: string, password: string): Observable<boolean> {
     //TODO check if token already exist (then api call to backend is unnecessary) => if (localStorage.getItem(this._tokenKey)*/
-    return this.http.post(`${this._url}/Login`, {username, password}).pipe(
+    return this.http.post(`${this._url}/LoginWebTeacher`, {username, password}).pipe(
       map((res: any) => {
         const token = res.token;
         if (token) {

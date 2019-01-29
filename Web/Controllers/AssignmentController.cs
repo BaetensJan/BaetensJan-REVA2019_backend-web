@@ -130,12 +130,11 @@ namespace Web.Controllers
 
             //TODO user should have a groupId, and get group via user and not as done below:
             // get group object via schoolId and groupName
-            var group = await _groupRepository.GetBySchoolIdAndGroupName(user.School.Id, groupName);
+            var group = await _groupRepository.GetById(Convert.ToInt32(User.Claims.ElementAt(4).Value));
 
             // Create assignment and Add to the groups assignments.
             var assignment = new Assignment(question);
             group.AddAssignment(assignment);
-            assignment = /*await*/_assignmentRepository.Add(assignment); //TODO nog niet async.
             await _assignmentRepository.SaveChanges();
 
             return assignment;
@@ -145,7 +144,7 @@ namespace Web.Controllers
          * When a group submits an Assignment in the application, this controller method will be called.
          */
         [HttpPost("SubmitAssignment")]
-        public async Task<IActionResult> Submit([FromBody] AssignmentViewModel model)
+        public async Task<IActionResult> Submit([FromBody] AssignmentDTO model)
         {
             if (ModelState.IsValid)
             {

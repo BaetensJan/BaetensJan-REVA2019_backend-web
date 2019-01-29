@@ -2,10 +2,12 @@ using System.ComponentModel.DataAnnotations;
 
 namespace Web.DTOs
 {
-    public class LoginDTO
+    public class LoginGroupDTO
     {
         [Required]
-        public string Username { get; set; }
+        public string SchoolName { get; set; }
+        [Required]
+        public string GroupName { get; set; }
         [Required]
         [DataType(DataType.Password)]
         public string Password { get; set; }
