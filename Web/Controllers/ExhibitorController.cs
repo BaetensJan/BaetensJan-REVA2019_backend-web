@@ -86,7 +86,9 @@ namespace Web.Controllers
             e.X = exhibitordto.X;
             e.Y = exhibitordto.Y;
             e.GroupsAtExhibitor = 0;
-            e.Categories = CreateCategories(exhibitordto.CategoryIds);
+            //e.Categories = 
+            List<CategoryExhibitor> lcatexb = CreateCategories(exhibitordto.CategoryIds);
+            //e.Categories = 
             Exhibitor exh = await _exhibitorManager.UpdateExhibitor(e);
             return exh;
             /*var exhibitor = new Exhibitor

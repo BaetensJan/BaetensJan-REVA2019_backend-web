@@ -61,7 +61,7 @@ export class ExhibitorsDataService {
    */
   updateExhibitor(exhibitor: Exhibitor): Observable<Exhibitor> {
     return this.http
-      .put(`${this._appUrl}/UpdateExhibitor/${exhibitor.id}`, exhibitor)
+      .put(`${this._appUrl}/UpdateExhibitor/${exhibitor.id}`, this.exhibitorToDTO(exhibitor))
       .pipe(map(Exhibitor.fromJSON));
   }
 

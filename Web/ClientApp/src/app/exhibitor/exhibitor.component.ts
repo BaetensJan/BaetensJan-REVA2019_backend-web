@@ -220,7 +220,6 @@ export class ExhibitorComponent implements AfterViewInit {
         this.router.navigate(["/exposanten"]);
       });
     } else {
-      console.log(this.selectedExhibitor);
       this._exhibitorsDataService.updateExhibitor(this.selectedExhibitor).subscribe(e => {
         this.router.navigate(["/exposanten"]);
       });
