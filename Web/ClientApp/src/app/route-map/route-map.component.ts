@@ -1,5 +1,8 @@
 import {AfterViewInit, Component, ElementRef, ViewChild, OnInit} from '@angular/core';
 import {ImageDataService} from "../image-data-service/image-data.service";
+import { Subscription } from 'rxjs/Subscription';
+import { Observable } from 'rxjs/Observable';
+import 'rxjs/add/observable/timer';
 
 @Component({
   selector: 'app-route-map',
@@ -19,6 +22,11 @@ export class RouteMapComponent implements AfterViewInit, OnInit {
   public cx: CanvasRenderingContext2D;
   private _routePlanImage; //image url
   fileSelected = false;
+  successMessage = "";
+  showMessage = false;
+  showMessageFail = false;
+  private subscription: Subscription;
+  private timer: Observable<any>;
 
   /**
    * Constructor
@@ -40,11 +48,22 @@ export class RouteMapComponent implements AfterViewInit, OnInit {
     formData.append('file', this.dataURItoBlob(this._routePlanImage));
     console.log(formData);
     this._imageDataService.UpdateRoutePlanImage(formData).subscribe((value: boolean) => {
-      if (value) {
-        console.log("successfully updated route plan image.");
+      if (value == false) {
+        this.fileSelected = false;
+        this.successMessage = "Het beursplan is succesvol geupload";
+        this.showMessage = true;
+        setTimeout(()=>{
+          this.showMessage = false;
+        }, 3000);
+      } else {
+        this.fileSelected = true;
+        this.successMessage = "Het uploaden van het beursplan is mislukt";
+        this.showMessageFail = true;
+        setTimeout(()=>{
+          this.showMessage = false;
+        }, 3000);
       }
     });
-    // });
   }
 
   /**

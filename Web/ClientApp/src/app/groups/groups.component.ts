@@ -43,7 +43,7 @@ export class GroupsComponent {
   filterOnGroupName = true; // if current filter option is filtering on 'groupName' or on 'groupMembers'
 
   private _school: School;
-  private _groups: Group[]; // array containing ALL the groups.
+  _groups: Group[]; // array containing ALL the groups.
   contentArray: Group[]; // array containing the groups that fits the filter.
   returnedArray: Group[]; // array containing the groups (maxNumberOfGroupsPerPage) that are showed on the current page.
   maxNumberOfGroupsPerPage = 5; // amount of groups that will be showed on the current page, to keep the page neat.
@@ -51,8 +51,9 @@ export class GroupsComponent {
   newMemberName: string = ""; // value of input-field in an already existing group. Will be used to add a new member to an existing group.
   createGroupClicked: boolean = false; // if the + button (for creating a group) was clicked.
   groupMembers: string[]; // members that were added to the newly created group.
-
+  filteredGroups: Group[];
   groupForm: FormGroup;
+  private filterValue: string = "";
 
   /**
    * Constructor
@@ -80,6 +81,7 @@ export class GroupsComponent {
       this._groupsDataService.allGroups.subscribe(value => {
         this._groups = value;
         this.contentArray = this._groups;
+        this.filteredGroups = this._groups
         this.initiateReturnedArray();
       });
     } else {
@@ -90,6 +92,7 @@ export class GroupsComponent {
         this._groups = this._school.groups;
         this.contentArray = this._groups;
         this.initiateReturnedArray();
+        this.filteredGroups = this._groups
       });
     }
     this.groupMembers = [];
@@ -291,6 +294,18 @@ export class GroupsComponent {
       this.groupForm.controls['groupPassword'].setValue("");
       // show alert (modal)
       this.add(newGroup.name);
+    });
+  }
+
+  public filter(token: string) {
+    console.log(token);
+    console.log(this._groups);
+    console.log(this.filteredGroups);
+    this.filteredGroups = this._groups.filter((group: Group) => {
+      return group.name.toLowerCase().startsWith(token.toLowerCase());
+
+      //return question.categoryExhibitor.exhibitor.name.toLowerCase().startsWith(token.toLowerCase()) ||
+      //  question.categoryExhibitor.category.name.toLowerCase().startsWith(token.toLowerCase());
     });
   }
 

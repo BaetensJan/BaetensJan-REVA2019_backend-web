@@ -4,6 +4,7 @@ import {Router} from "@angular/router";
 import {ExhibitorsDataService} from "./exhibitors-data.service";
 import {ExhibitorShareService} from "../exhibitor/exhibitor-share.service";
 import {Exhibitor} from "../models/exhibitor.model";
+import {Group} from "../models/group.model";
 
 @Component({
   selector: 'app-exhibitors',
@@ -28,6 +29,8 @@ export class ExhibitorsComponent implements OnInit {
    */
   refModal: BsModalRef;
 
+  _filteredExhibitors: Exhibitor[];
+
   /**
    * Constructor
    *
@@ -40,6 +43,7 @@ export class ExhibitorsComponent implements OnInit {
     this._exhibitorsDataService.exhibitors.subscribe(exhibitors => {
       this._exhibitors = exhibitors.sort((a, b) => a.name > b.name ? 1 : -1);
       this._contentArray = this._exhibitors;
+      this._filteredExhibitors = this._exhibitors
     });
   }
 
@@ -48,6 +52,16 @@ export class ExhibitorsComponent implements OnInit {
               private _exhibitorsDataService: ExhibitorsDataService,
               private _exhibitorShareService: ExhibitorShareService
   ) {
+  }
+
+
+  public filter(token: string) {
+    this._filteredExhibitors = this._exhibitors.filter((exhibitor: Exhibitor) => {
+      return exhibitor.name.toLowerCase().startsWith(token.toLowerCase());
+
+      //return question.categoryExhibitor.exhibitor.name.toLowerCase().startsWith(token.toLowerCase()) ||
+      //  question.categoryExhibitor.category.name.toLowerCase().startsWith(token.toLowerCase());
+    });
   }
 
   /**
