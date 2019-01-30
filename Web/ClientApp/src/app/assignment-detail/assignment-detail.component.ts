@@ -3,6 +3,8 @@ import {ActivatedRoute, Router} from "@angular/router";
 import {Group} from "../models/group.model";
 import {Observable} from "rxjs";
 import {GroupsDataService} from "../groups/groups-data.service";
+import * as jsPDF from "jspdf";
+import * as html2canvas from 'html2canvas';
 
 @Component({
   selector: 'app-assignment-detail',
@@ -15,7 +17,7 @@ export class AssignmentDetailComponent implements OnInit {
   public group: Group;
   public groupId: number;
 
-  constructor(private router: Router,private route: ActivatedRoute, private _groupsDataService: GroupsDataService
+  constructor(private router?: Router,private route?: ActivatedRoute, private _groupsDataService?: GroupsDataService
               /*, private _assignmentDataService: AssignmentDataService*/) { }
 
   ngOnInit() {

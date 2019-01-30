@@ -17,17 +17,12 @@
 </div>
 
 <!--Search Filter Bar-->
-<div class="row" *ngIf="exhibitors != null && exhibitors.length > 0" style="margin-bottom: 2em;">
+<div class="row" style="margin-bottom: 2em;">
   <div class="col-md-10">
     <div class="input-group">
       <span class="input-group-addon">Zoekfilter
        </span>
-      <input class="form-control" type="text" placeholder="filter" [(ngModel)]="selected"
-             [typeahead]="exhibitors"
-             typeaheadOptionField="name"
-             (typeaheadOnSelect)="onSelect($event)"
-             (typeaheadNoResults)="typeaheadNoResults($event)"
-             [typeaheadItemTemplate]="customItemTemplate">
+      <input class="form-control" type="text" placeholder="filter" (ngModelChange)="filter($event)" [(ngModel)]="filterValue">
     </div>
   </div>
 </div>
@@ -50,7 +45,7 @@
       </tr>
       </thead>
       <tbody>
-      <tr *ngFor="let exhibitor of exhibitors">
+      <tr *ngFor="let exhibitor of _filteredExhibitors">
         <td>{{exhibitor.name}}</td>
         <td>
           <span class="btn glyphicon glyphicon-pencil" aria-hidden="true"
