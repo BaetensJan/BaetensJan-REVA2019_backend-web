@@ -83,6 +83,11 @@ namespace Infrastructure.Repositories
             return _exhibitors.AddAsync(Exhibitor);
         }
 
+        public void Update(Exhibitor exhibitor)
+        {
+            _exhibitors.Update(exhibitor);
+        }
+        
         public void Remove(Exhibitor Exhibitor)
         {
             _exhibitors.Remove(Exhibitor);

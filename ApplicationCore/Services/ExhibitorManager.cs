@@ -99,6 +99,15 @@ namespace ApplicationCore.Services
             return exhibitor;
         }
 
+        public async Task<Exhibitor> UpdateExhibitor(int id, Exhibitor exhibitorLast)
+        {
+            Exhibitor exhibitor = await _exhibitorRepository.GetById(id);
+            exhibitor.Name = exhibitorLast.Name;
+            _exhibitorRepository.Update(exhibitor);
+            await _exhibitorRepository.SaveChanges();
+            return exhibitor;
+        } 
+        
         public async Task<Exhibitor> RemoveExhibitor(int id)
         {
             Exhibitor exhibitor = await _exhibitorRepository.GetById(id);

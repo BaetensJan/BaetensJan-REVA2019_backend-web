@@ -36,6 +36,21 @@ namespace Web.Controllers
         {
             return _exhibitorManager.ExhibitorsLight();
         }
+        
+        [HttpPut("[action]/{id}")]
+        public Task<Exhibitor> UpdateExhibitor([FromRoute] int id, [FromBody] ExhibitorDTO exhibitordto)
+        {
+            var exhibitor = new Exhibitor
+            {
+                Name = exhibitordto.Name,
+                ExhibitorNumber = exhibitordto.ExhibitorNumber,
+                X = exhibitordto.X,
+                Y = exhibitordto.Y,
+                GroupsAtExhibitor = 0,
+                Categories = CreateCategories(exhibitordto.CategoryIds)
+            };
+            return _exhibitorManager.UpdateExhibitor(id,exhibitor);
+        }
 
         [HttpDelete("[action]/{id}")]
         public Task<Exhibitor> RemoveExhibitor([FromRoute] int id)
