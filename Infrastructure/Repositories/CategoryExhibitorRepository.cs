@@ -37,7 +37,7 @@ namespace Infrastructure.Repositories
 
         public Task<CategoryExhibitor> GetByCategoryAndExhibitorId(int catId, int exhId)
         {
-            return _categoryExhibitors.SingleOrDefaultAsync(cE => cE.CategoryId == catId && cE.ExhibitorId == exhId);
+            return _categoryExhibitors.Include(c => c.Category).Include(e => e.Exhibitor).SingleOrDefaultAsync(cE => cE.CategoryId == catId && cE.ExhibitorId == exhId);
         }
 
         public Task<int> SaveChanges()

@@ -91,7 +91,10 @@ namespace Infrastructure.Repositories
 
         public Task<Question> GetById(int id)
         {
-            var question = _questions.SingleOrDefaultAsync(c => c.Id == id);
+            var question = _questions.Include(q => q.CategoryExhibitor)
+                .ThenInclude(catExh => catExh.Exhibitor)
+                .Include(q => q.CategoryExhibitor)
+                .ThenInclude(catExh => catExh.Category).SingleOrDefaultAsync(c => c.Id == id);
             return question;
         }
 
@@ -114,7 +117,7 @@ namespace Infrastructure.Repositories
             question.Answer = answerText;
             question.QuestionText = questionText;
             question.CategoryExhibitor = ce;
-            return question;
+            return _questions.Update(question).Entity;
         }
 
         public Question Remove(Question question)

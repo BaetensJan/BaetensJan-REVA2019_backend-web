@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using ApplicationCore.Entities;
@@ -61,7 +62,7 @@ namespace Web.Controllers
         public async Task<ActionResult> EditQuestion([FromBody] QuestionUpdateDTO model)
         {
             var ce = await GetOrCreateCategoryExhibitor(model.CategoryId, model.ExhibitorId);
-            var q = _questionRepository.EditQuestion(model.QuestionId, model.QuestionText, model.AnswerText, ce);
+            var q =  await _questionRepository.EditQuestion(model.QuestionId, model.QuestionText, model.AnswerText, ce);
 
             if (q == null)
             {
@@ -71,7 +72,6 @@ namespace Web.Controllers
                         Message = "Zorg dat questionId correct is."
                     });
             }
-
             await _questionRepository.SaveChanges();
             return Ok(q);
         }

@@ -117,7 +117,7 @@ namespace ApplicationCore.Services
             e.Categories = exhibitor.Categories;
             e.ExhibitorNumber = exhibitor.ExhibitorNumber;
 
-            _exhibitorRepository.SaveChanges();
+            await _exhibitorRepository.SaveChanges();
             return exhibitor;
         }
 
