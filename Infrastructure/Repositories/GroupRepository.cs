@@ -142,11 +142,5 @@ namespace Infrastructure.Repositories
         {
             return _dbContext.SaveChangesAsync();
         }
-        
-        public Task<Group> GetBySchoolIdAndGroupName(int schoolId, string groupName)
-        {
-            return _schools.Include(s => s.Groups).ThenInclude(g =>g.Assignments).Where(s => s.Id == schoolId)
-                .Select(s => s.Groups.SingleOrDefault(g => g.Name.ToLower().Equals(groupName.ToLower()))).SingleOrDefaultAsync();
-        }
     }
 }

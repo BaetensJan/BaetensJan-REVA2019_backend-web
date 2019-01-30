@@ -37,16 +37,6 @@ namespace Web.Controllers
             _configuration = configuration;
         }
 
-        /**
-         * Returns all groups of school with schoolId equal to parameter schoolId.
-         * Return: Task<IEnumerable<Group>> (list of groups) 
-         */
-        [HttpGet("[action]/{schoolId}")]
-        public async Task<IEnumerable<Group>> GroupsBasicBySchoolId(int schoolId)
-        {
-            //TODO get username out of token, get groups from user.
-            return await _groupRepository.GetBasicsBySchoolId(schoolId);
-        }
 
         /**
         * return group via token -> groepId
@@ -73,10 +63,18 @@ namespace Web.Controllers
          * Returns all groups of school with schoolId equal to parameter schoolId.
          */
         [HttpGet("[action]/{schoolId}")]
-        public async Task<IEnumerable<Group>> Groups(int schoolId)
+        public async Task<IActionResult> Groups(int schoolId)
         {
-//            return await _groupRepository.GetAllBySchoolId(schoolId); //Todo: deze haalt de assignments niet op
-            return _groupRepository.GetAllBySchoolIdLight(schoolId);
+            var school = await _schoolRepository.GetById(schoolId);
+            if (school != null)
+            {
+                return Ok(school.Groups);
+            }
+
+            return Ok(new
+            {
+                Message = "School not found"
+            });
         }
 
         /**
@@ -97,17 +95,6 @@ namespace Web.Controllers
         public async Task<IEnumerable<Group>> Groups()
         {
             return await _groupRepository.GetAllLight();
-        }
-
-        /**
-         * Returns group with schoolId equal to parameter schoolId and groupName equal to parameter.
-         * If parameter schoolId is -1, then the schoolId can be extracted out of the token via User.claims.
-         */
-        [HttpGet("[action]/{schoolId}/{groupName}")]
-        public async Task<Group> GetBySchoolIdAndGroupName(int schoolId, string groupName)
-        {
-            // get group object via schoolId and groupName
-            return await _groupRepository.GetBySchoolIdAndGroupName(schoolId, groupName);
         }
 
         /**
@@ -149,22 +136,18 @@ namespace Web.Controllers
         [HttpPost("[action]/{schoolId}")]
         public async Task<ActionResult> CreateAndReturnGroup([FromBody] GroupDTO model, int schoolId)
         {
-            if (ModelState.IsValid)
-            {
-                var group = await CreateGroup(model);
-                var school = await AddGroupToSchool(schoolId, group);
+            if (!ModelState.IsValid)
+                return Ok(
+                    new
+                    {
+                        Message = "Zorg dat naam ingevuld is."
+                    });
+            var group = await CreateGroup(model);
+            var school = await AddGroupToSchool(schoolId, group);
 
-                await CreateGroupUser(school, model.Name, model.Password); //todo: add column group to appuser table
+            await CreateGroupUser(school, model.Name, model.Password); //todo: add column group to appuser table
 
-                return
-                    Ok(group);
-            }
-
-            return Ok(
-                new
-                {
-                    Message = "Zorg dat naam ingevuld is."
-                });
+            return Ok(group);
         }
 
         /**

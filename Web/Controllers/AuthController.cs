@@ -163,7 +163,7 @@ namespace Web.Controllers
 
             return output;
         }
-
+        
         /**
         * A Teacher wants to log in via web.
         * Return: JWT Token.
@@ -191,20 +191,6 @@ namespace Web.Controllers
                 claim = _authenticationManager.AddClaim(claim.ToList(), "school", appUser.School.Id.ToString())
                     .ToArray();
 
-            //THIS IS FOR FUTURE POSSABILITY OF A GROUP LOGGING IN IN WEB, remove isInRoleAsync Teacher check above
-//            // check if userLogin is from a group. (groupLogin is a concat of schoolName + groupName)
-//            var schoolName = appUser.School.Name;
-//            if (schoolName.Length < model.Username.Length)
-//            {
-//                var groupName = model.Username.Substring(schoolName.Length);
-//
-//                var group = await _groupRepository.GetBySchoolIdAndGroupName(appUser.School.Id, groupName);
-//                // Group login
-//                if (group != null)
-//                    claim = _authenticationManager
-//                        .AddClaim(claim.ToList(), "group", group.Id.ToString()).ToArray();
-//            }
-
             var token = GetToken(claim);
             return Ok(
                 new
@@ -212,6 +198,22 @@ namespace Web.Controllers
                     token = new JwtSecurityTokenHandler().WriteToken(token),
                     expiration = token.ValidTo
                 });
+            //THIS IS FOR FUTURE POSSIBILITY OF A GROUP LOGGING IN IN WEB, remove isInRoleAsync Teacher check above
+            // login could be with DNS (e.g. hogent.group1) or concat (e.g. hogentgroup1), so check if "."
+//            // check if userLogin is from a group. (groupLogin is a concat of schoolName + groupName)
+//            var schoolName = appUser.School.Name;
+//            if (schoolName.Length < model.Username.Length)
+//            {
+//                var groupName = model.Username.Substring(schoolName.Length);
+//
+//            var group = appUser.School.Groups.SingleOrDefault(g => g.Name == groupName);
+//                // Group login
+//                if (group != null)
+//                    claim = _authenticationManager
+//                        .AddClaim(claim.ToList(), "group", group.Id.ToString()).ToArray();
+//            } else{
+//                // this is not a group login => schoolName characters are bigger than the login username.
+// }
         }
 
         /**
@@ -234,7 +236,7 @@ namespace Web.Controllers
             if (!await CheckValidPassword(appUser, model.Password)) return Unauthorized();
 
 
-            var group = await _groupRepository.GetBySchoolIdAndGroupName(appUser.School.Id, model.GroupName);
+            var group = appUser.School.Groups.SingleOrDefault(g => g.Name == model.GroupName);
 
             if (group == null) // check if group exists
             {
@@ -264,7 +266,8 @@ namespace Web.Controllers
 
         private async Task<ApplicationUser> GetApplicationUser(string username)
         {
-            return _userManager.Users.Include(u => u.School).SingleOrDefault(u => u.UserName == username);
+            return _userManager.Users.Include(u => u.School).ThenInclude(s => s.Groups)
+                .SingleOrDefault(u => u.UserName == username);
         }
 
         /**
@@ -277,8 +280,10 @@ namespace Web.Controllers
             var school = await _schoolRepository.GetByName(model.Username);
             if (school == null)
             {
-                Response.StatusCode = 403;
-                return Unauthorized();
+                return Ok(new
+                {
+                    Message = "School not found"
+                });
             }
 
             if (school.Password.Equals(model.Password))
