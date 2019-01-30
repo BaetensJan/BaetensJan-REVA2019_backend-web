@@ -44,7 +44,6 @@ export class CategoryComponent implements AfterViewInit {
    */
   ngAfterViewInit() {
     this.selectedCategorie = this._categorieShareService.category;
-    console.log(this.selectedCategorie);
     this.aanpassen = this._categorieShareService.aanpassen;
     if (this.selectedCategorie == undefined) {
       this.selectedCategorie = new Category();
