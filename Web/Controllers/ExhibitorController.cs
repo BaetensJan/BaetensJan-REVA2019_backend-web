@@ -14,10 +14,12 @@ namespace Web.Controllers
     public class ExhibitorController : Controller
     {
         private readonly ExhibitorManager _exhibitorManager;
+        private readonly IExhibitorRepository _exhibitorRepository;
 
         public ExhibitorController(IExhibitorRepository exhibitorRepository, ICategoryRepository categoryRepository,
             ICategoryExhibitorRepository categoryExhibitorRepository, IQuestionRepository questionRepository)
         {
+            _exhibitorRepository = exhibitorRepository;
             _exhibitorManager = new ExhibitorManager(exhibitorRepository, categoryRepository, questionRepository);
         }
 
@@ -59,9 +61,20 @@ namespace Web.Controllers
         }
 
         [HttpPost("[action]")]
-        public Task<Exhibitor> UpdateExhibitor([FromBody] ExhibitorDTO exhibitordto)
+        public async Task<Exhibitor> UpdateExhibitor([FromBody] ExhibitorDTO exhibitordto)
         {
-            var exhibitor = new Exhibitor
+            
+            Exhibitor e = await _exhibitorRepository.GetById(exhibitordto.Id);
+            e.Id = exhibitordto.Id;
+            e.Name = exhibitordto.Name;
+            e.ExhibitorNumber = exhibitordto.ExhibitorNumber;
+            e.X = exhibitordto.X;
+            e.Y = exhibitordto.Y;
+            e.GroupsAtExhibitor = 0;
+            e.Categories = CreateCategories(exhibitordto.CategoryIds);
+            Exhibitor exh = await _exhibitorManager.UpdateExhibitor(e);
+            return exh;
+            /*var exhibitor = new Exhibitor
             {
                 Id = exhibitordto.Id,
                 Name = exhibitordto.Name,
@@ -71,8 +84,9 @@ namespace Web.Controllers
                 GroupsAtExhibitor = 0,
                 Categories = CreateCategories(exhibitordto.CategoryIds)
             };
-
-            return _exhibitorManager.UpdateExhibitor(exhibitor);
+            
+            return await _exhibitorRepository.SaveChanges();*/
+            //return await _exhibitorManager.UpdateExhibitor(exhibitor);
         }
 
         private static List<CategoryExhibitor> CreateCategories(IReadOnlyCollection<int> categoryIdList)
