@@ -1,4 +1,5 @@
 import {Category} from "./category.model";
+import {Question} from "./question.model";
 
 export class Exhibitor {
   /**
@@ -40,9 +41,11 @@ export class Exhibitor {
    */
   static fromJSON(json: any): Exhibitor {
     const rec = new Exhibitor();
-    rec.name = json.name;
+    console.log(json);
+    rec._name = json.name;
     rec._exhibitorNumber = json.exhibitorNumber;
-    rec.categories = json.categories.map(ce => ce.category);
+    //rec._categories = json.forEach(c => c.category = Category.fromJSON(c.category));
+    rec._categories = json.categories.map(ce=>ce.category);
     rec._id = json.id;
     rec._y = json.y;
     rec._x = json.x;
