@@ -28,11 +28,11 @@ namespace Web.Controllers
         }
 
         /**
-         * Returns the Categories that were not yet picker if isExtraRound parameter is false,
+         * Returns the Categories that were not yet picker if isExtraRound (normal tour, with 8 assignments has been finished),
          * or returns the categories of which the exhibitors were not all yet picked.
          */
-        [HttpGet("[action]/{isExtraRound}")]
-        public async Task<IEnumerable<Category>> GetUnpickedCategories(bool isExtraRound)
+        [HttpGet("[action]")]
+        public async Task<IEnumerable<Category>> GetUnpickedCategories()
         {
             var group = await _groupRepository.GetById(Convert.ToInt32(User.Claims.ElementAt(5).Value));
             var assignments = group.Assignments;
@@ -40,22 +40,27 @@ namespace Web.Controllers
             var unpickedCategories = new List<Category>();
 
             var counter = 0;
-            if (isExtraRound)
+            var found = false;
+
+            // check if extra round (when a group has already finished the max number of assignments in a normal tour)
+            if (assignments.Count >= 8) //TODO maxNumberOfRounds uit conf file halen
             {
                 foreach (var category in categories)
                 {
-                    category.Exhibitors.ForEach(e =>
+                    foreach (var categoryExhibitor in category.Exhibitors)
                     {
-                        assignments.ForEach(a =>
+                        foreach (var assignment in assignments)
                         {
-                            if (e.Exhibitor == a.Question.CategoryExhibitor.Exhibitor
-                                && category == a.Question.CategoryExhibitor.Category) counter++;
-                        });
-                    });
+                            if (categoryExhibitor.Exhibitor.Id == assignment.Question.CategoryExhibitor.Exhibitor.Id
+                                && category.Id == assignment.Question.CategoryExhibitor.Category.Id) counter++;
+                        }
+                    }
+
                     // not all exhibitors of a certain Category were picked by the group (otherwise all Exhibitors of a
                     // certain Category would be found in the submitted assignments  (where the chosen Category AND
                     // Exhibitor would match). 
                     if (counter != category.Exhibitors.Count) unpickedCategories.Add(category);
+                    counter = 0; // reset counter
                 }
             }
             else
@@ -65,14 +70,14 @@ namespace Web.Controllers
                     foreach (var assignment in assignments)
                     {
                         // current Category was already chosen. Break in order to not add it to unpickedCategories.
-                        if (assignment.Question.CategoryExhibitor.Category == category)
-                        {
-                            break;
-                        }
-
-                        // all assignments were checked and none had current Category as chosen Category.
-                        if (counter == assignments.Count) unpickedCategories.Add(category);
+                        if (assignment.Question.CategoryExhibitor.Category.Id != category.Id) continue;
+                        found = true;
+                        break;
                     }
+
+                    // all assignments were checked and none had current Category as chosen Category.
+                    if (!found) unpickedCategories.Add(category);
+                    found = false;
                 }
             }
 
