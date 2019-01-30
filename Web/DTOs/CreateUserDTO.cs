@@ -2,7 +2,7 @@
 
 namespace Web.DTOs
 {
-    public class CreateUserViewModel
+    public class CreateUserDTO
     {
         [Required]
         public string Username { get; set; }

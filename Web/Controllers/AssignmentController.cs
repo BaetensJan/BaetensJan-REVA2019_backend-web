@@ -21,10 +21,8 @@ namespace Web.Controllers
     public class AssignmentController : Controller
     {
         private readonly UserManager<ApplicationUser> _userManager;
-        private readonly IConfiguration _configuration;
         private readonly IAssignmentRepository _assignmentRepository;
         private readonly IExhibitorRepository _exhibitorRepository;
-        private readonly ICategoryRepository _categoryRepository;
         private readonly IGroupRepository _groupRepository;
         private readonly IQuestionRepository _questionRepository;
         private readonly ExhibitorManager _exhibitorManager;
@@ -41,10 +39,8 @@ namespace Web.Controllers
         {
             _groupRepository = groupRepository;
             _userManager = userManager;
-            _configuration = configuration;
             _assignmentRepository = assignmentRepository;
             _exhibitorRepository = exhibitorRepository;
-            _categoryRepository = categoryRepository;
             _exhibitorManager =
                 new ExhibitorManager(exhibitorRepository, categoryRepository, questionRepository);
             _questionRepository = questionRepository;
@@ -84,25 +80,16 @@ namespace Web.Controllers
         }
 
         /**
-        * Creates an assignment related to an exhibitor with exhibitorId equal to parameter exhibitorId and
-         * category with a categoryId equal to the parameter exhibitorId
-        * parameter1: string exhibitorId - the id of the exhibitor of which a question should be the subject.
-        * parameter2: string category - the, by the students chosen, category
-        * 
-        * RETURN an Assignment, containing an Exhibitor object that represent the current, newly assigned Exhibitor.
+        * Checks if a group has an unfinished assignment, and return it if true, else returns null.
         */
-        [HttpGet("[Action]/{categoryId}/{exhibitorId}")]
-        public async Task<IActionResult> GetAssignmentOfExhibitorAndCategory(int categoryId, int exhibitorId)
+        [HttpGet("[Action]")]
+        public async Task<IActionResult> GetCurrentAssignmentFromBackend()
         {
-            var exhibitor = await _exhibitorRepository.GetById(exhibitorId);
-            var question = await GetQuestion(exhibitor, categoryId);
 
-            var assignment = await CreateAssignment(question);
-            assignment =
-                await _assignmentRepository
-                    .GetByIdLight(assignment.Id); //Todo temporary, otherwise we have recursive catExh data
-
-            return Ok(assignment);
+            var group = await _groupRepository.GetById(Convert.ToInt32(User.Claims.ElementAt(5).Value));
+            var assignments = group.Assignments;
+            var assignment = assignments.SingleOrDefault(a => !a.Submitted);
+            return assignment == null ? Ok(new { Message = "Group has no unsubmitted assignments" }) : Ok(assignment);
         }
 
         private async Task<Question> GetQuestion(Exhibitor exhibitor, int categoryId)
@@ -130,12 +117,11 @@ namespace Web.Controllers
 
             //TODO user should have a groupId, and get group via user and not as done below:
             // get group object via schoolId and groupName
-            var group = await _groupRepository.GetBySchoolIdAndGroupName(user.School.Id, groupName);
+            var group = await _groupRepository.GetById(Convert.ToInt32(User.Claims.ElementAt(5).Value));
 
             // Create assignment and Add to the groups assignments.
             var assignment = new Assignment(question);
             group.AddAssignment(assignment);
-            assignment = /*await*/_assignmentRepository.Add(assignment); //TODO nog niet async.
             await _assignmentRepository.SaveChanges();
 
             return assignment;
@@ -145,7 +131,7 @@ namespace Web.Controllers
          * When a group submits an Assignment in the application, this controller method will be called.
          */
         [HttpPost("SubmitAssignment")]
-        public async Task<IActionResult> Submit([FromBody] AssignmentViewModel model)
+        public async Task<IActionResult> Submit([FromBody] AssignmentDTO model)
         {
             if (ModelState.IsValid)
             {
@@ -184,9 +170,9 @@ namespace Web.Controllers
                 });
         }
 
-/**
- * If a group decides to cancel the Assignment in the application.
- */
+        /**
+         * If a group decides to cancel the Assignment in the application.
+         */
         [HttpDelete("RemoveAssignment/{assignmentId}")]
         public async Task<IActionResult> Remove(int assignmentId)
         {

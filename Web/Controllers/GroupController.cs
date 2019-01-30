@@ -49,6 +49,18 @@ namespace Web.Controllers
         }
 
         /**
+        * return group via token -> groepId
+        */
+        [HttpGet("[action]")] // /{groupId}
+        public async Task<Group> Group( /*int groupId*/)
+        {
+            // get username from jwt token.
+            var groupId = User.Claims.ElementAt(5).Value;
+
+            return await _groupRepository.GetById(Convert.ToInt32(groupId));
+        }
+
+        /**
          * return group with id equal to parameter groupId.
          */
         [HttpGet("[action]/{groupId}")]
@@ -94,17 +106,6 @@ namespace Web.Controllers
         [HttpGet("[action]/{schoolId}/{groupName}")]
         public async Task<Group> GetBySchoolIdAndGroupName(int schoolId, string groupName)
         {
-            if (schoolId == -1)
-            {
-                // get username from jwt token.
-                var username = User.Claims.ElementAt(3).Value;
-                // get ApplicationUser via username
-                var user = _userManager.Users.Include(u => u.School).SingleOrDefault(u => u.UserName == username);
-                schoolId = user.School.Id;
-                // get groupName out of the username (username is a concat of schooName + groupName)
-                groupName = username.Substring(user.School.Name.Length);
-            }
-
             // get group object via schoolId and groupName
             return await _groupRepository.GetBySchoolIdAndGroupName(schoolId, groupName);
         }
@@ -117,10 +118,11 @@ namespace Web.Controllers
         {
             if (ModelState.IsValid)
             {
-                var group = await CreateGroup(schoolId, model);
+                var group = await CreateGroup(model);
                 var school = await AddGroupToSchool(schoolId, group);
 
-                var user = await CreateGroupUser(school, model.Name, model.Password); //todo: add column group to appuser table
+                var user = await CreateGroupUser(school, model.Name,
+                    model.Password); //todo: add column group to appuser table
 
                 var token = GetToken(user, group.Id);
                 return
@@ -149,7 +151,7 @@ namespace Web.Controllers
         {
             if (ModelState.IsValid)
             {
-                var group = await CreateGroup(schoolId, model);
+                var group = await CreateGroup(model);
                 var school = await AddGroupToSchool(schoolId, group);
 
                 await CreateGroupUser(school, model.Name, model.Password); //todo: add column group to appuser table
@@ -168,7 +170,7 @@ namespace Web.Controllers
         /**
          * Sub method, used in Group Creation Methods (CreateGroup and CreateAndReturnGroup).
          */
-        private async Task<Group> CreateGroup(int schoolId, GroupDTO model)
+        private async Task<Group> CreateGroup(GroupDTO model)
         {
             // Creation of Group Entity
             var group = new Group
@@ -178,7 +180,7 @@ namespace Web.Controllers
                 Assignments = new List<Assignment>()
             };
 
-            group = _groupRepository.Add(group);
+            await _groupRepository.Add(group);
             await _groupRepository.SaveChanges();
             return group;
         }
@@ -260,7 +262,6 @@ namespace Web.Controllers
                 if (model.Members != null && model.Members.Count > 0)
                     group.Members = model.Members;
 
-                group = _groupRepository.Update(group);
                 await _groupRepository.SaveChanges();
 
                 return Ok(group);

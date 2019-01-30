@@ -40,7 +40,7 @@ namespace Infrastructure.Repositories
             return _categoryExhibitors.Include(c => c.Category).Include(e => e.Exhibitor).SingleOrDefaultAsync(cE => cE.CategoryId == catId && cE.ExhibitorId == exhId);
         }
 
-        public Task<int> SaveChanges()
+        public Task SaveChanges()
         {
             return _dbContext.SaveChangesAsync();
         }

@@ -44,8 +44,7 @@ namespace Web.Controllers
                     Answer = model.AnswerText,
                     CategoryExhibitor = ce
                 };
-
-                question = _questionRepository.Add(question);
+                await _questionRepository.Add(question);
                 //_categoryExhibitorRepository.Add(question.CategoryExhibitor);
                 await _questionRepository.SaveChanges();
                 return Ok(question);

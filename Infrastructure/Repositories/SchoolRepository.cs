@@ -70,17 +70,17 @@ namespace Infrastructure.Repositories
             return school;
         }
 
-        public void Add(School school)
+        public Task Add(School school)
         {
-            _schools.Add(school);
+            return _schools.AddAsync(school);
         }
 
-        public School Remove(School school)
+        public void Remove(School school)
         {
-            return _schools.Remove(school).Entity;
+            _schools.Remove(school);
         }
 
-        public Task<int> SaveChanges()
+        public Task SaveChanges()
         {
             return _dbContext.SaveChangesAsync();
         }

@@ -10,8 +10,8 @@ namespace ApplicationCore.Interfaces
         Task<School> GetById(int schoolId);
         School GetByIdLight(int schoolId);
         Task<School> GetByName(string schoolName);
-        void Add(School school);
-        School Remove(School school);
-        Task<int> SaveChanges();
+        Task Add(School school);
+        void Remove(School school);
+        Task SaveChanges();
     }
 }

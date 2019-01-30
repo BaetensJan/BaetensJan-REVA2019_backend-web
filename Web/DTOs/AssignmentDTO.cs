@@ -3,7 +3,7 @@ using ApplicationCore.Entities;
 
 namespace Web.DTOs
 {
-    public class AssignmentViewModel
+    public class AssignmentDTO
     {
         public int Id { get; set; }
 

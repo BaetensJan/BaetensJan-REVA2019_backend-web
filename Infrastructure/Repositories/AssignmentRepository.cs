@@ -93,17 +93,17 @@ namespace Infrastructure.Repositories
 //            return _Assignments.Where(e => e.Category == category);
 //        }
 
-        public Assignment Add(Assignment assignment)
+        public Task Add(Assignment assignment)
         {
-            return _assignments.Add(assignment).Entity;
+            return _assignments.AddAsync(assignment);
         }
 
-        public Assignment Remove(Assignment assignment)
+        public void Remove(Assignment assignment)
         {
-            return _assignments.Remove(assignment).Entity;
+            _assignments.Remove(assignment);
         }
 
-        public Task<int> SaveChanges()
+        public Task SaveChanges()
         {
             return _dbContext.SaveChangesAsync();
         }

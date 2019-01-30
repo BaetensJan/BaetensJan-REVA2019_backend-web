@@ -19,7 +19,7 @@ namespace Infrastructure.Repositories
             _categories = dbContext.Categories;
             _questions = dbContext.Questions;
         }
-        
+
         /**
          * Returns the categories of an Exhibitor with exhibitorId equal to parameter exhibitorId,
          * where the combination / relation of the CategoryExhibitor has a related question.
@@ -94,17 +94,17 @@ namespace Infrastructure.Repositories
             return cat;
         }
 
-        public Category Add(Category category)
+        public Task Add(Category category)
         {
-            return _categories.Add(category).Entity;
+            return _categories.AddAsync(category);
         }
 
-        public Category Remove(Category category)
+        public void Remove(Category category)
         {
-            return _categories.Remove(category).Entity;
+            _categories.Remove(category);
         }
 
-        public Task<int> SaveChanges()
+        public Task SaveChanges()
         {
             return _dbContext.SaveChangesAsync();
         }
