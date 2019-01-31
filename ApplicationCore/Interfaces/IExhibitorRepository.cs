@@ -10,6 +10,7 @@ namespace ApplicationCore.Interfaces
         Task<IEnumerable<Exhibitor>> AllLight();
         Task<Exhibitor> GetById(int id);
         Task Add(Exhibitor Exhibitor);
+        void Update(Exhibitor exhibitor);
         void Remove(Exhibitor Exhibitor);
         Task SaveChanges();
     }

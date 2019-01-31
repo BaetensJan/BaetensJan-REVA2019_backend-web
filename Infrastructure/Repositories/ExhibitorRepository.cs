@@ -55,7 +55,7 @@ namespace Infrastructure.Repositories
         public async Task<IEnumerable<Exhibitor>> AllLight()
         {
             // Abstractie: zorgt ervoor dat enkel de nodige data opgehaald wordt (geen recursieve loop).
-            var exhibitors = (await _exhibitors.ToListAsync()).Select(MapExhibitor);
+            var exhibitors = (await _exhibitors.Include(c=>c.Categories).ThenInclude(ce=>ce.Category).ToListAsync()).Select(MapExhibitor);
             return exhibitors;
         }
 
@@ -83,6 +83,11 @@ namespace Infrastructure.Repositories
             return _exhibitors.AddAsync(Exhibitor);
         }
 
+        public void Update(Exhibitor exhibitor)
+        {
+            _exhibitors.Update(exhibitor);
+        }
+        
         public void Remove(Exhibitor Exhibitor)
         {
             _exhibitors.Remove(Exhibitor);
