@@ -9,7 +9,6 @@ using ApplicationCore.Entities;
 using ApplicationCore.Interfaces;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 using Web.DTOs;
@@ -39,15 +38,34 @@ namespace Web.Controllers
 
 
         /**
-        * return group via token -> groepId
+        * return group status info
+         * Gets groupId via token -> groepId
         */
-        [HttpGet("[action]")] // /{groupId}
-        public async Task<Group> Group( /*int groupId*/)
+        [HttpGet("[action]")] 
+        public async Task<IActionResult> GroupInfo( /*int groupId*/)
         {
             // get username from jwt token.
             var groupId = User.Claims.ElementAt(5).Value;
+            var group = await _groupRepository.GetById(Convert.ToInt32(groupId));
 
-            return await _groupRepository.GetById(Convert.ToInt32(groupId));
+            var numberOfAssignmentsDone = 0;
+            Assignment currentAssignment = null;
+            if (group.Assignments != null && group.Assignments.Count > 0)
+            {
+                numberOfAssignmentsDone = group.Assignments.Count;
+                group.Assignments.Sort((ass1, ass2) => ass1.Id.CompareTo(ass2.Id));
+                currentAssignment = group.Assignments.Last();
+            }
+
+            var isFirstAssignment = numberOfAssignmentsDone == 0;
+            
+            return Ok(new
+            {
+                IsFirstAssignment = isFirstAssignment,
+                NumberOfAssignmentsDone = numberOfAssignmentsDone,
+                LastAssignment = currentAssignment,
+                IsUnsubmittedAssignment = !isFirstAssignment && !currentAssignment.Submitted
+            });
         }
 
         /**
@@ -77,6 +95,24 @@ namespace Web.Controllers
             });
         }
 
+        
+        /**
+         * Returns group with schoolId equal to parameter schoolId and groupName equal to parameter.
+         * If parameter schoolId is -1, then the schoolId can be extracted out of the token via User.claims.
+         */
+        [HttpGet("[action]/{schoolId}/{groupName}")]
+        public async Task<IActionResult> GetBySchoolIdAndGroupName(int schoolId, string groupName)
+        {
+            var school = await _schoolRepository.GetById(schoolId);
+            if (school == null)
+                return Ok(new
+                {
+                    Message = "School not found"
+                });
+            var group = school.Groups.SingleOrDefault(g => g.Name == groupName);
+            return group == null ? Ok(new {Message = "Group not found in school with school name: " + school.Name}) : Ok(group);
+        }
+        
         /**
          * Checks if the groupName already exists.
          */

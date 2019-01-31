@@ -10,7 +10,6 @@ using ApplicationCore.Entities;
 using ApplicationCore.Interfaces;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Server.Kestrel.Core.Internal.Http;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
@@ -25,17 +24,14 @@ namespace Web.Controllers
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly IConfiguration _configuration;
         private readonly ISchoolRepository _schoolRepository;
-        private readonly IGroupRepository _groupRepository;
         private readonly IAuthenticationManager _authenticationManager;
 
         public AuthController(UserManager<ApplicationUser> userManager, IConfiguration configuration,
-            ISchoolRepository schoolRepository, IGroupRepository groupRepository,
-            IAuthenticationManager authenticationManager)
+            ISchoolRepository schoolRepository, IAuthenticationManager authenticationManager)
         {
             _userManager = userManager;
             _configuration = configuration;
             _schoolRepository = schoolRepository;
-            _groupRepository = groupRepository;
             _authenticationManager = authenticationManager;
         }
 
@@ -82,7 +78,7 @@ namespace Web.Controllers
                 // creating the school
                 var school = new School(model.SchoolName, GetRandomString(6));
                 await _schoolRepository.Add(school);
-                await _schoolRepository.SaveChanges();
+                await _schoolRepository.SaveChanges(); //Todo this is unnecessary?
 
                 // creating teacher consisting of his school
                 var user = _authenticationManager.CreateApplicationUserObject(model.Email, model.Username,

@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using ApplicationCore.Entities;
@@ -79,19 +78,6 @@ namespace Web.Controllers
             return Ok(assignment);
         }
 
-        /**
-        * Checks if a group has an unfinished assignment, and return it if true, else returns null.
-        */
-        [HttpGet("[Action]")]
-        public async Task<IActionResult> GetCurrentAssignmentFromBackend()
-        {
-
-            var group = await _groupRepository.GetById(Convert.ToInt32(User.Claims.ElementAt(5).Value));
-            var assignments = group.Assignments;
-            var assignment = assignments.SingleOrDefault(a => !a.Submitted);
-            return assignment == null ? Ok(new { Message = "Group has no unsubmitted assignments" }) : Ok(assignment);
-        }
-
         private async Task<Question> GetQuestion(Exhibitor exhibitor, int categoryId)
         {
             var questions = await _questionRepository.GetAll();
@@ -106,17 +92,7 @@ namespace Web.Controllers
         {
             question.CategoryExhibitor.Exhibitor.GroupsAtExhibitor++;
 
-            // get username from jwt token.
-            var username = User.Claims.ElementAt(3).Value;
-
-            // get ApplicationUser via username
-            var user = _userManager.Users.Include(u => u.School).SingleOrDefault(u => u.UserName == username);
-
-            // get groupName out of the username (username is a concat of schooName + groupName)
-            var groupName = username.Substring(user.School.Name.Length);
-
-            //TODO user should have a groupId, and get group via user and not as done below:
-            // get group object via schoolId and groupName
+           // get group object via schoolId and groupName
             var group = await _groupRepository.GetById(Convert.ToInt32(User.Claims.ElementAt(5).Value));
 
             // Create assignment and Add to the groups assignments.
@@ -153,7 +129,7 @@ namespace Web.Controllers
 
                 assignment.Answer = answer;
                 assignment.Notes = model.Notes;
-                if (!String.IsNullOrEmpty(model.Photo)) assignment.Photo = _imageWriter.WriteBase64ToFile(model.Photo);
+                if (!string.IsNullOrEmpty(model.Photo)) assignment.Photo = _imageWriter.WriteBase64ToFile(model.Photo);
                 assignment.Submitted = true;
                 await _assignmentRepository.SaveChanges();
 
