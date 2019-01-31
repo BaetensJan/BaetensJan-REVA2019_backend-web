@@ -41,30 +41,38 @@ namespace Web.Controllers
         * return group status info
          * Gets groupId via token -> groepId
         */
-        [HttpGet("[action]")] 
+        [HttpGet("[action]")]
         public async Task<IActionResult> GroupInfo( /*int groupId*/)
         {
             // get username from jwt token.
             var groupId = User.Claims.ElementAt(5).Value;
             var group = await _groupRepository.GetById(Convert.ToInt32(groupId));
+            if (group == null) return Ok(new {Message = "Group not found or groupId not in token."});
+            if (group.Assignments == null) group.Assignments = new List<Assignment>();
 
-            var numberOfAssignmentsDone = 0;
-            Assignment currentAssignment = null;
-            if (group.Assignments != null && group.Assignments.Count > 0)
+            var numberOfAssignments = group.Assignments.Count;
+            var hasNoAssignments = numberOfAssignments == 0;
+            var currentAssignment = group.Assignments[0];
+
+            var previousExhibitorXCoordinate = 0.0;
+            var previousExhibitorYCoordinate = 0.0;
+            
+            if (group.Assignments.Count > 1)
             {
-                numberOfAssignmentsDone = group.Assignments.Count;
                 group.Assignments.Sort((ass1, ass2) => ass1.Id.CompareTo(ass2.Id));
                 currentAssignment = group.Assignments.Last();
+
+                previousExhibitorXCoordinate = group.Assignments[group.Assignments.Count - 2].Question.CategoryExhibitor.Exhibitor.X;
+                previousExhibitorYCoordinate = group.Assignments[group.Assignments.Count - 2].Question.CategoryExhibitor.Exhibitor.Y;
             }
 
-            var isFirstAssignment = numberOfAssignmentsDone == 0;
-            
             return Ok(new
             {
-                IsFirstAssignment = isFirstAssignment,
-                NumberOfAssignmentsDone = numberOfAssignmentsDone,
-                LastAssignment = currentAssignment,
-                IsUnsubmittedAssignment = !isFirstAssignment && !currentAssignment.Submitted
+                hasNoAssignments,
+                numberOfAssignments,
+                currentAssignment, // last assignment
+                previousExhibitorXCoordinate,
+                previousExhibitorYCoordinate
             });
         }
 
@@ -95,7 +103,7 @@ namespace Web.Controllers
             });
         }
 
-        
+
         /**
          * Returns group with schoolId equal to parameter schoolId and groupName equal to parameter.
          * If parameter schoolId is -1, then the schoolId can be extracted out of the token via User.claims.
@@ -110,9 +118,11 @@ namespace Web.Controllers
                     Message = "School not found"
                 });
             var group = school.Groups.SingleOrDefault(g => g.Name == groupName);
-            return group == null ? Ok(new {Message = "Group not found in school with school name: " + school.Name}) : Ok(group);
+            return group == null
+                ? Ok(new {Message = "Group not found in school with school name: " + school.Name})
+                : Ok(group);
         }
-        
+
         /**
          * Checks if the groupName already exists.
          */
