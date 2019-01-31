@@ -10,6 +10,7 @@ namespace ApplicationCore.Interfaces
         Task<List<Category>> ExhibitorsCategoryComboWithQuestion(int exhibitorId);
         Task<Category> GetById(int id);
         Task Add(Category category);
+        void Update(Category category);
         void Remove(Category category);
         Task SaveChanges();
     }
