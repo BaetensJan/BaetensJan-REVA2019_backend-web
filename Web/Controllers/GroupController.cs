@@ -57,14 +57,14 @@ namespace Web.Controllers
                 currentAssignment = group.Assignments.Last();
             }
 
-            var isFirstAssignment = numberOfAssignmentsDone == 0;
+            var hasNoAssignments = numberOfAssignmentsDone == 0;
             
             return Ok(new
             {
-                IsFirstAssignment = isFirstAssignment,
-                NumberOfAssignmentsDone = numberOfAssignmentsDone,
-                LastAssignment = currentAssignment,
-                IsUnsubmittedAssignment = !isFirstAssignment && !currentAssignment.Submitted
+                hasNoAssignments,
+                numberOfAssignmentsDone,
+                currentAssignment, // last assignment
+                isSubmittedAssignment = !hasNoAssignments && currentAssignment.Submitted 
             });
         }
 

@@ -33,28 +33,39 @@
             <span class='glyphicon glyphicon-info-sign'></span> Informatie App
           </a>
         </li>
-        <div class='clearfix' *ngIf='(isAdmin | async)' style="margin-bottom: 2.5em;"></div>
 
-        <li [routerLinkActive]='["link-active"]' *ngIf='(isAdmin | async)'>
-          <a [routerLink]='["categorieen"]' (click)='collapse()'>
-            <span class='glyphicon glyphicon-info-sign'></span> Categorieën
-          </a>
-        </li>
-        <li [routerLinkActive]='["link-active"]' *ngIf='(isAdmin | async)'>
-          <a [routerLink]='["exposanten"]' (click)='collapse()'>
-            <span class='glyphicon glyphicon-th-list'></span> Exposanten
-          </a>
-        </li>
-        <li [routerLinkActive]='["link-active"]' *ngIf='(isAdmin | async)'>
-          <a [routerLink]='["routeMap"]' (click)='collapse()'>
-            <span class='glyphicon glyphicon-picture'></span> Beursplan
-          </a>
-        </li>
-        <li [routerLinkActive]='["link-active"]' *ngIf='(isAdmin | async)'>
-          <a [routerLink]='["questions"]' (click)='collapse()'>
-            <span class='glyphicon glyphicon-th-list'></span> Vragen
-          </a>
-        </li>
+        <ng-container *ngIf='(isAdmin | async)'>
+          <div class='clearfix' style="margin-bottom: 2.5em;"></div>
+
+          <li [routerLinkActive]='["link-active"]'>
+            <a [routerLink]='["categorieen"]' (click)='collapse()'>
+              <span class='glyphicon glyphicon-info-sign'></span> Categorieën
+            </a>
+          </li>
+          <li [routerLinkActive]='["link-active"]'>
+            <a [routerLink]='["exposanten"]' (click)='collapse()'>
+              <span class='glyphicon glyphicon-th-list'></span> Exposanten
+            </a>
+          </li>
+          <li [routerLinkActive]='["link-active"]'>
+            <a [routerLink]='["routeMap"]' (click)='collapse()'>
+              <span class='glyphicon glyphicon-picture'></span> Beursplan
+            </a>
+          </li>
+          <li [routerLinkActive]='["link-active"]'>
+            <a [routerLink]='["questions"]' (click)='collapse()'>
+              <span class='glyphicon glyphicon-th-list'></span> Vragen
+            </a>
+          </li>
+
+          <ng-container class='clearfix' style="margin-bottom: 1.5em;"></ng-container>
+
+          <li [routerLinkActive]='["link-active"]'>
+            <a [routerLink]='["/register"]' (click)='collapse()'>
+              <span class='glyphicon glyphicon-th-list'></span> Leerkracht aanmaken
+            </a>
+          </li>
+        </ng-container>
 
         <div class='clearfix' style="margin-bottom: 1.5em;"></div>
 
