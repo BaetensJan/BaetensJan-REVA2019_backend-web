@@ -119,15 +119,15 @@ namespace Web.Controllers
             await _categoryRepository.SaveChanges();
             return category;
         }
-
-        [HttpPost("[action]")]
-        public async Task<Category> UpdateCategory([FromBody] Category category)
+        
+        [HttpPut("[action]/{id}")]
+        public async Task<Category> UpdateCategory([FromRoute] int id, [FromBody] Category category)
         {
-            Console.WriteLine(category?.Id);
             Category c = await _categoryRepository.GetById(category.Id);
             c.Name = category.Name;
             c.Description = category.Description;
 
+            _categoryRepository.Update(c);
             await _categoryRepository.SaveChanges();
             return category;
         }
