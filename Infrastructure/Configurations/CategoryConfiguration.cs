@@ -15,6 +15,7 @@ namespace Infrastructure.Configurations
             builder.Property(c => c.Name);
             builder.Property(c => c.Photo);
             builder.Property(c => c.Description);
+            builder.Property(c => c.CreationDate);
         }
     }
 }

@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 
@@ -10,6 +11,7 @@ namespace ApplicationCore.Entities
         public string Name { get; set; }
         public List<Assignment> Assignments { get; set; }
         [NotMapped] public List<string> Members { get; set; }
+        public DateTime CreationDate { get; set; }
 
         /**
          * Attribute is only used by backend (groupConfiguration) to store members as string
@@ -17,13 +19,14 @@ namespace ApplicationCore.Entities
          */
         public string MembersAsString
         {
-            get => string.Join(',', Members/*.Where(s => !string.IsNullOrEmpty(s))*/);
-            set => Members = string.IsNullOrWhiteSpace(value)  ? new List<string>() : value.Split(',').ToList();
+            get => string.Join(',', Members /*.Where(s => !string.IsNullOrEmpty(s))*/);
+            set => Members = string.IsNullOrWhiteSpace(value) ? new List<string>() : value.Split(',').ToList();
         }
 
         public Group()
         {
             Assignments = new List<Assignment>();
+            CreationDate = DateTime.Now;
         }
 
         public Assignment AddAssignment(Assignment assignment)

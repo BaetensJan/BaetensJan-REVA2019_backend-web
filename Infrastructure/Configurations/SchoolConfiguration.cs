@@ -13,6 +13,7 @@ namespace Infrastructure.Configurations
             builder.Property(s => s.Password);
             builder.Property(s => s.Start);
             builder.HasMany(s => s.Groups);
+            builder.Property(s => s.CreationDate);
         }
     }
 }

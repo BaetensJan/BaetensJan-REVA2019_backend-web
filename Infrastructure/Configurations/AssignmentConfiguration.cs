@@ -25,6 +25,8 @@ namespace Infrastructure.Configurations
             builder.HasOne(t => t.Question);
             builder.Property(t => t.Answer).HasColumnName("Answer");
             builder.Property(t => t.Submitted).HasColumnName("Submitted");
+            builder.Property(t => t.CreationDate);
+            builder.Property(t => t.SubmissionDate);
         }
     }
 }

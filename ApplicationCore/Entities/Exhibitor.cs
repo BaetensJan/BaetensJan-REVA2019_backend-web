@@ -14,13 +14,17 @@ namespace ApplicationCore.Entities
         public double X { get; set; }
         public double Y { get; set; }
         public int GroupsAtExhibitor { get; set; }
+
         public string ExhibitorNumber { get; set; } // exhibition number - Standnummer
+
+        public DateTime CreationDate { get; set; }
 
         public Exhibitor()
         {
             GroupsAtExhibitor = 0;
             Name = "";
             Categories = new List<CategoryExhibitor>();
+            CreationDate = DateTime.Now;
         }
 
         public Exhibitor(int id, string name, List<Category> categories, double x, double y, int groupsAtExhibitor,
@@ -33,6 +37,7 @@ namespace ApplicationCore.Entities
             Y = y;
             GroupsAtExhibitor = groupsAtExhibitor;
             ExhibitorNumber = exhibitorNumber;
+            CreationDate = DateTime.Now;
         }
 
         public bool Equals(Exhibitor exhibitor)

@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using ApplicationCore.Entities;
@@ -85,11 +84,10 @@ namespace Web.Controllers
         [HttpGet("[Action]")]
         public async Task<IActionResult> GetCurrentAssignmentFromBackend()
         {
-
             var group = await _groupRepository.GetById(Convert.ToInt32(User.Claims.ElementAt(5).Value));
             var assignments = group.Assignments;
             var assignment = assignments.SingleOrDefault(a => !a.Submitted);
-            return assignment == null ? Ok(new { Message = "Group has no unsubmitted assignments" }) : Ok(assignment);
+            return assignment == null ? Ok(new {Message = "Group has no unsubmitted assignments"}) : Ok(assignment);
         }
 
         private async Task<Question> GetQuestion(Exhibitor exhibitor, int categoryId)
@@ -155,6 +153,8 @@ namespace Web.Controllers
                 assignment.Notes = model.Notes;
                 if (!String.IsNullOrEmpty(model.Photo)) assignment.Photo = _imageWriter.WriteBase64ToFile(model.Photo);
                 assignment.Submitted = true;
+                assignment.SubmissionDate = DateTime.Now;
+
                 await _assignmentRepository.SaveChanges();
 
 //                if (result.Succeeded)
