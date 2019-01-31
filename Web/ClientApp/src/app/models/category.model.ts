@@ -82,7 +82,9 @@ export class Category {
    */
   static fromJSON(json: any): Category {
     const rec = new Category();
-    rec._exhibitors = json.exhibitors.map(ce => ce.exhibitor); // from CategoryExhibitor to exhibitor
+    if(json.exhibitors != null) {
+      rec._exhibitors = json.exhibitors.map(ce => ce.exhibitor); // from CategoryExhibitor to exhibitor
+    }
     rec._id = json.id;
     rec._name = json.name;
     rec._description = json.description;

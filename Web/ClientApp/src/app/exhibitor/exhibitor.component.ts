@@ -80,17 +80,20 @@ export class ExhibitorComponent implements AfterViewInit {
   ) {
   }
 
-  selectCategory(cat: Category) {
+  public selectCategory(cat: Category) {
     // if category wasn't selected yet.
     let index = this.selectedCategories.findIndex(c => c.id == cat.id);
     if (index < 0) this.selectedCategories.push(cat);
     else this.selectedCategories.splice(index, 1);
-    console.log(this.selectedCategories);
+    //console.log(this.selectedCategories);
   }
 
-  isSelected(category) {
+  public isSelected(category) {
     let classType = 'btn-default'; // if category wasn't selected yet, make button default.
+    //console.log(this.selectedCategories);
     this.selectedCategories.forEach(cat => {
+      //console.log(cat.id);
+      //console.log(category.id);
       if (cat.id == category.id) {
         classType = 'btn-primary'; // if the category was selected make button primary (blue)
         return;
@@ -217,7 +220,6 @@ export class ExhibitorComponent implements AfterViewInit {
         this.router.navigate(["/exposanten"]);
       });
     } else {
-      console.log(this.selectedExhibitor);
       this._exhibitorsDataService.updateExhibitor(this.selectedExhibitor).subscribe(e => {
         this.router.navigate(["/exposanten"]);
       });

@@ -23,6 +23,7 @@ namespace Infrastructure.Configurations
                 .IsRequired();
 //            builder.Property(t => t.Password);
             //builder.Property(t => t.School).IsRequired().HasMaxLength(100);
+            builder.Property(t => t.CreationDate);
         }
     }
 }

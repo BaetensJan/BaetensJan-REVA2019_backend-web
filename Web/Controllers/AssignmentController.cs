@@ -131,6 +131,8 @@ namespace Web.Controllers
                 assignment.Notes = model.Notes;
                 if (!string.IsNullOrEmpty(model.Photo)) assignment.Photo = _imageWriter.WriteBase64ToFile(model.Photo);
                 assignment.Submitted = true;
+                assignment.SubmissionDate = DateTime.Now;
+
                 await _assignmentRepository.SaveChanges();
 
 //                if (result.Succeeded)

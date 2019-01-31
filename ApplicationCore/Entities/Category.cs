@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 
 namespace ApplicationCore.Entities
@@ -9,6 +10,7 @@ namespace ApplicationCore.Entities
         public string Photo { get; set; }
         public string Description { get; set; }
         public List<CategoryExhibitor> Exhibitors { get; set; }
+        public DateTime CreationDate { get; set; }
 
         public Category(int id, string name, string photo, string description)
         {
@@ -16,10 +18,12 @@ namespace ApplicationCore.Entities
             Name = name;
             Photo = photo;
             Description = description;
+            CreationDate = DateTime.Now;
         }
 
         public Category()
         {
+            CreationDate = DateTime.Now;
         }
     }
 }

@@ -14,6 +14,7 @@ namespace Infrastructure.Configurations
             builder.Property(q => q.QuestionText);
             builder.Property(q => q.Answer);
             builder.HasOne(q => q.CategoryExhibitor); //Todo In commentaar?
+            builder.Property(q => q.CreationDate);
         }
     }
 }
