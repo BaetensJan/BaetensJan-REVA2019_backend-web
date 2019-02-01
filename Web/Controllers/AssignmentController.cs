@@ -61,7 +61,7 @@ namespace Web.Controllers
         * RETURN an Assignment, containing an Exhibitor object that represent the current, newly assigned Exhibitor.
         */
         [HttpGet("[Action]/{categoryId}/{previousExhibitorId}")]
-        public async Task<IActionResult> GetAssignment(int categoryId, int previousExhibitorId)
+        public async Task<IActionResult> createAssignment(int categoryId, int previousExhibitorId)
         {
             Question question;
             if (categoryId == -1) // Group created a new exhibitor in the Extra Tour phase 
@@ -72,8 +72,9 @@ namespace Web.Controllers
             }
             else
             {
+                // FindNextExhibitor already checks if the categoryId and ExhibitorId combo has a question in the DB.
                 var exhibitor = await _exhibitorManager.FindNextExhibitor(previousExhibitorId, categoryId);
-                question = await GetQuestion(exhibitor, categoryId);
+                question = await _questionRepository.GetQuestion(categoryId, exhibitor.Id);
             }
 
             var assignment = await CreateAssignment(question);
@@ -83,15 +84,29 @@ namespace Web.Controllers
 
             return Ok(assignment);
         }
-
-        private async Task<Question> GetQuestion(Exhibitor exhibitor, int categoryId)
+        
+       /**
+       * Gets an assignment when a group runs an Extra Round.
+       * The Group has chosen a specific Exhibitor for a specific Category.
+        * 
+       * Creates an assignment related to an exhibitor with exhibitorId equal to parameter exhibitorId and
+       * category with a categoryId equal to the parameter exhibitorId
+       * parameter1: string exhibitorId - the id of the exhibitor of which a question should be the subject.
+       * parameter2: string category - the, by the students chosen, category
+       * 
+       * RETURN an Assignment, containing an Exhibitor object that represent the current, newly assigned Exhibitor.
+       */
+        [HttpGet("[Action]/{categoryId}/{exhibitorId}")]
+        public async Task<IActionResult> createAssignmentOfExhibitorAndCategory(int categoryId, int exhibitorId)
         {
-            var questions = await _questionRepository.GetAll();
-            //Todo: methode in repo maken die via beide id's (als parameter meegegeven) de question ophaalt.
-            var question = questions.First(q => q.CategoryExhibitor.CategoryId == categoryId
-                                                && q.CategoryExhibitor.ExhibitorId ==
-                                                exhibitor.Id);
-            return question;
+            var question = await _questionRepository.GetQuestion(categoryId, exhibitorId);
+            
+            var assignment = await CreateAssignment(question);
+            assignment =
+                await _assignmentRepository
+                    .GetByIdLight(assignment.Id); //Todo temporary, otherwise we have recursive catExh data
+
+            return Ok(assignment);
         }
 
         private async Task<Assignment> CreateAssignment(Question question)

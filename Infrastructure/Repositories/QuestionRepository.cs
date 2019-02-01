@@ -26,6 +26,16 @@ namespace Infrastructure.Repositories
             return _questions.ToListAsync();
         }
 
+        /**
+        * Checks if there exists a question for the categoryId & exhibitorId combination.
+        * A question is based upon a certain Category and Exhibitor combination.
+        */
+        public Task<Question> GetQuestion(int categoryId, int exhibitorId)
+        {
+            return _questions.SingleOrDefaultAsync(question => question.CategoryExhibitor.CategoryId == categoryId &&
+                                                        question.CategoryExhibitor.ExhibitorId == exhibitorId);
+        }
+
         public Task<List<Question>> GetAll()
         {
             var questions = _questions.Include(q => q.CategoryExhibitor)

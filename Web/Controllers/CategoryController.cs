@@ -14,11 +14,14 @@ namespace Web.Controllers
     {
         private readonly ICategoryRepository _categoryRepository;
         private readonly IGroupRepository _groupRepository;
+        private readonly IQuestionRepository _questionRepository;
 
-        public CategoryController(ICategoryRepository categoryRepository, IGroupRepository groupRepository)
+        public CategoryController(ICategoryRepository categoryRepository, IGroupRepository groupRepository,
+            IQuestionRepository questionRepository)
         {
             _categoryRepository = categoryRepository;
             _groupRepository = groupRepository;
+            _questionRepository = questionRepository;
         }
 
         [HttpGet("[action]")]
@@ -36,6 +39,7 @@ namespace Web.Controllers
         {
             var group = await _groupRepository.GetById(Convert.ToInt32(User.Claims.ElementAt(5).Value));
             var assignments = group.Assignments;
+            var questions = await _questionRepository.GetAll();
             var categories = await _categoryRepository.All();
             var unpickedCategories = new List<Category>();
 
@@ -51,8 +55,14 @@ namespace Web.Controllers
                     {
                         foreach (var assignment in assignments)
                         {
-                            if (categoryExhibitor.Exhibitor.Id == assignment.Question.CategoryExhibitor.Exhibitor.Id
-                                && category.Id == assignment.Question.CategoryExhibitor.Category.Id) counter++;
+                            var categoryId = categoryExhibitor.Exhibitor.Id;
+                            var exhibitorId = category.Id;
+
+                            if (exhibitorId == assignment.Question.CategoryExhibitor.Exhibitor.Id
+                                && categoryId == assignment.Question.CategoryExhibitor.Category.Id
+                                && await _questionRepository.GetQuestion(categoryId, exhibitorId) != null)
+
+                                counter++;
                         }
                     }
 
@@ -119,7 +129,7 @@ namespace Web.Controllers
             await _categoryRepository.SaveChanges();
             return category;
         }
-        
+
         [HttpPut("[action]/{id}")]
         public async Task<Category> UpdateCategory([FromRoute] int id, [FromBody] Category category)
         {

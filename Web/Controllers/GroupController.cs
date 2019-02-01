@@ -38,8 +38,9 @@ namespace Web.Controllers
 
 
         /**
-        * return group status info
-         * Gets groupId via token -> groepId
+        * Returns group status/info to android (current assignment, number of assignments done by group,
+        * if group already has an assignment and the coordinates of the previous exhibitor if existing).
+        * Gets groupId via token -> groepId
         */
         [HttpGet("[action]")]
         public async Task<IActionResult> GroupInfo( /*int groupId*/)
