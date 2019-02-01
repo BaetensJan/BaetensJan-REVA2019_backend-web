@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 
 namespace ApplicationCore.Entities
@@ -9,7 +10,7 @@ namespace ApplicationCore.Entities
 
         public string Name { get; set; }
 
-        public List<CategoryExhibitor> Categories { get; set; }
+        public IEnumerable<CategoryExhibitor> Categories { get; set; }
 
         public double X { get; set; }
         public double Y { get; set; }

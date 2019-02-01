@@ -61,7 +61,7 @@ namespace Web.Controllers
         * RETURN an Assignment, containing an Exhibitor object that represent the current, newly assigned Exhibitor.
         */
         [HttpGet("[Action]/{categoryId}/{previousExhibitorId}")]
-        public async Task<IActionResult> createAssignment(int categoryId, int previousExhibitorId)
+        public async Task<IActionResult> CreateAssignment(int categoryId, int previousExhibitorId)
         {
             Question question;
             if (categoryId == -1) // Group created a new exhibitor in the Extra Tour phase 
@@ -78,9 +78,7 @@ namespace Web.Controllers
             }
 
             var assignment = await CreateAssignment(question);
-            assignment =
-                await _assignmentRepository
-                    .GetByIdLight(assignment.Id); //Todo temporary, otherwise we have recursive catExh data
+            assignment = await _assignmentRepository.GetByIdLight(assignment.Id); //Todo temporary, otherwise we have recursive catExh data
 
             return Ok(assignment);
         }
@@ -88,7 +86,7 @@ namespace Web.Controllers
        /**
        * Gets an assignment when a group runs an Extra Round.
        * The Group has chosen a specific Exhibitor for a specific Category.
-        * 
+       * 
        * Creates an assignment related to an exhibitor with exhibitorId equal to parameter exhibitorId and
        * category with a categoryId equal to the parameter exhibitorId
        * parameter1: string exhibitorId - the id of the exhibitor of which a question should be the subject.
@@ -97,7 +95,7 @@ namespace Web.Controllers
        * RETURN an Assignment, containing an Exhibitor object that represent the current, newly assigned Exhibitor.
        */
         [HttpGet("[Action]/{categoryId}/{exhibitorId}")]
-        public async Task<IActionResult> createAssignmentOfExhibitorAndCategory(int categoryId, int exhibitorId)
+        public async Task<IActionResult> CreateAssignmentOfExhibitorAndCategory(int categoryId, int exhibitorId)
         {
             var question = await _questionRepository.GetQuestion(categoryId, exhibitorId);
             

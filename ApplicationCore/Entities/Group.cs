@@ -29,11 +29,10 @@ namespace ApplicationCore.Entities
             CreationDate = DateTime.Now;
         }
 
-        public Assignment AddAssignment(Assignment assignment)
+        public void AddAssignment(Assignment assignment)
         {
             if (Assignments == null) Assignments = new List<Assignment>();
             Assignments.Add(assignment);
-            return assignment;
         }
 
         /* => school eerst mappen
