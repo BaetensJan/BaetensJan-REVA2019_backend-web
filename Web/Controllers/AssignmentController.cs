@@ -6,7 +6,6 @@ using ApplicationCore.Interfaces;
 using ApplicationCore.Services;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Web.DTOs;
 
@@ -26,6 +25,7 @@ namespace Web.Controllers
         private readonly IQuestionRepository _questionRepository;
         private readonly ExhibitorManager _exhibitorManager;
         private readonly IImageWriter _imageWriter;
+        private readonly IConfiguration _configuration;
 
         public AssignmentController(UserManager<ApplicationUser> userManager,
             IConfiguration configuration,
@@ -36,6 +36,7 @@ namespace Web.Controllers
             IImageWriter imageWriter,
             IQuestionRepository questionRepository)
         {
+            _configuration = configuration;
             _groupRepository = groupRepository;
             _userManager = userManager;
             _assignmentRepository = assignmentRepository;
@@ -44,6 +45,11 @@ namespace Web.Controllers
                 new ExhibitorManager(exhibitorRepository, categoryRepository, questionRepository);
             _questionRepository = questionRepository;
             _imageWriter = imageWriter;
+        }
+        [HttpGet("[Action]")]
+        public IActionResult GetAmountOfAssignments()
+        {
+            return Ok(_configuration["AmountOfQuestions"]);
         }
 
         /**
@@ -92,7 +98,7 @@ namespace Web.Controllers
         {
             question.CategoryExhibitor.Exhibitor.GroupsAtExhibitor++;
 
-           // get group object via schoolId and groupName
+            // get group object via schoolId and groupName
             var group = await _groupRepository.GetById(Convert.ToInt32(User.Claims.ElementAt(5).Value));
 
             // Create assignment and Add to the groups assignments.
