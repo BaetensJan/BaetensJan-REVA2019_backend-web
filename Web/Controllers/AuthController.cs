@@ -25,14 +25,28 @@ namespace Web.Controllers
         private readonly IConfiguration _configuration;
         private readonly ISchoolRepository _schoolRepository;
         private readonly IAuthenticationManager _authenticationManager;
+        private readonly IEmailSender _emailSender;
 
         public AuthController(UserManager<ApplicationUser> userManager, IConfiguration configuration,
-            ISchoolRepository schoolRepository, IAuthenticationManager authenticationManager)
+            ISchoolRepository schoolRepository, IAuthenticationManager authenticationManager, IEmailSender emailSender)
         {
             _userManager = userManager;
             _configuration = configuration;
             _schoolRepository = schoolRepository;
             _authenticationManager = authenticationManager;
+            _emailSender = emailSender;
+        }
+
+        [HttpGet("[Action]")]
+        public async Task<IActionResult> TestMail()
+        {
+            await _emailSender.SendMailAsync("baetens-jan@vivaldi.net",
+                "Amazon SES test (SMTP interface accessed using C#)",
+                "<h1>Amazon SES Test</h1>" +
+                "<p>This email was sent through the " +
+                "<a href='https://aws.amazon.com/ses'>Amazon SES</a> SMTP interface " +
+                "using the .NET System.Net.Mail library.</p>");
+            return Ok("OK");
         }
 
         /**
@@ -159,7 +173,7 @@ namespace Web.Controllers
 
             return output;
         }
-        
+
         /**
         * A Teacher wants to log in via web.
         * Return: JWT Token.
