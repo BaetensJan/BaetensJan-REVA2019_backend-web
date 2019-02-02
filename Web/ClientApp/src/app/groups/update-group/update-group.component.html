@@ -60,7 +60,7 @@
         <button style="margin-left: 0.4em;"
                 type="button"
                 *ngFor="let member of group.members"
-                (click)="openModal(template, member)"><span class="glyphicon glyphicon-remove"></span>
+                (click)="openModal(template, group.id, member)"><span class="glyphicon glyphicon-remove"></span>
           {{member}}
         </button>
       </div>
@@ -68,3 +68,18 @@
 
   </div>
 </div>
+
+<!-- delete member of group modal -->
+<ng-template #template>
+  <div class="modal-body text-center">
+    <p>{{modalMessage}}</p>
+    <div class="modal-footer">
+      <button type="button" class="btn btn-success pull-left" (click)="decline()">
+        Nee
+      </button>
+      <button type="button" class="btn btn-danger pull-right" (click)="confirm()">
+        Ja
+      </button>
+    </div>
+  </div>
+</ng-template>

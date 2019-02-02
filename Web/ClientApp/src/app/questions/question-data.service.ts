@@ -47,7 +47,7 @@ export class QuestionDataService {
    */
   editQuestion(question: any): Observable<Question> {
     return this.http
-      .post(`${this._appUrl}/EditQuestion/`, question)
+      .put(`${this._appUrl}/EditQuestion/${question.questionId}`, question)
       .pipe(map(Question.fromJSON)); //Todo bij falen van edit => errortext weergeven idpv mappen naar question.
   }
 
