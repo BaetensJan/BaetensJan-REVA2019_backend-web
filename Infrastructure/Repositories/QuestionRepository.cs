@@ -32,8 +32,11 @@ namespace Infrastructure.Repositories
         */
         public Task<Question> GetQuestion(int categoryId, int exhibitorId)
         {
-            return _questions.SingleOrDefaultAsync(question => question.CategoryExhibitor.CategoryId == categoryId &&
-                                                        question.CategoryExhibitor.ExhibitorId == exhibitorId);
+            //TODO there are more than 1 questions related to a specific CategoryExhibitor (which shouldn't be, but is...)
+            //TODO normally this should be done with SingleOrDefaultAsync
+            return _questions.FirstOrDefaultAsync(q =>
+                q.CategoryExhibitor.CategoryId == categoryId && q.CategoryExhibitor.ExhibitorId
+                == exhibitorId);
         }
 
         public Task<List<Question>> GetAll()

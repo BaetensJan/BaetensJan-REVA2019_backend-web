@@ -53,7 +53,7 @@ namespace Web.Controllers
 
             var numberOfAssignments = group.Assignments.Count;
             var hasNoAssignments = numberOfAssignments == 0;
-            var currentAssignment = group.Assignments[0];
+            var currentAssignment = group.Assignments.FirstOrDefault();
 
             var previousExhibitorXCoordinate = 0.0;
             var previousExhibitorYCoordinate = 0.0;
