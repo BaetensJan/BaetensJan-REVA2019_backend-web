@@ -1,0 +1,94 @@
+<div *ngIf='errorMsg' class="ui error message">{{errorMsg}}</div>
+
+<form class="form-horizontal" [formGroup]='user' (ngSubmit)='onSubmit()'>
+  <h2 class="col-sm-offset-2" style="margin-bottom: 2em;">Leerkracht aanmaken</h2>
+
+  <!--Name-->
+  <div class="form-group">
+    <label class="col-sm-2 control-label" for="name">Voornaam:</label>
+    <div class="col-sm-10 col-md-3">
+      <input class="form-control" type="text" id="name" formControlName='name'>
+    </div>
+  </div>
+  <div class='alert alert-danger'
+       *ngIf='user.get("name").errors?.required && user.get("name").touched'>
+    Gelieve uw voornaam in te vullen.
+  </div>
+
+  <!--Surname-->
+  <div class="form-group">
+    <label class="col-sm-2 control-label" for="surname">Familienaam:</label>
+    <div class="col-sm-10 col-md-3">
+      <input class="form-control" type="text" id="surname" formControlName='surname'>
+    </div>
+  </div>
+  <div class='alert alert-danger'
+       *ngIf='user.get("surname").errors?.required && user.get("surname").touched'>
+    Gelieve uw familienaam in te vullen.
+  </div>
+
+  <!--SchoolName-->
+  <div class="form-group">
+    <label class="col-sm-2 control-label" for="schoolName">Schoolnaam:</label>
+    <div class="col-sm-10 col-md-3">
+      <input class="form-control" type="text" id="schoolName" formControlName='schoolName'>
+    </div>
+  </div>
+
+  <div class='alert alert-danger'
+       *ngIf='user.get("schoolName").errors?.required && user.get("schoolName").touched'>
+    Een schoolnaam is vereist.
+  </div>
+  <div class='alert alert-danger'
+       *ngIf='user.get("schoolName").errors?.minlength && user.get("schoolName").touched'>
+    De schoolnaam moet ten minste {{user.get("schoolName").errors?.minlength.requiredLength }} letters bevatten.
+    U heeft momenteel {{user.get("schoolName").errors?.minlength.actualLength}} lettertekens gebruikt.
+  </div>
+  <div class='alert alert-danger'
+       *ngIf='user.get("schoolName").errors?.schoolAlreadyExists && user.get("schoolName").touched'>
+    Er is al een school teruggevonden met deze school naam. Als u toegang wil tot het platform met deze school zal u
+    <strong>
+      <a> <!-- //TODO email versturen met email die verbonden is met deze school.-->
+        contact moeten opnemen
+      </a>
+    </strong>
+    met de beheerder van het account.
+  </div>
+  <div class='alert alert-danger' *ngIf='user.get("schoolName").errors?.wrongInput && user.get("schoolName").touched'>
+    De schoolnaam mag geen <strong>punt</strong> (<b style="font-weight: bold; font-size: 1.8em;">.</b>) bevatten.
+  </div>
+
+  <!--Email-->
+  <div class="form-group">
+    <label class="col-sm-2 control-label" for="email">Email:</label>
+    <div class="col-sm-10 col-md-3">
+      <input class="form-control" id="email" formControlName="email" type="email">
+    </div>
+  </div>
+
+  <div class='alert alert-danger' *ngIf='user.get("email").errors?.required && user.get("email").touched'>
+    Uw emailadres is verplicht.
+  </div>
+  <!--<div class='alert alert-danger' *ngIf='user.get("email").errors?.emailAlreadyExists && user.get("email").touched'>-->
+  <!--A user with that email already exists-->
+  <!--</div>-->
+  <div class='alert alert-danger' *ngIf='user.get("email").errors?.wrongInput && user.get("email").touched'>
+    Gelieve een geldig emailadres in te vullen.
+  </div>
+
+  <!--Note-->
+  <div class="form-group">
+    <label class="col-sm-2 control-label" for="note">Notitie:</label>
+    <div class="col-sm-10 col-md-3">
+      <textarea class="form-control" id="note" formControlName="note" type="note"></textarea>
+    </div>
+  </div>
+
+  <button class="btn btn-primary col-sm-offset-2 col-sm-3" type='submit' [disabled]='!user.valid'>
+    Leerkracht aanmaken.
+  </button>
+  <br><br>
+  <div class="col-sm-offset-2 col-sm-3">
+    <p>Er wordt automatisch een mail verzonden naar de leerkracht na de creatie van een account.</p>
+  </div>
+</form>

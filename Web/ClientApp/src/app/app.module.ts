@@ -12,7 +12,6 @@ import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
 import {VerticalTimelineModule} from 'angular-vertical-timeline';
 import {
   ModalModule,
-  AccordionModule,
   PaginationModule,
   TypeaheadModule,
   ButtonsModule,
@@ -74,7 +73,7 @@ import {AppRoutingModule} from "./app-routing/app-routing.module";
     QuestionDataService,
     QuestionSharedService,
     SchoolDataService,
-    ImageDataService
+    ImageDataService,
   ],
   bootstrap: [AppComponent]
 })
