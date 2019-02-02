@@ -9,6 +9,7 @@ using ApplicationCore.Entities;
 using ApplicationCore.Interfaces;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 using Web.DTOs;
@@ -214,7 +215,7 @@ namespace Web.Controllers
             await _groupRepository.SaveChanges();
             return group;
         }
-
+        
         private async Task<ApplicationUser> CreateGroupUser(School school, string username, string password)
         {
             // Creation of ApplicationUser
@@ -259,39 +260,52 @@ namespace Web.Controllers
                 signingCredentials: new SigningCredentials(signInKey, SecurityAlgorithms.HmacSha256));
         }
 
-        [HttpPost("UpdateGroup")]
-        public async Task<ActionResult> UpdateGroup([FromBody] GroupUpdateDTO model)
+        [HttpPut("[action]/{id}")]
+        public async Task<ActionResult> UpdateGroup([FromRoute] int id,[FromBody] GroupUpdateDTO model)
         {
             if (ModelState.IsValid)
             {
-                var groupApplicationUser = _userManager.Users.SingleOrDefault(u => u.UserName == model.Name);
+                string schname = "";
+                IEnumerable<School> school = _userManager.Users.Where(t => t.School.Groups.Any(i => i.Id == id))
+                    .Select(s => s.School);
+                foreach (var var in school)
+                {
+                    schname = var.Name;
+                }
+                IEnumerable<ApplicationUser> users =
+                    _userManager.Users;
 
-                //check if group exists 
-                if (groupApplicationUser == null)
-                    return Ok(
-                        new
-                        {
-                            Message = "Groep niet teruggevonden."
-                        });
+                Task<Group> groups = _groupRepository.GetById(id);
+                string hashpassword = "";
+                
+                //String schoolnaam = sch.Name;
+                //String schoolUsername = sch.Name + model.Name;
+                String beforeChangeSchoolName = schname+groups.Result.Name;
 
-                var group = await _groupRepository.GetById(model.GroupId);
+                ApplicationUser user = users.SingleOrDefault(t => t.UserName == beforeChangeSchoolName);
+                if (!string.IsNullOrWhiteSpace(model.Password))
+                {
+                    hashpassword = _userManager.PasswordHasher.HashPassword(user, model.Password);
+
+                }
+                var group = await _groupRepository.GetById(id);
 
                 // name was updated.
                 if (!group.Name.ToLower().Equals(model.Name.ToLower()))
                 {
-                    groupApplicationUser.UserName = model.Name;
-                    group.Name = model.Name;
+                    //groupApplicationUser.UserName = model.Name;
+                    user.UserName = schname+model.Name;
                 }
 
-                // password was updated.
-                if (!string.IsNullOrWhiteSpace(model.Password))
-                {
-                    groupApplicationUser.PasswordHash = model.Password;
-                }
 
+                //updaten password
+
+                //Console.WriteLine(hashpassword);
                 if (model.Members != null && model.Members.Count > 0)
                     group.Members = model.Members;
-
+                group.Name = model.Name;
+                user.PasswordHash = hashpassword;
+                _groupRepository.Update(group);
                 await _groupRepository.SaveChanges();
 
                 return Ok(group);

@@ -84,6 +84,11 @@ namespace Infrastructure.Repositories
 
             return group;
         }
+        
+        public void Update(Group group)
+        {
+            _groups.Update(group);
+        }
 
         private Group MapGroup(Group group)
         {

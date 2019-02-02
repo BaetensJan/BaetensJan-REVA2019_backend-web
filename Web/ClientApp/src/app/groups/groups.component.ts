@@ -81,7 +81,7 @@ export class GroupsComponent {
       this._groupsDataService.allGroups.subscribe(value => {
         this._groups = value;
         this.contentArray = this._groups;
-        this.filteredGroups = this._groups
+        this.filteredGroups = this._groups;
         this.initiateReturnedArray();
       });
     } else {
@@ -285,6 +285,7 @@ export class GroupsComponent {
       "password": this.groupForm.value.groupPassword,
       "members": this.groupMembers
     };
+    console.log(newGroup.password);
     this._groupsDataService.addNewGroup(this.school.id, newGroup).subscribe(value => {
       console.log(value);
       this._groups.push(value);
