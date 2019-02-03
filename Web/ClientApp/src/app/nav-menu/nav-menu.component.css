@@ -28,6 +28,7 @@ li.link-active a:focus {
 
 .navbar-nav li a{
   color: #fb8700 !important;
+  font-size: 1.4em;
 }
 
 @media (min-width: 768px) {
