@@ -92,13 +92,15 @@ namespace Web.Controllers
                 // creating the school
                 var school = new School(model.SchoolName, GetRandomString(6));
                 await _schoolRepository.Add(school);
-                await _schoolRepository.SaveChanges(); //Todo this is unnecessary?
+                await _schoolRepository.SaveChanges();
+
+                var password = GetRandomString(6);
 
                 // creating teacher consisting of his school
-                var user = _authenticationManager.CreateApplicationUserObject(model.Email, model.Username,
-                    model.Password);
+                var user = _authenticationManager.CreateApplicationUserObject(model.Email, model.Email,
+                    password);
                 user.School = await _schoolRepository.GetByName(model.SchoolName);
-                var result = await _userManager.CreateAsync(user, model.Password);
+                var result = await _userManager.CreateAsync(user, password);
 
                 if (result.Succeeded)
                 {
@@ -110,22 +112,40 @@ namespace Web.Controllers
                                 Message = "Something went wrong when creating your account."
                             });
                     await _userManager.AddToRoleAsync(user, "Teacher");
-
-
-                    var claim = await CreateClaims(user);
-                    //Todo kunnen van CreateClaims in List werken idpv array zodat men niet hoeft de array naar list om te zetten
-                    // en in addschoolclaim hoeft men dan geen returnwaarde te geven (want het Adden vd claim is op reference van de lijst)
-                    claim = _authenticationManager.AddClaim(claim.ToList(), "school", school.Id.ToString()).ToArray();
-
-                    var token = GetToken(claim);
+                    //todo change email once out of sandbox (amazon)
+                    await _emailSender.SendMailAsync("baetens-jan@vivaldi.net",
+                        "Uw Account voor de REVA app is hier!",
+                        $@"
+                        <h1>Uw Reva app account werd aangemaakt!</h1>
+                        <p>
+                        Uw login gegevens:
+                        </p>
+                        <p>
+                        Gebruikersnaam: {model.Email}
+                        </p>
+                        <p>
+                        Wachtwoord: {password}
+                        </p>
+                        <br>
+                        <b>
+                        Verander uw wachtwoord na inloggen!
+                        </b>
+                        <br>
+                        <br>
+                        <br>
+                        <footer>
+                        <p>Deze email werd automatisch verzonden! Reageer niet op dit bericht.</p>
+                        <p>Contacteer freddy@reva.be bij problemen.</p>
+                        </footer>");
 
                     return Ok(
                         new
                         {
+                            Message = "Teacher successfully created."
 //                            Username = user.UserName,
 //                            Token = GetToken(claim)
-                            token = new JwtSecurityTokenHandler().WriteToken(token),
-                            expiration = token.ValidTo
+//                            token = new JwtSecurityTokenHandler().WriteToken(token),
+//                            expiration = token.ValidTo
                         });
                 }
             }
