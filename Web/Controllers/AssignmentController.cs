@@ -23,6 +23,7 @@ namespace Web.Controllers
         private readonly IExhibitorRepository _exhibitorRepository;
         private readonly IGroupRepository _groupRepository;
         private readonly IQuestionRepository _questionRepository;
+        private readonly ICategoryRepository _categoryRepository;
         private readonly ExhibitorManager _exhibitorManager;
         private readonly IImageWriter _imageWriter;
         private readonly IConfiguration _configuration;
@@ -44,8 +45,10 @@ namespace Web.Controllers
             _exhibitorManager =
                 new ExhibitorManager(exhibitorRepository, categoryRepository, questionRepository);
             _questionRepository = questionRepository;
+            _categoryRepository = categoryRepository;
             _imageWriter = imageWriter;
         }
+
         [HttpGet("[Action]")]
         public IActionResult GetAmountOfAssignments()
         {
@@ -53,7 +56,8 @@ namespace Web.Controllers
         }
 
         /**
-        * Gets the closest exhibitor with a certain category, starting from previous exhibitor.
+        * Gets the closest exhibitor with a certain category, starting from previous exhibitor. (Normal Tour)
+        * 
         * parameter1: string previousExhibitorId - the id of the previous exhibitor, from which
         * the assigment has already been submitted.
         * parameter2: string category - the current, by the students chosen, category
@@ -63,42 +67,66 @@ namespace Web.Controllers
         [HttpGet("[Action]/{categoryId}/{previousExhibitorId}")]
         public async Task<IActionResult> CreateAssignment(int categoryId, int previousExhibitorId)
         {
-            Question question;
-            if (categoryId == -1) // Group created a new exhibitor in the Extra Tour phase 
-            {
-                //We take a specific question for this assignment, as an assignment needs a question
-                //and we dont want to create new (random) question in the database each time a group start an extra tour.
-                question = await _questionRepository.GetById(795);
-            }
-            else
-            {
-                // FindNextExhibitor already checks if the categoryId and ExhibitorId combo has a question in the DB.
-                var exhibitor = await _exhibitorManager.FindNextExhibitor(previousExhibitorId, categoryId);
-                question = await _questionRepository.GetQuestion(categoryId, exhibitor.Id);
-            }
+            // FindNextExhibitor already checks if the categoryId and ExhibitorId combo has a question in the DB.
+            var exhibitor = await _exhibitorManager.FindNextExhibitor(previousExhibitorId, categoryId);
+            var question = await _questionRepository.GetQuestion(categoryId, exhibitor.Id);
 
             var assignment = await CreateAssignment(question);
-            assignment = await _assignmentRepository.GetByIdLight(assignment.Id); //Todo temporary, otherwise we have recursive catExh data
+            assignment =
+                await _assignmentRepository
+                    .GetByIdLight(assignment.Id); //Todo temporary, otherwise we have recursive catExh data
 
             return Ok(assignment);
         }
-        
-       /**
-       * Gets an assignment when a group runs an Extra Round.
-       * The Group has chosen a specific Exhibitor for a specific Category.
-       * 
-       * Creates an assignment related to an exhibitor with exhibitorId equal to parameter exhibitorId and
-       * category with a categoryId equal to the parameter exhibitorId
-       * parameter1: string exhibitorId - the id of the exhibitor of which a question should be the subject.
-       * parameter2: string category - the, by the students chosen, category
-       * 
-       * RETURN an Assignment, containing an Exhibitor object that represent the current, newly assigned Exhibitor.
-       */
+
+        /**
+        * A group has created a new Exhibitor in the Extra Tour, as they didn't find the Exhibitor in the list.
+        */
+        [HttpGet("[Action]/{exhibitorName}/{categoryId}/{boothNumber}")]
+        public async Task<IActionResult> CreateAssignmentNewExhibitor(string exhibitorName, int categoryId,
+            int boothNumber)
+        {
+            //We take a specific question for this assignment, as an assignment needs a question
+            //and we dont want to create new (random) question in the database each time a group start an extra tour.
+            var question = await _questionRepository.GetById(79);
+
+            // We add the exhibitor information from the group to the Assignment.
+            var category = await _categoryRepository.GetById(categoryId);
+            question.QuestionText += $"\nExposant: {exhibitorName}";
+            if (categoryId != -1)
+            {
+                question.QuestionText += $", Categorie: {category.Name}";
+            }
+
+            if (boothNumber != -1)
+            {
+                question.QuestionText += $", Standnummer: {boothNumber}";
+            }
+
+            var assignment = await CreateAssignment(question);
+            assignment =
+                await _assignmentRepository
+                    .GetByIdLight(assignment.Id); //Todo temporary, otherwise we have recursive catExh data
+
+            return Ok(assignment);
+        }
+
+        /**
+        * Gets an assignment when a group runs an Extra Round.
+        * The Group has chosen a specific Exhibitor for a specific Category.
+        * 
+        * Creates an assignment related to an exhibitor with exhibitorId equal to parameter exhibitorId and
+        * category with a categoryId equal to the parameter exhibitorId
+        * parameter1: string exhibitorId - the id of the exhibitor of which a question should be the subject.
+        * parameter2: string category - the, by the students chosen, category
+        * 
+        * RETURN an Assignment, containing an Exhibitor object that represent the current, newly assigned Exhibitor.
+        */
         [HttpGet("[Action]/{categoryId}/{exhibitorId}")]
         public async Task<IActionResult> CreateAssignmentOfExhibitorAndCategory(int categoryId, int exhibitorId)
         {
             var question = await _questionRepository.GetQuestion(categoryId, exhibitorId);
-            
+
             var assignment = await CreateAssignment(question);
             assignment =
                 await _assignmentRepository
