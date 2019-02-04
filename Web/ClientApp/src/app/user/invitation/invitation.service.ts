@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import {Injectable} from '@angular/core';
 import {map} from 'rxjs/operators';
 import {Observable} from "rxjs";
 import {HttpClient} from "@angular/common/http";
@@ -11,7 +11,7 @@ export class InvitationService {
   /**
    * @ignore
    */
-  private readonly _url = '/api/invitation';
+  private readonly _url = '/api/auth';
 
   /**
    * Constructor
@@ -19,7 +19,8 @@ export class InvitationService {
    * @param http
    * @param router
    */
-  constructor(private http: HttpClient, private router: Router) { }
+  constructor(private http: HttpClient, private router: Router) {
+  }
 
   /** TODO: create a temporary account, so that Freddy doesn't have to re-type (exclude typo's) all the info.
    * Invite Request to join the web platform
@@ -31,9 +32,10 @@ export class InvitationService {
    * @param schoolName
    */
   inviteRequest(email: string, name: string, surname: string, schoolName: string, note: string): Observable<boolean> {
+    console.log({email, name, surname, schoolName, note});
     return this.http.post(`${this._url}/inviteRequest`, {email, name, surname, schoolName, note}).pipe(
       map((res: any) => {
-       return true;
+        return true;
       })
     );
   }
@@ -48,9 +50,10 @@ export class InvitationService {
    * @param schoolName
    */
   createTeacher(email: string, name: string, surname: string, schoolName: string): Observable<boolean> {
-    return this.http.post(`${this._url}/inviteRequest`, {email, name, surname, schoolName}).pipe(
+    console.log({email, name, surname, schoolName});
+    return this.http.post(`${this._url}/CreateTeacher`, {email, name, surname, schoolName}).pipe(
       map((res: any) => {
-       return true;
+        return true;
       })
     );
   }
