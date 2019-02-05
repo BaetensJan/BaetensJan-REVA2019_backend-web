@@ -44,7 +44,7 @@ export class QuestionsComponent implements OnInit {
    */
   private _filteredQuestions: Question[];
   private selectedCategory: Category;
-  private filterValue: string = "";
+  private _filterValue: string = "";
 
   /**
    * @ignore
@@ -86,12 +86,12 @@ export class QuestionsComponent implements OnInit {
     if (cat == null) {
       this.selectedCategory = null;
       this._currentCategoryQuestions = this._allQuestions;
-      this.filter(this.filterValue);
+      this.filter(this._filterValue);
       return;
     }
     this.selectedCategory = cat;
     this._currentCategoryQuestions = this._allQuestions.filter(q => q.category.id == this.selectedCategory.id);
-    this.filter(this.filterValue);
+    this.filter(this._filterValue);
   }
 
   get selectedExhibitors(): Exhibitor[] {
@@ -172,5 +172,14 @@ export class QuestionsComponent implements OnInit {
       this.clickedItem = null;
     });
     window.location.reload();
+  }
+
+
+  get filterValue(): string {
+    return this._filterValue;
+  }
+
+  set filterValue(value: string) {
+    this._filterValue = value;
   }
 }

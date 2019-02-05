@@ -7,7 +7,7 @@
     <div class="input-group">
       <span class="input-group-addon">Zoekfilter
        </span>
-      <input class="form-control" type="text" placeholder="filter" (ngModelChange)="filter($event)" [(ngModel)]="filterValue">
+      <input class="form-control" type="text" placeholder="filter" (ngModelChange)="filter($event)">
     </div>
   </div>
 
@@ -30,19 +30,20 @@
   <tr *ngFor="let group of _filteredGroups; let i = index">
     <div *ngIf="group.assignments.length > 0; then showRow else hideRow"></div>
     <ng-template #showRow>
-        <th scope="row">{{i+1}}</th>
-        <td>{{group.name}}</td>
-        <td>
+      <th scope="row">{{i+1}}</th>
+      <td>{{group.name}}</td>
+      <td>
 
-          <button class="" (click)="pdfDownload(group)"><img id="imageid" src="../../assets/logopdf.png" alt="logo pdf" width="50"
-                                                             height="50"></button>
-        </td>
-        <td>
-          <p>{{group.assignments.length}}</p>
-        </td>
-        <td>
-          <button (click)="detailAssignment(group)" class="btn btn-primary">Detailscherm van opdracht</button>
-        </td>
+        <button class="" (click)="pdfDownload(group)"><img id="imageid" src="../../assets/logopdf.png" alt="logo pdf"
+                                                           width="50"
+                                                           height="50"></button>
+      </td>
+      <td>
+        <p>{{group.assignments.length}}</p>
+      </td>
+      <td>
+        <button (click)="detailAssignment(group)" class="btn btn-primary">Detailscherm van opdracht</button>
+      </td>
     </ng-template>
     <ng-template #hideRow></ng-template>
   </tr>

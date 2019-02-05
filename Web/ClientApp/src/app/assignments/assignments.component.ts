@@ -41,7 +41,6 @@ export class AssignmentsComponent {
   returnedArray: Group[]; // array containing the groups (maxNumberOfGroupsPerPage) that are showed on the current page.
   private _filteredGroups: Group[];
 
-  private filterValue: string = "";
   /**
    * Constructor
    * @param router
