@@ -74,8 +74,8 @@ namespace Web
                 {
                     ValidateIssuer = true,
                     ValidateAudience = true,
-                    ValidAudience = "http://xyz.com",
-                    ValidIssuer = "http://xyz.com",
+                    ValidAudience = "http://app.reva.be",
+                    ValidIssuer = "http://app.reva.be",
                     IssuerSigningKey =
                         new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["AppSettings:Secret"]))
                 };

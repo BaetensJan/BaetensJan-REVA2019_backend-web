@@ -3,7 +3,6 @@ import {map} from 'rxjs/operators';
 import {Observable} from "rxjs";
 import {HttpClient} from "@angular/common/http";
 import {Router} from "@angular/router";
-import {Exhibitor} from "../../models/exhibitor.model";
 import {TeacherRequest} from "../../models/teacherRequest.model";
 
 @Injectable({
@@ -13,7 +12,7 @@ export class InvitationService {
   /**
    * @ignore
    */
-  private readonly _url = '/api/auth';
+  private readonly _url = '/api';
 
   /**
    * Constructor
@@ -22,6 +21,15 @@ export class InvitationService {
    * @param router
    */
   constructor(private http: HttpClient, private router: Router) {
+  }
+
+  /**
+   * Makes call to backend and returns all teacherRequests
+   */
+  get teacherRequests(): Observable<TeacherRequest[]> {
+    return this.http
+      .get(`${this._url}/teacherRequest/requests/`)
+      .pipe(map((list: any[]): TeacherRequest[] => list.map(TeacherRequest.fromJSON)));
   }
 
   /** TODO: create a temporary account, so that Freddy doesn't have to re-type (exclude typo's) all the info.
@@ -36,7 +44,7 @@ export class InvitationService {
   inviteRequest(email: string, name: string, surname: string, schoolName: string, note: string): Observable<boolean> {
     console.log({email, name, surname, schoolName, note});
     let teacherReq = new TeacherRequest(name, surname, email, schoolName, note);
-    return this.http.post(`/api/teacherRequest/sendRequest`, teacherReq).pipe(
+    return this.http.post(`${this._url}/teacherRequest/sendRequest`, teacherReq).pipe(
       map((res: any) => {
         return true;
       })
@@ -49,19 +57,10 @@ export class InvitationService {
    * @param teacherRequestId: number (the id of the by the admin selected teacherRequest).
    */
   createTeacher(teacherRequestId: number): Observable<boolean> {
-    return this.http.get(`${this._url}/CreateTeacher/${teacherRequestId}`).pipe(
+    return this.http.get(`${this._url}/Auth//CreateTeacher/${teacherRequestId}`).pipe(
       map((res: any) => {
         return true;
       })
     );
-  }
-
-  /**
-   * Makes call to backend and returns all teacherRequests
-   */
-  get teacherRequests(): Observable<TeacherRequest[]> {
-    return this.http
-      .get(`/api/teacherRequest/requests/`)
-      .pipe(map((list: any[]): TeacherRequest[] => list.map(TeacherRequest.fromJSON)));
   }
 }

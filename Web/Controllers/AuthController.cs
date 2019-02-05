@@ -91,33 +91,33 @@ namespace Web.Controllers
         public async Task<ActionResult> CreateTeacher(int teacherRequestId)
         {
             var model = await _teacherRequestRepository.GetById(teacherRequestId);
-                // creating the school
-                var school = new School(model.SchoolName, GetRandomString(6));
-                await _schoolRepository.Add(school);
-                await _schoolRepository.SaveChanges();
+            // creating the school
+            var school = new School(model.SchoolName, GetRandomString(6));
+            await _schoolRepository.Add(school);
+            await _schoolRepository.SaveChanges();
 
-                var password = GetRandomString(6);
+            var password = GetRandomString(6);
 
-                // creating teacher consisting of his school
-                var user = _authenticationManager.CreateApplicationUserObject(model.Email, model.Email,
-                    password);
-                user.School = await _schoolRepository.GetByName(model.SchoolName);
-                var result = await _userManager.CreateAsync(user, password);
+            // creating teacher consisting of his school
+            var user = _authenticationManager.CreateApplicationUserObject(model.Email, model.Email,
+                password);
+            user.School = await _schoolRepository.GetByName(model.SchoolName);
+            var result = await _userManager.CreateAsync(user, password);
 
-                if (result.Succeeded)
-                {
-                    user = _userManager.Users.SingleOrDefault(u => u.Id == user.Id);
-                    if (user.School == null)
-                        return Ok(
-                            new
-                            {
-                                Message = "Something went wrong when creating your account."
-                            });
-                    await _userManager.AddToRoleAsync(user, "Teacher");
-                    //todo change email once out of sandbox (amazon)
-                    await _emailSender.SendMailAsync("baetens-jan@vivaldi.net",
-                        "Uw Account voor de REVA app is hier!",
-                        $@"
+            if (result.Succeeded)
+            {
+                user = _userManager.Users.SingleOrDefault(u => u.Id == user.Id);
+                if (user.School == null)
+                    return Ok(
+                        new
+                        {
+                            Message = "Something went wrong when creating your account."
+                        });
+                await _userManager.AddToRoleAsync(user, "Teacher");
+                //todo change email once out of sandbox (amazon)
+                await _emailSender.SendMailAsync(model.Email,
+                    "Uw Account voor de REVA app is hier!",
+                    $@"
                         <h1>Uw Reva app account werd aangemaakt!</h1>
                         <p>
                         Uw login gegevens:
@@ -140,16 +140,16 @@ namespace Web.Controllers
                         <p>Contacteer freddy@reva.be bij problemen.</p>
                         </footer>");
 
-                    return Ok(
-                        new
-                        {
-                            Message = "Teacher successfully created."
+                return Ok(
+                    new
+                    {
+                        Message = "Teacher successfully created."
 //                            Username = user.UserName,
 //                            Token = GetToken(claim)
 //                            token = new JwtSecurityTokenHandler().WriteToken(token),
 //                            expiration = token.ValidTo
-                        });
-                }
+                    });
+            }
 
             return Ok(new
             {
@@ -165,7 +165,7 @@ namespace Web.Controllers
         private async Task<Claim[]> CreateClaims(ApplicationUser user)
         {
             var isAdmin = await _userManager.IsInRoleAsync(user, "Admin");
-            return new[]
+            var claims = new List<Claim>()
             {
                 new Claim(JwtRegisteredClaimNames.Sub, user.Email),
                 new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
@@ -173,6 +173,9 @@ namespace Web.Controllers
                 new Claim("username", user.UserName),
                 new Claim("isAdmin", isAdmin.ToString()),
             };
+            claims.AddRange((await _userManager.GetRolesAsync(user)).Select(role => new Claim(ClaimTypes.Role, role)));
+
+            return claims.ToArray();
         }
 
         /**
@@ -347,8 +350,8 @@ namespace Web.Controllers
                 Encoding.UTF8.GetBytes(_configuration["AppSettings:Secret"]));
 
             return new JwtSecurityToken(
-                issuer: "http://xyz.com",
-                audience: "http://xyz.com",
+                issuer: "http://app.reva.be",
+                audience: "http://app.reva.be",
                 claims: claim,
                 expires: DateTime.UtcNow.AddHours(1),
                 signingCredentials: new SigningCredentials(signInKey, SecurityAlgorithms.HmacSha256));
