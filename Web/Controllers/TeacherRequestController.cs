@@ -56,5 +56,22 @@ namespace Web.Controllers
                 Message = "Please fill in all required fields."
             });
         }
+
+        /**
+        * Admin declines Teacher Requast.
+        *
+        **/
+        [HttpPost("[Action]/{teacherRequestId}")]
+        public async Task<ActionResult> DeclineRequest(int teacherRequestId)
+        {
+            var request = await _teacherRequestRepository.GetById(teacherRequestId);
+            _teacherRequestRepository.Remove(request);
+            await _teacherRequestRepository.SaveChanges();
+
+            return Ok(new
+            {
+                Message = "Request removed."
+            });
+        }
     }
 }

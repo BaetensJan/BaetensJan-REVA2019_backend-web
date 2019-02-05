@@ -10,8 +10,8 @@ import {httpInterceptorProviders} from '../http-interceptors';
 import {AuthGuardService} from "./auth-guard.service";
 import {LogoutComponent} from "./logout/logout.component";
 import {InvitationService} from "./invitation/invitation.service";
-import {InviteRequestComponent} from "./invitation/invite-request/invite-request.component";
 import {RequestsComponent} from "./invitation/pending-requests/requests.component";
+import {InviteRequestComponent} from "./invitation/send-request/invite-request.component";
 
 /**
  * Routing for user login and registration

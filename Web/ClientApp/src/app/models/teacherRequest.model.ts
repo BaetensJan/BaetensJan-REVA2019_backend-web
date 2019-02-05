@@ -1,8 +1,8 @@
 export class TeacherRequest {
-
   /**
    * @ignore
    */
+  private _id: number;
   private _name: string;
   private _surname: string;
   private _email: string;
@@ -46,6 +46,7 @@ export class TeacherRequest {
       json.schoolName,
       json.note
     );
+    rec._id = json.id;
     return rec;
   }
 
@@ -54,12 +55,20 @@ export class TeacherRequest {
    */
   toJSON() {
     return {
+      id: this._id,
       name: this._name,
       surname: this._surname,
       email: this._email,
       schoolName: this._schoolName,
       note: this._note,
     };
+  }
+
+  /**
+   * Getter for Id
+   */
+  get id(): number {
+    return this._id;
   }
 
   /**

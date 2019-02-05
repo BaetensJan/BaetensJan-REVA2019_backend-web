@@ -14,7 +14,7 @@ namespace Infrastructure.Configurations
 
             //Props
             builder.Property(t => t.Id).ValueGeneratedOnAdd();
-            builder.Property(t => t.Notes);
+            builder.Property(t => t.Note);
             builder.Property(t => t.Name);
             builder.Property(t => t.Surname);
             builder.Property(t => t.SchoolName);

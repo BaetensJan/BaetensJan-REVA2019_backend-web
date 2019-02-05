@@ -9,16 +9,16 @@ namespace ApplicationCore.Entities
         public string Surname { get; set; } 
         public string Email { get; set; } 
         public string SchoolName { get; set; } 
-        public string Notes { get; set; } 
+        public string Note { get; set; } 
         public DateTime CreationDate { get; set; }
                
-        public TeacherRequest(string name, string surname, string email, string schoolName, string notes)
+        public TeacherRequest(string name, string surname, string email, string schoolName, string note)
         {
             Name = name;
             Surname = surname;
             Email = email;
             SchoolName = schoolName;
-            Notes = notes;
+            Note = note;
             CreationDate = DateTime.Now;
         }
     }   

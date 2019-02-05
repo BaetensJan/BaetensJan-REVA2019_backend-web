@@ -83,11 +83,11 @@ namespace Web.Controllers
         }
 
         /**
-         * Used when a teacher wants to register in the web platform.
+        * Used when a teacher wants to register in the web platform.
         * Create an ApplicationUser with Role Teacher.
         * Parameter = model: CreateTeacherViewModel
         */
-        [HttpPost("[Action]/{teacherRequestId}")]
+        [HttpGet("[Action]/{teacherRequestId}")]
         public async Task<ActionResult> CreateTeacher(int teacherRequestId)
         {
             var model = await _teacherRequestRepository.GetById(teacherRequestId);
@@ -139,7 +139,10 @@ namespace Web.Controllers
                         <p>Deze email werd automatisch verzonden! Reageer niet op dit bericht.</p>
                         <p>Contacteer freddy@reva.be bij problemen.</p>
                         </footer>");
-
+                
+                _teacherRequestRepository.Remove(model);
+                await _teacherRequestRepository.SaveChanges();
+                
                 return Ok(
                     new
                     {

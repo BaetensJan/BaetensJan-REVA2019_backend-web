@@ -32,7 +32,7 @@ export class InvitationService {
       .pipe(map((list: any[]): TeacherRequest[] => list.map(TeacherRequest.fromJSON)));
   }
 
-  /** TODO: create a temporary account, so that Freddy doesn't have to re-type (exclude typo's) all the info.
+  /**
    * Invite Request to join the web platform
    *
    * @param email
@@ -57,7 +57,20 @@ export class InvitationService {
    * @param teacherRequestId: number (the id of the by the admin selected teacherRequest).
    */
   createTeacher(teacherRequestId: number): Observable<boolean> {
-    return this.http.get(`${this._url}/Auth//CreateTeacher/${teacherRequestId}`).pipe(
+    return this.http.get(`${this._url}/Auth/CreateTeacher/${teacherRequestId}`).pipe(
+      map((res: any) => {
+        return true;
+      })
+    );
+  }
+
+  /**
+   * Decline request and delete TeacherRequest in DB
+   *
+   * @param teacherRequestId: number (the id of the by the admin selected teacherRequest).
+   */
+  deleteTeacher(teacherRequestId: number): Observable<boolean> {
+    return this.http.get(`${this._url}/teacherRequest/DeclineRequest/${teacherRequestId}`).pipe(
       map((res: any) => {
         return true;
       })

@@ -13,8 +13,8 @@ import {ExhibitorComponent} from "../exhibitor/exhibitor.component";
 import {QuestionsComponent} from "../questions/questions.component";
 import {QuestionComponent} from "../questions/question/question.component";
 import {RouteMapComponent} from "../route-map/route-map.component";
-import {InviteRequestComponent} from "../user/invitation/invite-request/invite-request.component";
 import {RequestsComponent} from "../user/invitation/pending-requests/requests.component";
+import {InviteRequestComponent} from "../user/invitation/send-request/invite-request.component";
 
 const appRoutes: Routes = [
   {path: 'home', component: HomeComponent},

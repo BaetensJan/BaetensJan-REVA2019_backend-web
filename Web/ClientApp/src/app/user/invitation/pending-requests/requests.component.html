@@ -1,6 +1,58 @@
-<div *ngIf="requests; else message">
-  <p *ngFor="let request of requests">{{request.name}}</p>
+<div id="header" style="margin-bottom: 2em;">
+  <h1>Aanvragen</h1>
 </div>
+
+<!--Overview of exhibitors-->
+<div class="row" *ngIf="requests; else message">
+  <div class="col-xs-12 col-12">
+    <table class="full-width-table table">
+      <thead>
+      <tr>
+        <th style="font-size: 1.2em; padding-bottom: 1.4em;">Naam</th>
+        <th style="font-size: 1.2em; padding-bottom: 1.4em;">Familienaam</th>
+        <th style="font-size: 1.2em; padding-bottom: 1.4em;">Email</th>
+        <th style="font-size: 1.2em; padding-bottom: 1.4em;">School</th>
+        <th style="font-size: 1.2em; padding-bottom: 1.4em;">Opmerking</th>
+      </tr>
+      </thead>
+      <tbody>
+      <tr *ngFor="let request of requests">
+        <td style="text-transform:capitalize;">{{request.name}}</td>
+        <td style="text-transform:capitalize;">{{request.surname}}</td>
+        <td style="text-transform:capitalize;">{{request.email}}</td>
+        <td style="text-transform:capitalize;">{{request.schoolName}}</td>
+        <td style="text-transform:capitalize;">{{request.note}}</td>
+        <td>
+          <span class="btn glyphicon glyphicon-ok" aria-hidden="true"
+                (click)="openModal(template, request, true)"></span>
+          <span class="btn glyphicon glyphicon-trash" aria-hidden="true"
+                (click)="openModal(template, request, false)"></span>
+        </td>
+      </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<ng-template #template>
+  <div class="modal-header">
+    <button type="button" class="close pull-right" aria-label="Close" (click)="hideModal()">
+      <span aria-hidden="true">&times;</span>
+    </button>
+  </div>
+  <div class="modal-body">
+    {{modalBody}}
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-danger pull-right" (click)="hideModal()">
+      Nee
+    </button>
+    <button type="button" class="btn btn-success pull-left" (click)="modalAccepted()">
+      Ja
+    </button>
+  </div>
+</ng-template>
+
 <ng-template #message>
   <p>Er zijn momenteel geen aanvragen.</p>
 </ng-template>
