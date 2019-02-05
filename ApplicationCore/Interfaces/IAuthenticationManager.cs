@@ -9,6 +9,7 @@ namespace ApplicationCore.Interfaces
     public interface IAuthenticationManager
     {
         ApplicationUser CreateApplicationUserObject(string email, string username, string password);
+        ApplicationUser UpdateApplicationUserObject(string email, string username, string password);
         ICollection<Claim> AddClaim(ICollection<Claim> claims, string claimName, string value);
     }
 }

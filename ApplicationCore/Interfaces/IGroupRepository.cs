@@ -12,6 +12,7 @@ namespace ApplicationCore.Interfaces
         Task Add(Group group);
         Task<Group> AddMember(int id, string member);
         Task<Group> RemoveMember(int id, string member);
+        void Update(Group group);
         void Remove(Group group);
         Task SaveChanges();
     }

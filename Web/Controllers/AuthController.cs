@@ -263,24 +263,14 @@ namespace Web.Controllers
                 model.SchoolName +
                 model.GroupName; //ApplicationUser-username is a concat of both school- and groupname.
             var appUser = await GetApplicationUser(username);
-            if (appUser == null)
-                return Ok(
-                    new
-                    {
-                        Message = "User not found"
-                    });
-            if (!await CheckValidPassword(appUser, model.Password)) return Unauthorized();
+            if (appUser == null || !await CheckValidPassword(appUser, model.Password)) return Unauthorized();
 
 
             var group = appUser.School.Groups.SingleOrDefault(g => g.Name == model.GroupName);
 
             if (group == null) // check if group exists
             {
-                return Ok(
-                    new
-                    {
-                        Message = "Group not found"
-                    });
+                return Unauthorized();
             }
 
             var claim = await CreateClaims(appUser);

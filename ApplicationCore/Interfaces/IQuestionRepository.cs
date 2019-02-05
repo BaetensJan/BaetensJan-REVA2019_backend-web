@@ -9,6 +9,7 @@ namespace ApplicationCore.Interfaces
         Task<List<Question>> GetAll();
         Task<List<Question>> GetAllLight();
         Task<Question> GetById(int QuestionId);
+        Task<Question> GetQuestion(int categoryId, int exhibitorId);
         Task Add(Question Question);
         Task<Question> EditQuestion(int questionId, string questionText, string answerText, CategoryExhibitor ce);
         void Remove(Question Question);

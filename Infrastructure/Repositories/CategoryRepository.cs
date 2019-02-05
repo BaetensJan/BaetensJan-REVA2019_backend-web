@@ -103,6 +103,11 @@ namespace Infrastructure.Repositories
         {
             _categories.Remove(category);
         }
+        
+        public void Update(Category category)
+        {
+            _categories.Update(category);
+        }
 
         public Task SaveChanges()
         {

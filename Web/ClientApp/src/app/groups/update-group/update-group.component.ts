@@ -1,4 +1,4 @@
-import {Component, OnInit} from '@angular/core';
+import {Component, OnInit, TemplateRef} from '@angular/core';
 import {GroupSharedService} from "../group-shared.service";
 import {Group} from "../../models/group.model";
 import {AbstractControl, FormBuilder, FormGroup, Validators} from "@angular/forms";
@@ -7,6 +7,9 @@ import {Observable} from "rxjs";
 import {map} from "rxjs/operators";
 import {Router} from "@angular/router";
 import { of } from 'rxjs';
+import {BsModalRef, BsModalService} from "ngx-bootstrap";
+import {School} from "../../models/school.model";
+import {SchoolDataService} from "../../schools/school-data.service";
 
 @Component({
   selector: 'app-update-group',
@@ -21,9 +24,18 @@ export class UpdateGroupComponent implements OnInit {
   private _groupForm: FormGroup;
   private _group: Group;
   private _schoolId;
+  memberToRemove = {name: "", group: null};
+  modalRef: BsModalRef; // modal that appears asking for confirmation to remove a member from a group.
+  modalMessage: string;
+  _groups: Group[];
+  groupMembers: String[];
+  returnedArray: Group[];
+  private _school: School;
 
   constructor(private _groupSharedService: GroupSharedService,
               private _groupDataService: GroupsDataService,
+              private _schoolDataService: SchoolDataService,
+              private modalService: BsModalService,
               private fb: FormBuilder,
               private router: Router) {
   }
@@ -33,7 +45,12 @@ export class UpdateGroupComponent implements OnInit {
       this.router.navigate(["groepen"]);
     else {
       this._schoolId = this._groupSharedService.schoolId;
+      this._schoolDataService.getSchool(this._schoolId).subscribe(value => {
+        /*Todo If teacher has multiple and different schools*/
+        this._school = value;
+      });
       this._group = this._groupSharedService.group;
+      this.groupMembers = this._group.members;
       this.prepareForm(this._group);
     }
   }
@@ -83,13 +100,85 @@ export class UpdateGroupComponent implements OnInit {
       "password": this._groupForm.value.groupPassword,
       "members": this._group.members //Todo check if max 5 members?
     };
+
     this._groupDataService.updateGroup(group).subscribe(value => {
-      this.router.navigate(["groepen"]);
+      this.router.navigate(["groepen/overzicht"]);
     });
   }
 
-  openModal(template, member: string) {
-    console.log("remove " + member);
+  openModal(template: TemplateRef<any>, groupId: number, memberName?: string) {
+    if (memberName) {
+      if (groupId != -1) {
+        //let group = this.findGroupWithId(groupId);
+        this.memberToRemove.group = this._group;
+        this.modalMessage = `Ben je zeker dat ${memberName} verwijderd mag worden uit ${this._group.name}?`;
+      } else { // delete member of not-yet-created group.
+        this.modalMessage = `Ben je zeker dat ${memberName} verwijderd mag worden uit de groep?`;
+      }
+      this.memberToRemove.name = memberName;
+    }
+    else { // deleting of a group.
+      //let group = this.findGroupWithId(groupId);
+      this.memberToRemove.group = this._group;
+      console.log(groupId);
+
+      this.modalMessage = `Ben je zeker dat de groep met groepsnaam ${this._group.name} verwijderd mag worden?`;
+
+    }
+    this.modalRef = this.modalService.show(template, {class: 'modal-sm'});
+  }
+
+  /*private findGroupWithId(groupId: number) {
+    let group = this._groups.find(g => g.id == groupId);
+    return group;
+  }*/
+
+  confirm(): void {
+    if (this.memberToRemove.name != "") {
+      if (this.memberToRemove.group != null) {
+        this.removeMemberFromAlreadyCreatedGroup(this.memberToRemove.group, this.memberToRemove.name);
+      }
+      const index = this.groupMembers.indexOf(this.memberToRemove.name, 0);
+      if (index > -1) {
+        this.groupMembers.splice(index, 1);
+      }
+    } else { // member to remove is from an already existing group.
+      this.removeGroup(this.memberToRemove.group);
+    }
+    this.memberToRemove.name = "";
+    this.memberToRemove.group = null;
+
+    this.modalRef.hide();
+  }
+
+
+  decline(): void {
+    this.memberToRemove.name = "";
+    this.memberToRemove.group = null;
+    this.modalRef.hide();
+  }
+
+  removeMemberFromAlreadyCreatedGroup(group, memberName) {
+    this._groupDataService.removeMember(group.id, memberName).subscribe(value => {
+      console.log(value);
+      const index = group.members.indexOf(memberName, 0);
+      if (index > -1) {
+        group.members.splice(index, 1);
+      }
+    });
+  }
+
+  removeGroup(group) {
+    this._groupDataService.removeGroup(group).subscribe(value => {
+      let index = this._groups.indexOf(group, 0);
+      if (index > -1) {
+        this._groups.splice(index, 1);
+      }
+      index = this.returnedArray.indexOf(group, 0);
+      if (index > -1) {
+        this.returnedArray.splice(index, 1);
+      }
+    });
   }
 
   get groupForm() {
@@ -98,5 +187,9 @@ export class UpdateGroupComponent implements OnInit {
 
   get group() {
     return this._group;
+  }
+
+  get school(): School {
+    return this._school;
   }
 }

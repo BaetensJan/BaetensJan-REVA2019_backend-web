@@ -59,7 +59,7 @@ export class CategoriesDataService {
    */
   updateCategorie(rec: Category): Observable<Category> {
     return this.http
-      .post(`${this._appUrl}/UpdateCategory/`, rec)
+      .put(`${this._appUrl}/UpdateCategory/${rec.id}`, rec)
       .pipe(map(Category.fromJSON));
   }
 }

@@ -25,6 +25,17 @@ namespace ApplicationCore.Services
                 PasswordHash = password
             };
         }
+        
+        public ApplicationUser UpdateApplicationUserObject(string email, string username, string password)
+        {
+            return new ApplicationUser
+            {
+                Email = email,
+                UserName = username,
+                SecurityStamp = Guid.NewGuid().ToString(),
+                PasswordHash = password
+            };
+        }
 
 //        public JwtSecurityToken GetToken(IEnumerable<Claim> claim)
 //        {

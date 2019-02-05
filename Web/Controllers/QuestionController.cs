@@ -57,7 +57,25 @@ namespace Web.Controllers
                 });
         }
 
-        [HttpPost("[Action]")]
+        [HttpPut("[action]/{id}")]
+        public async Task<ActionResult> EditQuestion([FromRoute] int id,[FromBody] QuestionUpdateDTO model)
+        {
+            var ce = await GetOrCreateCategoryExhibitor(model.CategoryId, model.ExhibitorId);
+            var q =  await _questionRepository.EditQuestion(id, model.QuestionText, model.AnswerText, ce);
+
+            if (q == null)
+            {
+                return Ok(
+                    new
+                    {
+                        Message = "Zorg dat questionId correct is."
+                    });
+            }
+            await _questionRepository.SaveChanges();
+            return Ok(q);
+        }
+        
+        /*[HttpPost("[Action]")]
         public async Task<ActionResult> EditQuestion([FromBody] QuestionUpdateDTO model)
         {
             var ce = await GetOrCreateCategoryExhibitor(model.CategoryId, model.ExhibitorId);
@@ -73,7 +91,7 @@ namespace Web.Controllers
             }
             await _questionRepository.SaveChanges();
             return Ok(q);
-        }
+        }*/
 
         public async Task<CategoryExhibitor> GetOrCreateCategoryExhibitor(int categoryId, int exhibitorId)
         {

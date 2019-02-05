@@ -9,6 +9,7 @@ using ApplicationCore.Entities;
 using ApplicationCore.Interfaces;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 using Web.DTOs;
@@ -38,33 +39,41 @@ namespace Web.Controllers
 
 
         /**
-        * return group status info
-         * Gets groupId via token -> groepId
+        * Returns group status/info to android (current assignment, number of assignments done by group,
+        * if group already has an assignment and the coordinates of the previous exhibitor if existing).
+        * Gets groupId via token -> groepId
         */
-        [HttpGet("[action]")] 
+        [HttpGet("[action]")]
         public async Task<IActionResult> GroupInfo( /*int groupId*/)
         {
             // get username from jwt token.
             var groupId = User.Claims.ElementAt(5).Value;
             var group = await _groupRepository.GetById(Convert.ToInt32(groupId));
+            if (group == null) return Ok(new {Message = "Group not found or groupId not in token."});
+            if (group.Assignments == null) group.Assignments = new List<Assignment>();
 
-            var numberOfAssignmentsDone = 0;
-            Assignment currentAssignment = null;
-            if (group.Assignments != null && group.Assignments.Count > 0)
+            var numberOfAssignments = group.Assignments.Count;
+            var hasNoAssignments = numberOfAssignments == 0;
+            var currentAssignment = group.Assignments.FirstOrDefault();
+
+            var previousExhibitorXCoordinate = 0.0;
+            var previousExhibitorYCoordinate = 0.0;
+            
+            if (group.Assignments.Count > 1)
             {
-                numberOfAssignmentsDone = group.Assignments.Count;
                 group.Assignments.Sort((ass1, ass2) => ass1.Id.CompareTo(ass2.Id));
                 currentAssignment = group.Assignments.Last();
-            }
 
-            var hasNoAssignments = numberOfAssignmentsDone == 0;
-            
+                previousExhibitorXCoordinate = group.Assignments[group.Assignments.Count - 2].Question.CategoryExhibitor.Exhibitor.X;
+                previousExhibitorYCoordinate = group.Assignments[group.Assignments.Count - 2].Question.CategoryExhibitor.Exhibitor.Y;
+            }
             return Ok(new
             {
                 hasNoAssignments,
-                numberOfAssignmentsDone,
+                numberOfAssignments,
                 currentAssignment, // last assignment
-                isSubmittedAssignment = !hasNoAssignments && currentAssignment.Submitted 
+                previousExhibitorXCoordinate,
+                previousExhibitorYCoordinate
             });
         }
 
@@ -95,7 +104,7 @@ namespace Web.Controllers
             });
         }
 
-        
+
         /**
          * Returns group with schoolId equal to parameter schoolId and groupName equal to parameter.
          * If parameter schoolId is -1, then the schoolId can be extracted out of the token via User.claims.
@@ -110,9 +119,11 @@ namespace Web.Controllers
                     Message = "School not found"
                 });
             var group = school.Groups.SingleOrDefault(g => g.Name == groupName);
-            return group == null ? Ok(new {Message = "Group not found in school with school name: " + school.Name}) : Ok(group);
+            return group == null
+                ? Ok(new {Message = "Group not found in school with school name: " + school.Name})
+                : Ok(group);
         }
-        
+
         /**
          * Checks if the groupName already exists.
          */
@@ -203,7 +214,7 @@ namespace Web.Controllers
             await _groupRepository.SaveChanges();
             return group;
         }
-
+        
         private async Task<ApplicationUser> CreateGroupUser(School school, string username, string password)
         {
             // Creation of ApplicationUser
@@ -248,39 +259,52 @@ namespace Web.Controllers
                 signingCredentials: new SigningCredentials(signInKey, SecurityAlgorithms.HmacSha256));
         }
 
-        [HttpPost("UpdateGroup")]
-        public async Task<ActionResult> UpdateGroup([FromBody] GroupUpdateDTO model)
+        [HttpPut("[action]/{id}")]
+        public async Task<ActionResult> UpdateGroup([FromRoute] int id,[FromBody] GroupUpdateDTO model)
         {
             if (ModelState.IsValid)
             {
-                var groupApplicationUser = _userManager.Users.SingleOrDefault(u => u.UserName == model.Name);
+                string schname = "";
+                IEnumerable<School> school = _userManager.Users.Where(t => t.School.Groups.Any(i => i.Id == id))
+                    .Select(s => s.School);
+                foreach (var var in school)
+                {
+                    schname = var.Name;
+                }
+                IEnumerable<ApplicationUser> users =
+                    _userManager.Users;
 
-                //check if group exists 
-                if (groupApplicationUser == null)
-                    return Ok(
-                        new
-                        {
-                            Message = "Groep niet teruggevonden."
-                        });
+                Task<Group> groups = _groupRepository.GetById(id);
+                string hashpassword = "";
+                
+                //String schoolnaam = sch.Name;
+                //String schoolUsername = sch.Name + model.Name;
+                String beforeChangeSchoolName = schname+groups.Result.Name;
 
-                var group = await _groupRepository.GetById(model.GroupId);
+                ApplicationUser user = users.SingleOrDefault(t => t.UserName == beforeChangeSchoolName);
+                if (!string.IsNullOrWhiteSpace(model.Password))
+                {
+                    hashpassword = _userManager.PasswordHasher.HashPassword(user, model.Password);
+
+                }
+                var group = await _groupRepository.GetById(id);
 
                 // name was updated.
                 if (!group.Name.ToLower().Equals(model.Name.ToLower()))
                 {
-                    groupApplicationUser.UserName = model.Name;
-                    group.Name = model.Name;
+                    //groupApplicationUser.UserName = model.Name;
+                    user.UserName = schname+model.Name;
                 }
 
-                // password was updated.
-                if (!string.IsNullOrWhiteSpace(model.Password))
-                {
-                    groupApplicationUser.PasswordHash = model.Password;
-                }
 
+                //updaten password
+
+                //Console.WriteLine(hashpassword);
                 if (model.Members != null && model.Members.Count > 0)
                     group.Members = model.Members;
-
+                group.Name = model.Name;
+                user.PasswordHash = hashpassword;
+                _groupRepository.Update(group);
                 await _groupRepository.SaveChanges();
 
                 return Ok(group);

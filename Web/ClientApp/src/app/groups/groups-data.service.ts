@@ -82,14 +82,21 @@ export class GroupsDataService {
       .pipe(map(Group.fromJSON));
   }
 
+  updateUser(schoolId, group): Observable<Group> {
+    return this.http
+      .put(`${this._appUrl}/UpdateUser/${schoolId}`, group)
+      .pipe(map(Group.fromJSON));
+  }
+
   /**
    * Makes call to the backend and updates Group
    *
    * @param group
    */
   updateGroup(group): Observable<Group> {
+    console.log(group);
     return this.http
-      .post(`${this._appUrl}/updateGroup/`, group)
+      .put(`${this._appUrl}/UpdateGroup/${group.groupId}`, group)
       .pipe(map(Group.fromJSON));
   }
 
