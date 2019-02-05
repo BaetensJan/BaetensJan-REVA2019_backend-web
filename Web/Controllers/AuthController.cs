@@ -24,15 +24,18 @@ namespace Web.Controllers
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly IConfiguration _configuration;
         private readonly ISchoolRepository _schoolRepository;
+        private readonly ITeacherRequestRepository _teacherRequestRepository;
         private readonly IAuthenticationManager _authenticationManager;
         private readonly IEmailSender _emailSender;
 
         public AuthController(UserManager<ApplicationUser> userManager, IConfiguration configuration,
-            ISchoolRepository schoolRepository, IAuthenticationManager authenticationManager, IEmailSender emailSender)
+            ISchoolRepository schoolRepository, ITeacherRequestRepository teacherRequestRepository,
+            IAuthenticationManager authenticationManager, IEmailSender emailSender)
         {
             _userManager = userManager;
             _configuration = configuration;
             _schoolRepository = schoolRepository;
+            _teacherRequestRepository = teacherRequestRepository;
             _authenticationManager = authenticationManager;
             _emailSender = emailSender;
         }
@@ -84,11 +87,10 @@ namespace Web.Controllers
         * Create an ApplicationUser with Role Teacher.
         * Parameter = model: CreateTeacherViewModel
         */
-        [HttpPost("[Action]")]
-        public async Task<ActionResult> CreateTeacher([FromBody] CreateTeacherDTO model)
+        [HttpPost("[Action]/{teacherRequestId}")]
+        public async Task<ActionResult> CreateTeacher(int teacherRequestId)
         {
-            if (ModelState.IsValid)
-            {
+            var model = await _teacherRequestRepository.GetById(teacherRequestId);
                 // creating the school
                 var school = new School(model.SchoolName, GetRandomString(6));
                 await _schoolRepository.Add(school);
@@ -148,13 +150,11 @@ namespace Web.Controllers
 //                            expiration = token.ValidTo
                         });
                 }
-            }
 
-            return Ok(
-                new
-                {
-                    Message = "Error please make sure your details are correct"
-                });
+            return Ok(new
+            {
+                Message = "Error when creating Teacher."
+            });
         }
 
 

@@ -18,6 +18,11 @@
             <span class='glyphicon glyphicon-home'></span> Home
           </a>
         </li>
+        <li [routerLinkActive]='["link-active"]'>
+          <a [routerLink]='["invite-request"]' (click)='collapse()'>
+            <span class='glyphicon glyphicon-plus'></span> Aanvraag indienen
+          </a>
+        </li>
         <li [routerLinkActive]='["link-active"]' *ngIf='(user | async)'>
           <a [routerLink]='["/groepen/overzicht"]' (click)='collapse()'>
             <span class='glyphicon glyphicon-user'></span> Groepen
@@ -61,8 +66,8 @@
           <ng-container class='clearfix' style="margin-bottom: 1.5em;"></ng-container>
 
           <li [routerLinkActive]='["link-active"]'>
-            <a [routerLink]='["invite"]' (click)='collapse()'>
-              <span class='glyphicon glyphicon-plus'></span> Leerkracht aanmaken
+            <a [routerLink]='["requests"]' (click)='collapse()'>
+              <span class='glyphicon glyphicon-plus'></span> Aanvragen
             </a>
           </li>
         </ng-container>

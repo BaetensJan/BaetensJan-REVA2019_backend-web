@@ -14,7 +14,7 @@ import {QuestionsComponent} from "../questions/questions.component";
 import {QuestionComponent} from "../questions/question/question.component";
 import {RouteMapComponent} from "../route-map/route-map.component";
 import {InviteRequestComponent} from "../user/invitation/invite-request/invite-request.component";
-import {InviteComponent} from "../user/invitation/create-teacher/invite.component";
+import {RequestsComponent} from "../user/invitation/pending-requests/requests.component";
 
 const appRoutes: Routes = [
   {path: 'home', component: HomeComponent},
@@ -35,7 +35,7 @@ const appRoutes: Routes = [
   {path: 'question', canActivate: [AuthGuardService], component: QuestionComponent},
   {path: 'routeMap', canActivate: [AuthGuardService], component: RouteMapComponent},
   {path: 'invite-request', component: InviteRequestComponent},
-  {path: 'invite', canActivate: [AuthGuardService], component: InviteComponent},
+  {path: 'requests', canActivate: [AuthGuardService], component: RequestsComponent},
   {path: '', redirectTo: 'home', pathMatch: 'full'},
   {path: '**', component: PageNotFoundComponent}
 ];

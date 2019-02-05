@@ -1,0 +1,6 @@
+<div *ngIf="requests; else message">
+  <p *ngFor="let request of requests">{{request.name}}</p>
+</div>
+<ng-template #message>
+  <p>Er zijn momenteel geen aanvragen.</p>
+</ng-template>

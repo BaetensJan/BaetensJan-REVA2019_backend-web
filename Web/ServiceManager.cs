@@ -96,6 +96,7 @@ namespace Web
             _services.AddScoped<ISchoolRepository, SchoolRepository>();
             _services.AddScoped<IAuthenticationManager, AuthenticationManager>();
             _services.AddScoped<IEmailSender, EmailSender>();
+            _services.AddScoped<ITeacherRequestRepository, TeacherRequestRepository>();
         }
     }
 }
