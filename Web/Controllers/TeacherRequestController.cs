@@ -48,6 +48,7 @@ namespace Web.Controllers
             {
                 var request = new TeacherRequest(model.Name, model.Surname, model.Email, model.SchoolName, model.Note);
                 await _teacherRequestRepository.Add(request);
+                await _teacherRequestRepository.SaveChanges();
                 
                 return Ok(new
                 {
