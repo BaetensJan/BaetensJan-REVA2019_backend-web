@@ -58,18 +58,25 @@ export class RequestsComponent implements OnInit {
   modalAccepted() {
     if (this.accept) {
       this._invitationService.createTeacher(this.clickedItem.id).subscribe(request => {
-        let index = this.requests.indexOf(this.requests.find((c) => c.id === this.clickedItem.id));
-        this.requests.splice(index, 1);
+        this.removeRequest();
       });
     } else {
-      this._invitationService.deleteTeacher(this.clickedItem.id).subscribe(categorie => {
-        let index = this.requests.indexOf(this.requests.find((c) => c.id === this.clickedItem.id));
-        this.requests.splice(index, 1);
+      this._invitationService.deleteTeacher(this.clickedItem.id).subscribe(request => {
+        this.removeRequest();
       });
     }
-    this.clickedItem = null;
     this.refModal.hide();
-    // window.location.reload();
+  }
+
+  /**
+   * Removes a request from the requests attribute (NOT DB)
+   */
+  private removeRequest(): void {
+    console.log(this.requests);
+    let index = this.requests.indexOf(this.requests.find((request: TeacherRequest) => request.id === this.clickedItem.id));
+    this.requests.splice(index, 1);
+    console.log(this.requests);
+    this.clickedItem = null;
   }
 
   get requests(): TeacherRequest[] {

@@ -62,7 +62,7 @@ export class InviteRequestComponent implements OnInit {
       schoolName: [
         '',
         [Validators.required,
-          Validators.minLength(5),
+          Validators.minLength(1),
           this.schoolNamePatternValidator()],
         this.serverSideValidateSchoolName()
       ],
@@ -82,7 +82,6 @@ export class InviteRequestComponent implements OnInit {
         /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/);
       //"^[^\s@]+@[^\s@]+\.[^\s@]{2,}$");
       let correctInput = regexp.test(email);
-      console.log(correctInput);
       return correctInput ? null : { wrongInput: true };
     };
   }
@@ -141,7 +140,6 @@ export class InviteRequestComponent implements OnInit {
           if (val) {
             this.router.navigate(['/']);
           }
-          console.log(val);
         },
         (error: HttpErrorResponse) => {
           this.errorMsg = `Er is iets fout gegaan bij de verwerking van uw aanvraag. Gelieve het later opnieuw te proberen.`;

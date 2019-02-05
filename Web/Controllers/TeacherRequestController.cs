@@ -61,7 +61,7 @@ namespace Web.Controllers
         * Admin declines Teacher Requast.
         *
         **/
-        [HttpPost("[Action]/{teacherRequestId}")]
+        [HttpGet("[Action]/{teacherRequestId}")]
         public async Task<ActionResult> DeclineRequest(int teacherRequestId)
         {
             var request = await _teacherRequestRepository.GetById(teacherRequestId);
