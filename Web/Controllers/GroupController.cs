@@ -67,7 +67,6 @@ namespace Web.Controllers
                 previousExhibitorXCoordinate = group.Assignments[group.Assignments.Count - 2].Question.CategoryExhibitor.Exhibitor.X;
                 previousExhibitorYCoordinate = group.Assignments[group.Assignments.Count - 2].Question.CategoryExhibitor.Exhibitor.Y;
             }
-
             return Ok(new
             {
                 hasNoAssignments,

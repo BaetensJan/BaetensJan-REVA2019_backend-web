@@ -42,7 +42,7 @@ namespace Web
                 options =>
                     //options.UseSqlite(_configuration.GetConnectionString("DefaultConnectionSqLite"),
                     options.UseSqlServer(_configuration.GetConnectionString("DefaultConnection"),
-                    //options.UseSqlServer(_configuration.GetConnectionString("DefaultConnectionPublish"),
+                        //options.UseSqlServer(_configuration.GetConnectionString("DefaultConnectionPublish"),
                         b => b.MigrationsAssembly("Web")));
         }
 
@@ -74,8 +74,8 @@ namespace Web
                 {
                     ValidateIssuer = true,
                     ValidateAudience = true,
-                    ValidAudience = "http://xyz.com",
-                    ValidIssuer = "http://xyz.com",
+                    ValidAudience = "http://app.reva.be",
+                    ValidIssuer = "http://app.reva.be",
                     IssuerSigningKey =
                         new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["AppSettings:Secret"]))
                 };
@@ -84,7 +84,7 @@ namespace Web
 
         public void AddScopes()
         {
-            _services.AddSingleton<IConfiguration>(_configuration);
+            _services.AddSingleton(_configuration);
             _services.AddScoped<ICategoryRepository, CategoryRepository>();
             _services.AddScoped<IGroupRepository, GroupRepository>();
             _services.AddScoped<IExhibitorRepository, ExhibitorRepository>();
@@ -95,6 +95,8 @@ namespace Web
             _services.AddScoped<IQuestionRepository, QuestionRepository>();
             _services.AddScoped<ISchoolRepository, SchoolRepository>();
             _services.AddScoped<IAuthenticationManager, AuthenticationManager>();
+            _services.AddScoped<IEmailSender, EmailSender>();
+            _services.AddScoped<ITeacherRequestRepository, TeacherRequestRepository>();
         }
     }
 }

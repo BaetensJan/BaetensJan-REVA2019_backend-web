@@ -14,6 +14,7 @@ namespace Infrastructure
         public DbSet<CategoryExhibitor> CategoryExhibitors { get; set; }
         public DbSet<Question> Questions { get; set; }
         public DbSet<School> Schools { get; set; }
+        public DbSet<TeacherRequest> TeacherRequests { get; set; }
 
         public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options)
         {
@@ -29,6 +30,7 @@ namespace Infrastructure
             builder.ApplyConfiguration(new CategoryExhibitorConfiguration());
             builder.ApplyConfiguration(new QuestionConfiguration());
             builder.ApplyConfiguration(new SchoolConfiguration());
+            builder.ApplyConfiguration(new TeacherRequestConfiguration());
         }
     }
 }

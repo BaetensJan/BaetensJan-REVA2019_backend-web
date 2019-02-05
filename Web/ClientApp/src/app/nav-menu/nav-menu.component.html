@@ -18,6 +18,11 @@
             <span class='glyphicon glyphicon-home'></span> Home
           </a>
         </li>
+        <li [routerLinkActive]='["link-active"]'>
+          <a [routerLink]='["invite-request"]' (click)='collapse()'>
+            <span class='glyphicon glyphicon-plus'></span> Aanvraag indienen
+          </a>
+        </li>
         <li [routerLinkActive]='["link-active"]' *ngIf='(user | async)'>
           <a [routerLink]='["/groepen/overzicht"]' (click)='collapse()'>
             <span class='glyphicon glyphicon-user'></span> Groepen
@@ -33,28 +38,39 @@
             <span class='glyphicon glyphicon-info-sign'></span> Informatie App
           </a>
         </li>
-        <div class='clearfix' *ngIf='(isAdmin | async)' style="margin-bottom: 2.5em;"></div>
 
-        <li [routerLinkActive]='["link-active"]' *ngIf='(isAdmin | async)'>
-          <a [routerLink]='["categorieen"]' (click)='collapse()'>
-            <span class='glyphicon glyphicon-info-sign'></span> Categorieën
-          </a>
-        </li>
-        <li [routerLinkActive]='["link-active"]' *ngIf='(isAdmin | async)'>
-          <a [routerLink]='["exposanten"]' (click)='collapse()'>
-            <span class='glyphicon glyphicon-th-list'></span> Exposanten
-          </a>
-        </li>
-        <li [routerLinkActive]='["link-active"]' *ngIf='(isAdmin | async)'>
-          <a [routerLink]='["routeMap"]' (click)='collapse()'>
-            <span class='glyphicon glyphicon-picture'></span> Beursplan
-          </a>
-        </li>
-        <li [routerLinkActive]='["link-active"]' *ngIf='(isAdmin | async)'>
-          <a [routerLink]='["questions"]' (click)='collapse()'>
-            <span class='glyphicon glyphicon-th-list'></span> Vragen
-          </a>
-        </li>
+        <ng-container *ngIf='(isAdmin | async)'>
+          <div class='clearfix' style="margin-bottom: 2.5em;"></div>
+
+          <li [routerLinkActive]='["link-active"]'>
+            <a [routerLink]='["categorieen"]' (click)='collapse()'>
+              <span class='glyphicon glyphicon-th-list'></span> Categorieën
+            </a>
+          </li>
+          <li [routerLinkActive]='["link-active"]'>
+            <a [routerLink]='["exposanten"]' (click)='collapse()'>
+              <span class='glyphicon glyphicon-th-list'></span> Exposanten
+            </a>
+          </li>
+          <li [routerLinkActive]='["link-active"]'>
+            <a [routerLink]='["routeMap"]' (click)='collapse()'>
+              <span class='glyphicon glyphicon-picture'></span> Beursplan
+            </a>
+          </li>
+          <li [routerLinkActive]='["link-active"]'>
+            <a [routerLink]='["questions"]' (click)='collapse()'>
+              <span class='glyphicon glyphicon-th-list'></span> Vragen
+            </a>
+          </li>
+
+          <ng-container class='clearfix' style="margin-bottom: 1.5em;"></ng-container>
+
+          <li [routerLinkActive]='["link-active"]'>
+            <a [routerLink]='["requests"]' (click)='collapse()'>
+              <span class='glyphicon glyphicon-plus'></span> Aanvragen
+            </a>
+          </li>
+        </ng-container>
 
         <div class='clearfix' style="margin-bottom: 1.5em;"></div>
 

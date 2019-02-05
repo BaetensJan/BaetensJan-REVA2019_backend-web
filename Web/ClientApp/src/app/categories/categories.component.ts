@@ -1,10 +1,9 @@
-import {Component, ElementRef, TemplateRef, ViewChild} from '@angular/core';
+import {Component, TemplateRef} from '@angular/core';
 import {CategoriesDataService} from "./categories-data.service";
 import {Category} from "../models/category.model";
 import {BsModalRef, BsModalService} from "ngx-bootstrap";
 import {Router} from "@angular/router";
 import {CategoryShareService} from "../category/category-share.service";
-import {Exhibitor} from "../models/exhibitor.model";
 
 @Component({
   selector: 'app-categories',
@@ -100,6 +99,6 @@ export class CategoriesComponent {
       let index = this.data.indexOf(this.data.find((c) => c.id === categorie.id));
       this.data.splice(index, 1);
     });
-    window.location.reload();
+    // window.location.reload();
   }
 }

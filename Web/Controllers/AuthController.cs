@@ -24,15 +24,32 @@ namespace Web.Controllers
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly IConfiguration _configuration;
         private readonly ISchoolRepository _schoolRepository;
+        private readonly ITeacherRequestRepository _teacherRequestRepository;
         private readonly IAuthenticationManager _authenticationManager;
+        private readonly IEmailSender _emailSender;
 
         public AuthController(UserManager<ApplicationUser> userManager, IConfiguration configuration,
-            ISchoolRepository schoolRepository, IAuthenticationManager authenticationManager)
+            ISchoolRepository schoolRepository, ITeacherRequestRepository teacherRequestRepository,
+            IAuthenticationManager authenticationManager, IEmailSender emailSender)
         {
             _userManager = userManager;
             _configuration = configuration;
             _schoolRepository = schoolRepository;
+            _teacherRequestRepository = teacherRequestRepository;
             _authenticationManager = authenticationManager;
+            _emailSender = emailSender;
+        }
+
+        [HttpGet("[Action]")]
+        public async Task<IActionResult> TestMail()
+        {
+            await _emailSender.SendMailAsync("baetens-jan@vivaldi.net",
+                "Amazon SES test (SMTP interface accessed using C#)",
+                "<h1>Amazon SES Test</h1>" +
+                "<p>This email was sent through the " +
+                "<a href='https://aws.amazon.com/ses'>Amazon SES</a> SMTP interface " +
+                "using the .NET System.Net.Mail library.</p>");
+            return Ok("OK");
         }
 
         /**
@@ -66,61 +83,81 @@ namespace Web.Controllers
         }
 
         /**
-         * Used when a teacher wants to register in the web platform.
+        * Used when a teacher wants to register in the web platform.
         * Create an ApplicationUser with Role Teacher.
         * Parameter = model: CreateTeacherViewModel
         */
-        [HttpPost("[Action]")]
-        public async Task<ActionResult> CreateTeacher([FromBody] CreateTeacherDTO model)
+        [HttpGet("[Action]/{teacherRequestId}")]
+        public async Task<ActionResult> CreateTeacher(int teacherRequestId)
         {
-            if (ModelState.IsValid)
+            var model = await _teacherRequestRepository.GetById(teacherRequestId);
+            // creating the school
+            var school = new School(model.SchoolName, GetRandomString(6));
+            await _schoolRepository.Add(school);
+            await _schoolRepository.SaveChanges();
+
+            var password = GetRandomString(6);
+
+            // creating teacher consisting of his school
+            var user = _authenticationManager.CreateApplicationUserObject(model.Email, model.Email,
+                password);
+            user.School = await _schoolRepository.GetByName(model.SchoolName);
+            var result = await _userManager.CreateAsync(user, password);
+
+            if (result.Succeeded)
             {
-                // creating the school
-                var school = new School(model.SchoolName, GetRandomString(6));
-                await _schoolRepository.Add(school);
-                await _schoolRepository.SaveChanges(); //Todo this is unnecessary?
-
-                // creating teacher consisting of his school
-                var user = _authenticationManager.CreateApplicationUserObject(model.Email, model.Username,
-                    model.Password);
-                user.School = await _schoolRepository.GetByName(model.SchoolName);
-                var result = await _userManager.CreateAsync(user, model.Password);
-
-                if (result.Succeeded)
-                {
-                    user = _userManager.Users.SingleOrDefault(u => u.Id == user.Id);
-                    if (user.School == null)
-                        return Ok(
-                            new
-                            {
-                                Message = "Something went wrong when creating your account."
-                            });
-                    await _userManager.AddToRoleAsync(user, "Teacher");
-
-
-                    var claim = await CreateClaims(user);
-                    //Todo kunnen van CreateClaims in List werken idpv array zodat men niet hoeft de array naar list om te zetten
-                    // en in addschoolclaim hoeft men dan geen returnwaarde te geven (want het Adden vd claim is op reference van de lijst)
-                    claim = _authenticationManager.AddClaim(claim.ToList(), "school", school.Id.ToString()).ToArray();
-
-                    var token = GetToken(claim);
-
+                user = _userManager.Users.SingleOrDefault(u => u.Id == user.Id);
+                if (user.School == null)
                     return Ok(
                         new
                         {
+                            Message = "Something went wrong when creating your account."
+                        });
+                await _userManager.AddToRoleAsync(user, "Teacher");
+                //todo change email once out of sandbox (amazon)
+                await _emailSender.SendMailAsync(model.Email,
+                    "Uw Account voor de REVA app is hier!",
+                    $@"
+                        <h1>Uw Reva app account werd aangemaakt!</h1>
+                        <p>
+                        Uw login gegevens:
+                        </p>
+                        <p>
+                        Gebruikersnaam: {model.Email}
+                        </p>
+                        <p>
+                        Wachtwoord: {password}
+                        </p>
+                        <br>
+                        <b>
+                        Verander uw wachtwoord na inloggen!
+                        </b>
+                        <br>
+                        <br>
+                        <br>
+                        <footer>
+                        <p>Deze email werd automatisch verzonden! Reageer niet op dit bericht.</p>
+                        <p>Contacteer freddy@reva.be bij problemen.</p>
+                        </footer>");
+
+                _teacherRequestRepository.Remove(model);
+                await _teacherRequestRepository.SaveChanges();
+
+                return Ok(
+                    new
+                    {
+                        Message = "Teacher successfully created."
 //                            Username = user.UserName,
 //                            Token = GetToken(claim)
-                            token = new JwtSecurityTokenHandler().WriteToken(token),
-                            expiration = token.ValidTo
-                        });
-                }
+//                            token = new JwtSecurityTokenHandler().WriteToken(token),
+//                            expiration = token.ValidTo
+                    });
             }
 
-            return Ok(
-                new
-                {
-                    Message = "Error please make sure your details are correct"
-                });
+            return Ok(new
+            {
+                Message = "Error when creating Teacher."
+            });
         }
 
 
@@ -131,7 +168,7 @@ namespace Web.Controllers
         private async Task<Claim[]> CreateClaims(ApplicationUser user)
         {
             var isAdmin = await _userManager.IsInRoleAsync(user, "Admin");
-            return new[]
+            var claims = new List<Claim>()
             {
                 new Claim(JwtRegisteredClaimNames.Sub, user.Email),
                 new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
@@ -139,6 +176,9 @@ namespace Web.Controllers
                 new Claim("username", user.UserName),
                 new Claim("isAdmin", isAdmin.ToString()),
             };
+            claims.AddRange((await _userManager.GetRolesAsync(user)).Select(role => new Claim(ClaimTypes.Role, role)));
+
+            return claims.ToArray();
         }
 
         /**
@@ -292,6 +332,26 @@ namespace Web.Controllers
             return exists ? Ok(new {Username = "alreadyexists"}) : Ok(new {Username = "ok"});
         }
 
+        [Route("[action]/{email}")]
+        [HttpGet]
+        public async Task<IActionResult> CheckEmail(string email)
+        {
+            var exists = await _userManager.FindByEmailAsync(email) != null;
+            if (!exists)
+                exists = await _teacherRequestRepository.GetByEmail(email) != null;
+            return exists ? Ok(new {Email = "alreadyexists"}) : Ok(new {Email = "ok"});
+        }
+
+        [Route("[action]/{school}")]
+        [HttpGet]
+        public async Task<IActionResult> CheckSchool(string school)
+        {
+            var exists = await _schoolRepository.GetByName(school) != null;
+            if (!exists)
+                exists = await _teacherRequestRepository.GetBySchool(school) != null;
+            return exists ? Ok(new {School = "alreadyexists"}) : Ok(new {School = "ok"});
+        }
+
         //Todo: dit moet in de AuthenticationManager (wordt ook door groupController gebruikt)
         /**
          * Create Jwt Token via a specific IEnumerable of claims.
@@ -303,8 +363,8 @@ namespace Web.Controllers
                 Encoding.UTF8.GetBytes(_configuration["AppSettings:Secret"]));
 
             return new JwtSecurityToken(
-                issuer: "http://xyz.com",
-                audience: "http://xyz.com",
+                issuer: "http://app.reva.be",
+                audience: "http://app.reva.be",
                 claims: claim,
                 expires: DateTime.UtcNow.AddHours(1),
                 signingCredentials: new SigningCredentials(signInKey, SecurityAlgorithms.HmacSha256));

@@ -13,6 +13,8 @@ import {ExhibitorComponent} from "../exhibitor/exhibitor.component";
 import {QuestionsComponent} from "../questions/questions.component";
 import {QuestionComponent} from "../questions/question/question.component";
 import {RouteMapComponent} from "../route-map/route-map.component";
+import {RequestsComponent} from "../user/invitation/pending-requests/requests.component";
+import {InviteRequestComponent} from "../user/invitation/send-request/invite-request.component";
 
 const appRoutes: Routes = [
   {path: 'home', component: HomeComponent},
@@ -32,6 +34,8 @@ const appRoutes: Routes = [
   {path: 'questions', canActivate: [AuthGuardService], component: QuestionsComponent},
   {path: 'question', canActivate: [AuthGuardService], component: QuestionComponent},
   {path: 'routeMap', canActivate: [AuthGuardService], component: RouteMapComponent},
+  {path: 'invite-request', component: InviteRequestComponent},
+  {path: 'requests', canActivate: [AuthGuardService], component: RequestsComponent},
   {path: '', redirectTo: 'home', pathMatch: 'full'},
   {path: '**', component: PageNotFoundComponent}
 ];

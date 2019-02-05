@@ -9,6 +9,9 @@ import {RegisterComponent} from './register/register.component';
 import {httpInterceptorProviders} from '../http-interceptors';
 import {AuthGuardService} from "./auth-guard.service";
 import {LogoutComponent} from "./logout/logout.component";
+import {InvitationService} from "./invitation/invitation.service";
+import {RequestsComponent} from "./invitation/pending-requests/requests.component";
+import {InviteRequestComponent} from "./invitation/send-request/invite-request.component";
 
 /**
  * Routing for user login and registration
@@ -26,9 +29,10 @@ const routes = [
     ReactiveFormsModule,
     RouterModule.forChild(routes)
   ],
-  declarations: [LoginComponent, LogoutComponent, RegisterComponent],
+  declarations: [LoginComponent, LogoutComponent, RegisterComponent, InviteRequestComponent, RequestsComponent],
   providers: [
     httpInterceptorProviders,
+    InvitationService,
     AuthenticationService,
     AuthGuardService
   ],

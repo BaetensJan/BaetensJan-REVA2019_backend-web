@@ -128,7 +128,6 @@ export class ExhibitorsComponent implements OnInit {
       index = this._contentArray.indexOf(this._contentArray.find((c) => c.id === exhibitor.id));
       this._contentArray.splice(index, 1);
     });
-    window.location.reload();
   }
 
   openModal(template: TemplateRef<any>, exhibitor: Exhibitor) {
