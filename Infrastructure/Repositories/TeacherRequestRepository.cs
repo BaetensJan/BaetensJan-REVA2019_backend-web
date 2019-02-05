@@ -1,5 +1,4 @@
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 using ApplicationCore.Entities;
 using ApplicationCore.Interfaces;
@@ -26,6 +25,18 @@ namespace Infrastructure.Repositories
         public Task<TeacherRequest> GetById(int id)
         {
             var teacherRequest = _teacherRequests.SingleOrDefaultAsync(c => c.Id == id);
+            return teacherRequest;
+        }
+
+        public Task<TeacherRequest> GetByEmail(string email)
+        {
+            var teacherRequest = _teacherRequests.SingleOrDefaultAsync(c => c.Email == email);
+            return teacherRequest;
+        }
+
+        public Task<TeacherRequest> GetBySchool(string school)
+        {
+            var teacherRequest = _teacherRequests.SingleOrDefaultAsync(c => c.SchoolName == school);
             return teacherRequest;
         }
 

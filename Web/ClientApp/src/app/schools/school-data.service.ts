@@ -39,9 +39,9 @@ export class SchoolDataService {
    * @param schoolName
    */
   checkSchoolNameAvailability(schoolName: string): Observable<boolean> {
-    return this.http.get(`${this._appUrl}/CheckSchoolName/${schoolName}`).pipe(
+    return this.http.get(`/API/Auth/CheckSchool/${schoolName}`).pipe(
       map((item: any) => {
-        if (item.schoolName === 'alreadyexists') {
+        if (item.school === 'alreadyexists') {
           return false;
         } else {
           return true;

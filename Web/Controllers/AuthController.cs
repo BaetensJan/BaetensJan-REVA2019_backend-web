@@ -139,10 +139,10 @@ namespace Web.Controllers
                         <p>Deze email werd automatisch verzonden! Reageer niet op dit bericht.</p>
                         <p>Contacteer freddy@reva.be bij problemen.</p>
                         </footer>");
-                
+
                 _teacherRequestRepository.Remove(model);
                 await _teacherRequestRepository.SaveChanges();
-                
+
                 return Ok(
                     new
                     {
@@ -340,6 +340,26 @@ namespace Web.Controllers
         {
             var exists = await _userManager.FindByNameAsync(username) != null;
             return exists ? Ok(new {Username = "alreadyexists"}) : Ok(new {Username = "ok"});
+        }
+
+        [Route("[action]/{email}")]
+        [HttpGet]
+        public async Task<IActionResult> CheckEmail(string email)
+        {
+            var exists = await _userManager.FindByEmailAsync(email) != null;
+            if (!exists)
+                exists = await _teacherRequestRepository.GetByEmail(email) != null;
+            return exists ? Ok(new {Email = "alreadyexists"}) : Ok(new {Email = "ok"});
+        }
+
+        [Route("[action]/{school}")]
+        [HttpGet]
+        public async Task<IActionResult> CheckSchool(string school)
+        {
+            var exists = await _schoolRepository.GetByName(school) != null;
+            if (!exists)
+                exists = await _teacherRequestRepository.GetBySchool(school) != null;
+            return exists ? Ok(new {School = "alreadyexists"}) : Ok(new {School = "ok"});
         }
 
         //Todo: dit moet in de AuthenticationManager (wordt ook door groupController gebruikt)

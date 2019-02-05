@@ -28,25 +28,19 @@ export class AuthenticationService {
   /**
    * @ignore
    */
+  public redirectUrl: string;
+  /**
+   * @ignore
+   */
   private readonly _tokenKey = 'currentUser';
   /**
    * @ignore
    */
   private readonly _url = '/api/auth';
   /**
-   * @ignore
-   */
-  private _user$: BehaviorSubject<string>;
-
-  /**
    * Checks if logged in user is an administrator.
    */
   private _isAdmin$: BehaviorSubject<boolean>;
-
-  /**
-   * @ignore
-   */
-  public redirectUrl: string;
 
   /**
    * Constructor
@@ -72,6 +66,11 @@ export class AuthenticationService {
 
     this._isAdmin$ = new BehaviorSubject<boolean>(parsedToken && JSON.parse(parsedToken.isAdmin.toLowerCase()));
   }
+
+  /**
+   * @ignore
+   */
+  private _user$: BehaviorSubject<string>;
 
   /**
    * Getter for user
@@ -112,8 +111,7 @@ export class AuthenticationService {
             return true;
           }
           return false; // checkUserRole failed => user is a group
-        }
-        else return false;
+        } else return false;
       })
     )
   }
@@ -137,19 +135,6 @@ export class AuthenticationService {
         return false;
       })
     );
-  }
-
-  private setTokenAndUsername(token, username) {
-    localStorage.setItem(this._tokenKey, token);
-    this._user$.next(username);
-  }
-
-  private checkUserRole(parsedToken): boolean {
-    // check if user is administrator.
-    this._isAdmin$ = new BehaviorSubject<boolean>(JSON.parse(parsedToken.isAdmin.toLowerCase()));
-
-    // check if user is a group. Groups have no access to web.
-    return !(parsedToken && parsedToken.group);
   }
 
   /**
@@ -180,5 +165,30 @@ export class AuthenticationService {
         }
       })
     );
+  }
+
+  checkEmailAvailability(email: string): Observable<boolean> {
+    return this.http.get(`${this._url}/CheckEmail/${email}`).pipe(
+      map((item: any) => {
+        if (item.email === 'alreadyexists') {
+          return false;
+        } else {
+          return true;
+        }
+      })
+    );
+  }
+
+  private setTokenAndUsername(token, username) {
+    localStorage.setItem(this._tokenKey, token);
+    this._user$.next(username);
+  }
+
+  private checkUserRole(parsedToken): boolean {
+    // check if user is administrator.
+    this._isAdmin$ = new BehaviorSubject<boolean>(JSON.parse(parsedToken.isAdmin.toLowerCase()));
+
+    // check if user is a group. Groups have no access to web.
+    return !(parsedToken && parsedToken.group);
   }
 }

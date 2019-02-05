@@ -67,9 +67,11 @@ export class InviteRequestComponent implements OnInit {
         this.serverSideValidateSchoolName()
       ],
       email: [
-        '', Validators.compose([
+        '',
+        Validators.compose([
           Validators.required,
-          this.emailPatternValidator()])
+          this.emailPatternValidator()]),
+        this.serverSideValidateEmail()
       ],
       note: ''
     });
@@ -82,14 +84,14 @@ export class InviteRequestComponent implements OnInit {
         /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/);
       //"^[^\s@]+@[^\s@]+\.[^\s@]{2,}$");
       let correctInput = regexp.test(email);
-      return correctInput ? null : { wrongInput: true };
+      return correctInput ? null : {wrongInput: true};
     };
   }
 
   schoolNamePatternValidator(): ValidatorFn {
     return (control: AbstractControl): { [key: string]: any } => {
       const schoolName: string = control.value;
-      return schoolName.indexOf(".") < 0 ? null : { wrongInput: true };
+      return schoolName.indexOf(".") < 0 ? null : {wrongInput: true};
     };
   }
 
@@ -124,6 +126,21 @@ export class InviteRequestComponent implements OnInit {
               return null;
             }
             return {schoolAlreadyExists: true};
+          })
+        );
+    };
+  }
+
+  serverSideValidateEmail(): (control: AbstractControl) => Observable<{ [p: string]: any }> {
+    return (control: AbstractControl): Observable<{ [key: string]: any }> => {
+      return this._authenticationService
+        .checkEmailAvailability(control.value)
+        .pipe(
+          map(available => {
+            if (available) {
+              return null;
+            }
+            return {emailAlreadyExists: true};
           })
         );
     };

@@ -8,6 +8,8 @@ namespace ApplicationCore.Interfaces
     {
         Task<List<TeacherRequest>> All();
         Task<TeacherRequest> GetById(int id);
+        Task<TeacherRequest> GetByEmail(string email);
+        Task<TeacherRequest> GetBySchool(string school);
         Task Add(TeacherRequest teacherRequest);
         void Remove(TeacherRequest teacherRequest);
         Task SaveChanges();
