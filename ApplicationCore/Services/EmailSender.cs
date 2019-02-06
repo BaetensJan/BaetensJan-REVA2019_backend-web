@@ -16,7 +16,7 @@ namespace ApplicationCore.Services
             _configuration = configuration;
         }
 
-        public async Task SendMailAsync(String to, String subject, String body)
+        public async Task SendMailAsync(string to, string subject, string body, string[] ccs)
         {
             try
             {
@@ -37,7 +37,10 @@ namespace ApplicationCore.Services
                 mailMessage.Body = body;
                 mailMessage.IsBodyHtml = true;
                 mailMessage.From = new MailAddress(_configuration.GetValue<String>("Email:Smtp:From"));
-
+                foreach (var cc in ccs)
+                {
+                    mailMessage.CC.Add(new MailAddress(cc));
+                }
 
                 Console.WriteLine("Attempting to send email...");
                 await smtpClient.SendMailAsync(mailMessage);

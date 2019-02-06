@@ -48,7 +48,7 @@ namespace Web.Controllers
                 "<h1>Amazon SES Test</h1>" +
                 "<p>This email was sent through the " +
                 "<a href='https://aws.amazon.com/ses'>Amazon SES</a> SMTP interface " +
-                "using the .NET System.Net.Mail library.</p>");
+                "using the .NET System.Net.Mail library.</p>", new string[] { });
             return Ok("OK");
         }
 
@@ -138,7 +138,7 @@ namespace Web.Controllers
                         <footer>
                         <p>Deze email werd automatisch verzonden! Reageer niet op dit bericht.</p>
                         <p>Contacteer freddy@reva.be bij problemen.</p>
-                        </footer>");
+                        </footer>", new string[] { });
 
                 _teacherRequestRepository.Remove(model);
                 await _teacherRequestRepository.SaveChanges();
@@ -374,7 +374,7 @@ namespace Web.Controllers
         [HttpPost]
         public async Task<IActionResult> SendQuestion([FromBody] AskQuestionDTO model)
         {
-            await _emailSender.SendMailAsync(model.Email,
+            await _emailSender.SendMailAsync(_configuration["Email:Smtp:From"],
                 $"Reva App vraag: {model.Subject}",
                 $@"
                         <h3>
@@ -382,7 +382,7 @@ namespace Web.Controllers
                         </h3>
                         <p>
                             {model.Message}
-                        </p>");
+                        </p>", new[] {model.Email});
             return Ok(true);
         }
     }
