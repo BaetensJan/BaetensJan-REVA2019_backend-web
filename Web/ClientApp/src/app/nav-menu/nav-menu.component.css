@@ -31,6 +31,12 @@ li.link-active a:focus {
   font-size: 1.4em;
 }
 
+.navbar-nav li small {
+  color: white !important;
+
+}
+
+
 @media (min-width: 768px) {
   /* On small screens, convert the nav menu to a vertical sidebar */
   .main-nav {
