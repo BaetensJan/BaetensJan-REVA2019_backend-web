@@ -118,6 +118,7 @@ img{
 
 .timeline .timeline-heading h4.subheading {
   margin:0;
+  margin-bottom: 0.3em !important;
   padding:0;
   text-transform: none;
   font-size: 30px;
