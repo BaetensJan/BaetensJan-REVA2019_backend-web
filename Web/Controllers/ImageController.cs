@@ -23,6 +23,7 @@ namespace Web.Controllers
         }
 
         [HttpPost("[action]")]
+        [RequestSizeLimit(100_000_000)]
         public async Task<IActionResult> UpdateExhibitionRoutePlanImage(IFormFile file)
         {
             //Todo: check in frontend that only .jpg files are uploaded.
