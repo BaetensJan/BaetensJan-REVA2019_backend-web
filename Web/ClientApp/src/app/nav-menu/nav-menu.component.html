@@ -1,40 +1,45 @@
 <div class='main-nav'>
   <div class='navbar navbar-inverse'>
     <div class='navbar-header'>
-      <button type='button' class='navbar-toggle' data-toggle='collapse' data-target='.navbar-collapse'
-              [attr.aria-expanded]='isExpanded' (click)='toggle()'>
+      <button (click)='toggle()' [attr.aria-expanded]='isExpanded' class='navbar-toggle' data-target='.navbar-collapse'
+              data-toggle='collapse' type='button'>
         <span class='sr-only'>Toggle navigation</span>
         <span class='icon-bar'></span>
         <span class='icon-bar'></span>
         <span class='icon-bar'></span>
       </button>
-      <a class='navbar-brand' [routerLink]='["/"]'>REVA</a>
+      <a [routerLink]='["/"]' class='navbar-brand'>REVA</a>
     </div>
     <div class='clearfix'></div>
-    <div class='navbar-collapse collapse' [ngClass]='{ "in": isExpanded }'>
+    <div [ngClass]='{ "in": isExpanded }' class='navbar-collapse collapse'>
       <ul class='nav navbar-nav'>
-        <li [routerLinkActive]='["link-active"]' [routerLinkActiveOptions]='{ exact: true }'>
-          <a [routerLink]='["/"]' (click)='collapse()'>
+        <li [routerLinkActiveOptions]='{ exact: true }' [routerLinkActive]='["link-active"]'>
+          <a (click)='collapse()' [routerLink]='["/"]'>
             <span class='glyphicon glyphicon-home'></span> Home
           </a>
         </li>
         <li [routerLinkActive]='["link-active"]'>
-          <a [routerLink]='["invite-request"]' (click)='collapse()'>
+          <a (click)='collapse()' [routerLink]='["invite-request"]'>
             <span class='glyphicon glyphicon-plus'></span> Aanvraag indienen
           </a>
         </li>
-        <li [routerLinkActive]='["link-active"]' *ngIf='(user | async)'>
-          <a [routerLink]='["/groepen/overzicht"]' (click)='collapse()'>
+        <li *ngIf='(user | async)' [routerLinkActive]='["link-active"]'>
+          <a (click)='collapse()' [routerLink]='["/groepen/overzicht"]'>
             <span class='glyphicon glyphicon-user'></span> Groepen
           </a>
         </li>
-        <li [routerLinkActive]='["link-active"]' *ngIf='(user | async)'>
-          <a [routerLink]='["opdrachten"]' (click)='collapse()'>
+        <li *ngIf='(user | async)' [routerLinkActive]='["link-active"]'>
+          <a (click)='collapse()' [routerLink]='["opdrachten"]'>
             <span class='glyphicon glyphicon-th-list'></span> Opdrachten
           </a>
         </li>
         <li [routerLinkActive]='["link-active"]'>
-          <a [routerLink]='["informatiescherm"]' (click)='collapse()'>
+          <a (click)='collapse()' [routerLink]='["ask-question"]'>
+            <span class='glyphicon glyphicon-info-sign'></span> Vragen?
+          </a>
+        </li>
+        <li [routerLinkActive]='["link-active"]'>
+          <a (click)='collapse()' [routerLink]='["informatiescherm"]'>
             <span class='glyphicon glyphicon-info-sign'></span> Informatie App
           </a>
         </li>
@@ -43,22 +48,22 @@
           <div class='clearfix' style="margin-bottom: 2.5em;"></div>
 
           <li [routerLinkActive]='["link-active"]'>
-            <a [routerLink]='["categorieen"]' (click)='collapse()'>
+            <a (click)='collapse()' [routerLink]='["categorieen"]'>
               <span class='glyphicon glyphicon-th-list'></span> Categorieën
             </a>
           </li>
           <li [routerLinkActive]='["link-active"]'>
-            <a [routerLink]='["exposanten"]' (click)='collapse()'>
+            <a (click)='collapse()' [routerLink]='["exposanten"]'>
               <span class='glyphicon glyphicon-th-list'></span> Exposanten
             </a>
           </li>
           <li [routerLinkActive]='["link-active"]'>
-            <a [routerLink]='["routeMap"]' (click)='collapse()'>
+            <a (click)='collapse()' [routerLink]='["routeMap"]'>
               <span class='glyphicon glyphicon-picture'></span> Beursplan
             </a>
           </li>
           <li [routerLinkActive]='["link-active"]'>
-            <a [routerLink]='["questions"]' (click)='collapse()'>
+            <a (click)='collapse()' [routerLink]='["questions"]'>
               <span class='glyphicon glyphicon-th-list'></span> Vragen
             </a>
           </li>
@@ -66,7 +71,7 @@
           <ng-container class='clearfix' style="margin-bottom: 1.5em;"></ng-container>
 
           <li [routerLinkActive]='["link-active"]'>
-            <a [routerLink]='["requests"]' (click)='collapse()'>
+            <a (click)='collapse()' [routerLink]='["requests"]'>
               <span class='glyphicon glyphicon-plus'></span> Aanvragen
             </a>
           </li>
@@ -74,14 +79,14 @@
 
         <div class='clearfix' style="margin-bottom: 1.5em;"></div>
 
-        <li [routerLinkActive]='["link-active"]' *ngIf='(user | async); else loginlink'>
-          <a [routerLink]='["logout"]' (click)='collapse()'>
+        <li *ngIf='(user | async); else loginlink' [routerLinkActive]='["link-active"]'>
+          <a (click)='collapse()' [routerLink]='["logout"]'>
             <span class="glyphicon glyphicon-user"></span> Logout
           </a>
         </li>
         <ng-template #loginlink>
           <li [routerLinkActive]='["link-active"]'>
-            <a [routerLink]='["login"]' (click)='collapse()'>
+            <a (click)='collapse()' [routerLink]='["login"]'>
               <span class="glyphicon glyphicon-user"></span> Login
             </a>
           </li>

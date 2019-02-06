@@ -369,5 +369,21 @@ namespace Web.Controllers
                 expires: DateTime.UtcNow.AddHours(1),
                 signingCredentials: new SigningCredentials(signInKey, SecurityAlgorithms.HmacSha256));
         }
+
+        [Route("[action]")]
+        [HttpPost]
+        public async Task<IActionResult> SendQuestion([FromBody] AskQuestionDTO model)
+        {
+            await _emailSender.SendMailAsync(model.Email,
+                $"Reva App vraag: {model.Subject}",
+                $@"
+                        <h3>
+                            Vraag van {model.Email}
+                        </h3>
+                        <p>
+                            {model.Message}
+                        </p>");
+            return Ok(true);
+        }
     }
 }
