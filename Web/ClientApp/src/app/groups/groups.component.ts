@@ -50,7 +50,7 @@ export class GroupsComponent {
   groupMembers: string[]; // members that were added to the newly created group.
   filteredGroups: Group[];
   groupForm: FormGroup;
-  applicationStartDate: Date;
+  private _applicationStartDate: Date;
   private filterValue: string = "";
 
   /**
@@ -114,7 +114,7 @@ export class GroupsComponent {
       });
     }
     this.groupMembers = [];
-    this._assignmentDataService.getApplicationStartDate().subscribe(value => console.log(value));
+    this._assignmentDataService.getApplicationStartDate().subscribe(value => this._applicationStartDate = new Date(value));
   }
 
   updateGroup(group: Group) {
@@ -364,5 +364,14 @@ export class GroupsComponent {
   private findGroupWithId(groupId: number) {
     let group = this._groups.find(g => g.id == groupId);
     return group;
+  }
+
+
+  get applicationStartDate(): Date {
+    return this._applicationStartDate;
+  }
+
+  set applicationStartDate(value: Date) {
+    this._applicationStartDate = value;
   }
 }
