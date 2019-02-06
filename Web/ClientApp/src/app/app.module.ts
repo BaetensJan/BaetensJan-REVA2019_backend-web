@@ -38,13 +38,14 @@ import {SchoolDataService} from "./schools/school-data.service";
 import {ImageDataService} from "./image-data-service/image-data.service";
 import { PageNotFoundComponent } from './page-not-found/page-not-found.component';
 import {AppRoutingModule} from "./app-routing/app-routing.module";
+import { AskQuestionComponent } from './ask-question/ask-question.component';
 
 @NgModule({
   declarations: [
     AppComponent,
     PageNotFoundComponent, HomeComponent, AssignmentsComponent, InformatieschermComponent,
     CategoriesComponent, CategoryComponent, ExhibitorComponent, ExhibitorsComponent, AssignmentDetailComponent,
-    QuestionComponent, QuestionsComponent, RouteMapComponent, NavMenuComponent
+    QuestionComponent, QuestionsComponent, RouteMapComponent, NavMenuComponent, AskQuestionComponent
   ],
   imports: [
     BrowserModule.withServerTransition({appId: 'ng-cli-universal'}),

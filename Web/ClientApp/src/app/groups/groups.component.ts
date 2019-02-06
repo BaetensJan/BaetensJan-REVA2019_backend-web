@@ -12,6 +12,7 @@ import {SchoolDataService} from "../schools/school-data.service";
 import {GroupSharedService} from "./group-shared.service";
 import {Router} from "@angular/router";
 import {map} from "rxjs/operators";
+import {AssignmentDataService} from "../assignments/assignment-data.service";
 
 
 function parseJwt(token) {
@@ -41,18 +42,15 @@ export class GroupsComponent {
   filterOption = "name"; // current filter option: 'groupName' = name or 'groupMembers' = members.
   filterText = "Groepsnaam"; // current text in filterOption button
   filterOnGroupName = true; // if current filter option is filtering on 'groupName' or on 'groupMembers'
-
-  private _school: School;
-  _groups: Group[]; // array containing ALL the groups.
   contentArray: Group[]; // array containing the groups that fits the filter.
   returnedArray: Group[]; // array containing the groups (maxNumberOfGroupsPerPage) that are showed on the current page.
   maxNumberOfGroupsPerPage = 5; // amount of groups that will be showed on the current page, to keep the page neat.
-
   newMemberName: string = ""; // value of input-field in an already existing group. Will be used to add a new member to an existing group.
   createGroupClicked: boolean = false; // if the + button (for creating a group) was clicked.
   groupMembers: string[]; // members that were added to the newly created group.
   filteredGroups: Group[];
   groupForm: FormGroup;
+  private _applicationStartDate: Date;
   private filterValue: string = "";
 
   /**
@@ -60,6 +58,7 @@ export class GroupsComponent {
    * @param router
    * @param _groupsDataService
    * @param _groupsSharedService
+   * @param _assignmentDataService
    * @param _schoolDataService
    * @param fb
    * @param modalService
@@ -69,8 +68,27 @@ export class GroupsComponent {
               private _groupsDataService: GroupsDataService,
               private _groupsSharedService: GroupSharedService,
               private _schoolDataService: SchoolDataService,
+              private _assignmentDataService: AssignmentDataService,
               private fb: FormBuilder, private modalService: BsModalService,
               private appShareService: AppShareService) {
+  }
+
+  private _school: School;
+
+  /**
+   * Getter for school
+   */
+  get school(): School {
+    return this._school;
+  }
+
+  _groups: Group[]; // array containing ALL the groups.
+
+  /**
+   * Getter for groups
+   */
+  get groups(): Group[] {
+    return this._groups;
   }
 
   ngOnInit(): void {
@@ -96,6 +114,7 @@ export class GroupsComponent {
       });
     }
     this.groupMembers = [];
+    this._assignmentDataService.getApplicationStartDate().subscribe(value => this._applicationStartDate = new Date(value));
   }
 
   updateGroup(group: Group) {
@@ -113,8 +132,7 @@ export class GroupsComponent {
         this.modalMessage = `Ben je zeker dat ${memberName} verwijderd mag worden uit de groep?`;
       }
       this.memberToRemove.name = memberName;
-    }
-    else { // deleting of a group.
+    } else { // deleting of a group.
       let group = this.findGroupWithId(groupId);
       this.memberToRemove.group = group;
       console.log(groupId);
@@ -172,11 +190,6 @@ export class GroupsComponent {
     this.modalRef.hide();
   }
 
-  private findGroupWithId(groupId: number) {
-    let group = this._groups.find(g => g.id == groupId);
-    return group;
-  }
-
   /**
    * Shows a message when a group was successfully created.
    * @param groupName
@@ -195,8 +208,7 @@ export class GroupsComponent {
     if (this.filterOnGroupName) {
       this.filterOption = "name";
       this.filterText = "Groepsnaam";
-    }
-    else {
+    } else {
       this.filterOption = "members";
       this.filterText = "Groepslid";
     }
@@ -323,8 +335,7 @@ export class GroupsComponent {
           this.contentArray.push(group);
         }
       });
-    }
-    else {
+    } else {
       this.contentArray = this._groups;
     }
     this.initiateReturnedArray();
@@ -350,17 +361,17 @@ export class GroupsComponent {
     this.executeFilterQuery();
   }
 
-  /**
-   * Getter for groups
-   */
-  get groups(): Group[] {
-    return this._groups;
+  private findGroupWithId(groupId: number) {
+    let group = this._groups.find(g => g.id == groupId);
+    return group;
   }
 
-  /**
-   * Getter for school
-   */
-  get school(): School {
-    return this._school;
+
+  get applicationStartDate(): Date {
+    return this._applicationStartDate;
+  }
+
+  set applicationStartDate(value: Date) {
+    this._applicationStartDate = value;
   }
 }

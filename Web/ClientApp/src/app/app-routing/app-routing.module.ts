@@ -15,6 +15,7 @@ import {QuestionComponent} from "../questions/question/question.component";
 import {RouteMapComponent} from "../route-map/route-map.component";
 import {RequestsComponent} from "../user/invitation/pending-requests/requests.component";
 import {InviteRequestComponent} from "../user/invitation/send-request/invite-request.component";
+import {AskQuestionComponent} from "../ask-question/ask-question.component";
 
 const appRoutes: Routes = [
   {path: 'home', component: HomeComponent},
@@ -36,6 +37,7 @@ const appRoutes: Routes = [
   {path: 'routeMap', canActivate: [AuthGuardService], component: RouteMapComponent},
   {path: 'invite-request', component: InviteRequestComponent},
   {path: 'requests', canActivate: [AuthGuardService], component: RequestsComponent},
+  {path: 'ask-question', component: AskQuestionComponent},
   {path: '', redirectTo: 'home', pathMatch: 'full'},
   {path: '**', component: PageNotFoundComponent}
 ];
@@ -48,4 +50,5 @@ const appRoutes: Routes = [
   declarations: [],
   exports: [RouterModule]
 })
-export class AppRoutingModule {}
+export class AppRoutingModule {
+}
