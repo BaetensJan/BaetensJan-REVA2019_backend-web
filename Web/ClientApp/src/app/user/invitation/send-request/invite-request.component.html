@@ -46,13 +46,17 @@
   </div>
   <div class='alert alert-danger'
        *ngIf='user.get("schoolName").errors?.schoolAlreadyExists && user.get("schoolName").touched'>
-    Er is al een school teruggevonden met deze school naam. Als u toegang wil tot het platform met deze school zal u
-    <strong>
-      <a> <!-- //TODO email versturen met email die verbonden is met deze school.-->
-        contact moeten opnemen
-      </a>
-    </strong>
-    met de beheerder van het account.
+    Er is al een school teruggevonden met deze schoolnaam. Als u toegang wil tot het platform met deze school zal u dit
+    in het 'opmerking' veld moeten vermelden. <b>Vergeet niet om de schoolnaam ook in het 'opmerking' veld te vermelden én tijdelijk een
+  cijfer achter de schoolnaam in het huidige veld te plaatsen om te kunnen indienen (bijv. {{user.get("schoolName").value}}2</b>)
+    Er zal vervolgens contact opgenomen worden met de leerkracht die op dit platform beheerder is van deze school, en er zal een email
+    naar uw email adres ({{user.get("email").value}}) gestuurd worden als deze beheerder dit aanvaardt.
+    <!--<strong>-->
+      <!--<a> &lt;!&ndash; //TODO email versturen met email die verbonden is met deze school.&ndash;&gt;-->
+        <!--contact moeten opnemen-->
+      <!--</a>-->
+    <!--</strong>-->
+    <!--met de beheerder van het account.-->
   </div>
   <div class='alert alert-danger' *ngIf='user.get("schoolName").errors?.wrongInput && user.get("schoolName").touched'>
     De schoolnaam mag geen <strong>punt</strong> (<b style="font-weight: bold; font-size: 1.8em;">.</b>) bevatten.
