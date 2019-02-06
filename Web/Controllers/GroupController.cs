@@ -52,25 +52,29 @@ namespace Web.Controllers
             if (group == null) return Ok(new {Message = "Group not found or groupId not in token."});
             if (group.Assignments == null) group.Assignments = new List<Assignment>();
 
-            var numberOfAssignments = group.Assignments.Count;
-            var hasNoAssignments = numberOfAssignments == 0;
-            var currentAssignment = group.Assignments.FirstOrDefault();
-
             var previousExhibitorXCoordinate = 0.0;
             var previousExhibitorYCoordinate = 0.0;
-            
-            if (group.Assignments.Count > 1)
+            var numberOfAssignments = group.Assignments.Count;
+
+            if (numberOfAssignments > 1)
             {
                 group.Assignments.Sort((ass1, ass2) => ass1.Id.CompareTo(ass2.Id));
-                currentAssignment = group.Assignments.Last();
 
-                previousExhibitorXCoordinate = group.Assignments[group.Assignments.Count - 2].Question.CategoryExhibitor.Exhibitor.X;
-                previousExhibitorYCoordinate = group.Assignments[group.Assignments.Count - 2].Question.CategoryExhibitor.Exhibitor.Y;
+                previousExhibitorXCoordinate =
+                    group.Assignments[numberOfAssignments - 2].Question.CategoryExhibitor.Exhibitor.X;
+                previousExhibitorYCoordinate =
+                    group.Assignments[numberOfAssignments - 2].Question.CategoryExhibitor.Exhibitor.Y;
             }
+
+            var currentAssignment = group.Assignments.LastOrDefault();
+            var numberOfSubmittedAssignments = currentAssignment == null ? 0 : 
+                currentAssignment.Submitted ? numberOfAssignments : numberOfAssignments - 1;
+            var hasNoAssignments = numberOfAssignments == 0;
+
             return Ok(new
             {
                 hasNoAssignments,
-                numberOfAssignments,
+                numberOfSubmittedAssignments,
                 currentAssignment, // last assignment
                 previousExhibitorXCoordinate,
                 previousExhibitorYCoordinate
@@ -214,7 +218,7 @@ namespace Web.Controllers
             await _groupRepository.SaveChanges();
             return group;
         }
-        
+
         private async Task<ApplicationUser> CreateGroupUser(School school, string username, string password)
         {
             // Creation of ApplicationUser
@@ -260,7 +264,7 @@ namespace Web.Controllers
         }
 
         [HttpPut("[action]/{id}")]
-        public async Task<ActionResult> UpdateGroup([FromRoute] int id,[FromBody] GroupUpdateDTO model)
+        public async Task<ActionResult> UpdateGroup([FromRoute] int id, [FromBody] GroupUpdateDTO model)
         {
             if (ModelState.IsValid)
             {
@@ -271,29 +275,30 @@ namespace Web.Controllers
                 {
                     schname = var.Name;
                 }
+
                 IEnumerable<ApplicationUser> users =
                     _userManager.Users;
 
                 Task<Group> groups = _groupRepository.GetById(id);
                 string hashpassword = "";
-                
+
                 //String schoolnaam = sch.Name;
                 //String schoolUsername = sch.Name + model.Name;
-                String beforeChangeSchoolName = schname+groups.Result.Name;
+                String beforeChangeSchoolName = schname + groups.Result.Name;
 
                 ApplicationUser user = users.SingleOrDefault(t => t.UserName == beforeChangeSchoolName);
                 if (!string.IsNullOrWhiteSpace(model.Password))
                 {
                     hashpassword = _userManager.PasswordHasher.HashPassword(user, model.Password);
-
                 }
+
                 var group = await _groupRepository.GetById(id);
 
                 // name was updated.
                 if (!group.Name.ToLower().Equals(model.Name.ToLower()))
                 {
                     //groupApplicationUser.UserName = model.Name;
-                    user.UserName = schname+model.Name;
+                    user.UserName = schname + model.Name;
                 }
 
 
