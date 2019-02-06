@@ -1,7 +1,7 @@
 <div *ngIf='errorMsg' class="ui error message">{{errorMsg}}</div>
 
 <form class="form-horizontal" [formGroup]='user' (ngSubmit)='onSubmit()'>
-  <h2 class="col-sm-offset-2" style="margin-bottom: 2em;">Aanvraag toegang tot platform</h2>
+  <h2 class="col-sm-offset-2" style="margin-bottom: 2em;">Aanvraag toegang tot <br/>platform</h2>
 
   <!--Name-->
   <div class="form-group">
@@ -85,7 +85,11 @@
     </div>
   </div>
 
-  <button class="btn btn-primary col-sm-offset-2 col-sm-3" type='submit' [disabled]='!user.valid'>
-    Aanvraag verzenden
-  </button>
+  <div class="row form-group" style="margin-top: 1em;">
+    <div class="col-sm-offset-2 col-sm-10 col-md-3">
+      <button class="btn btn-primary" style="width: 100%;" type='submit' [disabled]='!user.valid'>
+        Aanvraag verzenden
+      </button>
+    </div>
+  </div>
 </form>
