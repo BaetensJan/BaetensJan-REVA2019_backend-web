@@ -1,3 +1,4 @@
+using System;
 using System.Text;
 using ApplicationCore.Entities;
 using ApplicationCore.Interfaces;
@@ -5,6 +6,7 @@ using ApplicationCore.Services;
 using Infrastructure;
 using Infrastructure.Repositories;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -38,12 +40,22 @@ namespace Web
 
         public void AddDatabase()
         {
-            _services.AddDbContext<ApplicationDbContext>(
-                options =>
-                    //options.UseSqlite(_configuration.GetConnectionString("DefaultConnectionSqLite"),
-                    options.UseSqlServer(_configuration.GetConnectionString("DefaultConnection"),
-                        //options.UseSqlServer(_configuration.GetConnectionString("DefaultConnectionPublish"),
-                        b => b.MigrationsAssembly("Web")));
+            var environment = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT");
+            var isDevelopment = environment == EnvironmentName.Development;
+            if (isDevelopment)
+            {
+                _services.AddDbContext<ApplicationDbContext>(
+                    options =>
+                        options.UseSqlServer(_configuration.GetConnectionString("DefaultConnection"),
+                            b => b.MigrationsAssembly("Web")));
+            }
+            else
+            {
+                _services.AddDbContext<ApplicationDbContext>(
+                    options =>
+                        options.UseSqlServer(_configuration.GetConnectionString("DefaultConnectionPublish"),
+                            b => b.MigrationsAssembly("Web")));
+            }
         }
 
         public void AddIdentity()
