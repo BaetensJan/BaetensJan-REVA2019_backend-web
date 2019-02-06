@@ -1,9 +1,7 @@
 import {Injectable} from "@angular/core";
 import {HttpClient} from "@angular/common/http";
-import {Observable} from "rxjs/index";
-import {map} from "rxjs/operators/index";
-import {Group} from "../models/group.model";
-import {School} from "../models/school.model";
+import {Observable} from "rxjs";
+import {map} from "rxjs/operators";
 
 @Injectable({
   providedIn: 'root'
@@ -20,5 +18,11 @@ export class AssignmentDataService {
    * @param http
    */
   constructor(private http: HttpClient) {
+  }
+
+  getApplicationStartDate(): Observable<any> {
+    return this.http
+      .get(`${this._appUrl}/GetStartDateOfApplication/`)
+      .pipe(map((d: any) => d.startDate))
   }
 }

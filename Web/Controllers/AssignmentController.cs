@@ -55,6 +55,15 @@ namespace Web.Controllers
             return Ok(_configuration["AmountOfQuestions"]);
         }
 
+        [HttpGet("[Action]")]
+        public IActionResult GetStartDateOfApplication()
+        {
+            return Ok(new
+            {
+                StartDate = _configuration["StartDate"]
+            });
+        }
+
         /**
         * Gets the closest exhibitor with a certain category, starting from previous exhibitor. (Normal Tour)
         * 
