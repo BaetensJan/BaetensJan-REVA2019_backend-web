@@ -70,9 +70,9 @@ img{
   z-index: 100;
   position: absolute;
   left: 50%;
-  border: 7px solid #3b5998;
+  border: 7px solid #1e7f91; /*#3b5998;*/
   border-radius: 100%;
-  background-color: #3b5998;
+  background-color: #1e7f91;/* #3b5998;*/
   box-shadow: 0 0 5px #4582ec;
   width: 200px;
   height: 200px;
@@ -120,12 +120,13 @@ img{
   margin:0;
   padding:0;
   text-transform: none;
-  font-size:18px;
+  font-size: 30px;
   color:#333333;
 }
 
 .timeline .timeline-body>p,
 .timeline .timeline-body>ul {
+  font-size: 17px; /*Font size of text next to "balloons" */
   margin-bottom: 0;
   color:#808080;
 }

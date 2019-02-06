@@ -1,6 +1,8 @@
 <a target="_self" class="btn btn-default glyphicon glyphicon-download-alt" aria-hidden="true"
-   (click)="downloadPDF()" ></a>
-<button class="btn"><a href="mailto:?subject=Link naar informatiescherm beurs Reva&body=De link naar het informatiescherm: http://localhost:5000/informatiescherm">Email versturen</a></button>
+   (click)="downloadPDF()"></a>
+<button class="btn"><a
+  href="mailto:?subject=Link naar informatiescherm beurs Reva&body=De link naar het informatiescherm: http://localhost:5000/informatiescherm">Email
+  versturen</a></button>
 <div id="contentToConvert" #content class="container">
   <div class="row">
     <div class="col-lg-12 ">
@@ -15,10 +17,14 @@
             </div>
             <div class="timeline-body">
               <p class="text-muted links">
-                Hiernaast ziet u het startscherm. Hier vindt u een uitleg over wat de app inhoud.
-                Linksboven ziet u het hamburgermenu met volgende opties: home, mijn groepen, beursplan, exposanten en instellingen.
-                Met de knop (het mannetje rechtsboven) kan u naar het instellingen scherm gaan indien u iets wenst aan te passen aan uw account.
-                Wanneer de rondleiding kan beginnen zal de knop (waar nu staat "wachten op de leerkracht") Veranderen in "rondleiding starten". Door op deze knop te duwen zal de rondleiding starten.
+                Hiernaast ziet u het startscherm. <br>
+                Hier vindt u een uitleg over wat de app inhoudt.
+                Linksboven ziet u het "hamburgermenu" met volgende opties: <b>Home, Beursplan, Categorieën en
+                Groepsleden</b>.
+                <!--  Met de knop (het mannetje rechtsboven) kan u naar het instellingen scherm gaan indien u iets wenst aan te passen aan uw account. -->
+                Wanneer de rondleiding kan beginnen (als de beurs start) zal er een knop "rondleiding starten"
+                tevoorschijn komen.
+                Door op deze knop te duwen zal de rondleiding starten.
               </p>
             </div>
           </div>
@@ -34,8 +40,12 @@
             </div>
             <div class="timeline-body">
               <p class="text-muted rechts">
-                Klikken we bij het hamburgermenu op beursplan, dan krijgen we een plan te zien van hoe de beursstanden zijn geplaatst. Men kan dit tijdens de rondleiding gebruiken
-                om plaatsen terug te vinden. Deze nummers komen overeen met de nummers die u tijdens uw rondleiding krijgt.
+                Klikken we bij het hamburgermenu op beursplan, dan krijgen we een plan van de beurs te zien waarop ook
+                de standplaatsen van
+                de exposanten zichtbaar terug te vinden zijn.
+                Men kan dit tijdens de rondleiding gebruiken om exposanten terug te vinden.
+                Deze standplaatsen komen overeen met diegene die je toegewezen krijgt bij een opdracht in de app, als
+                men een rondleiding start.
               </p>
             </div>
           </div>
@@ -51,12 +61,14 @@
             </div>
             <div class="timeline-body">
               <p class="text-muted links">
-                Bij het klikken in het hamburgermenu op categoriëen komt een scherm tevoorschijn (links), met alle te bezoeken mogelijkheden.
-                Dit kan u helpen bij het maken van een beslissing wat uw voorkeur is om te bezichtigen. Indien u klikt op een van deze categoriëen krijgt u extra details over de categorie zelf.
-                Waardoor we u al van informatie verschaffen om een doorslaggevende keuze te kunnen maken.              </p>
+                Bij het klikken op <b>categoriëen</b> in het hamburgermenu komt er een scherm tevoorschijn (links), met
+                alle mogelijke categorieën
+                waaruit een groep kan kiezen. Er is een detailscherm als men op een specifieke categorie klikt,
+                waardoor we een groep van informatie voorzien om een doorslaggevende keuze te kunnen maken.
+              </p>
             </div>
           </div>
-         <!-- <div class="line"></div>-->
+          <!-- <div class="line"></div>-->
         </li>
         <li class="timeline-inverted">
           <div class="timeline-image">
@@ -64,12 +76,13 @@
           </div>
           <div class="timeline-panel">
             <div class="timeline-heading">
-              <h4 class="subheading">Keuze rondleiding</h4>
+              <h4 class="subheading">Rondleiding is gestart, tijd voor een keuze</h4>
             </div>
             <div class="timeline-body">
               <p class="text-muted rechts">
-                Men kan in het scherm rechts aangeven welke categoriëen men het liefste zou bezoeken. Hieruit zal een keuze worden gemaakt zodat de aangegeven voorkeuren zeker kunnen worden bezocht tijdens de rondleiding.
-                We zullen hier zoveel mogelijk rekening mee proberen houden.
+                Als de groep de rondleiding start krijgen ze een overzicht (zichtbaar in de afbeelding) van alle categoriëen
+                te zien.
+                Eens een categorie gekozen zal er een opdracht aangemaakt worden die de groep zal moeten indienen.
               </p>
             </div>
           </div>
@@ -81,13 +94,43 @@
           </div>
           <div class="timeline-panel">
             <div class="timeline-heading">
-              <h4 class="subheading">Rondleiding</h4>
+              <h4 class="subheading">Exposant bezoeken & opdracht indienen</h4>
             </div>
             <div class="timeline-body">
               <p class="text-muted links">
-                Bij het klikken van rondleiding starten (zie eerste alinea). Word in dit scherm de rondleiding gestart met de eerste exposant.
-                Op de kaart wordt weergegeven waar deze zich bevindt. Dan kan u de vraag en eventueel een foto ingeven en op volgende duwen waarbij u verder gaat met uw rondleiding.
-                Bij de laatste vraag komt u terecht op het eindscherm. Dit betekent dat u uw rondleiding heeft beeïndigt en u mag zich begeven naar het afgesproken samenkomstpunt.              </p>
+                Hier heeft men een categorie aangeklikt en wordt er een nieuw scherm weergegeven waarop het beursplan
+                wordt weergegeven met een route naar de positie van de te bezoeken exposant.
+                Eens de groep zich bij de exposant bevindt, klikt men op 'volgende' om zo doorverwezen te worden naar
+                het volgende
+                scherm, waarop een opdracht zal ingevuld moeten worden. Hier zal er een vraag beantwoord
+                of een foto gemaakt moeten worden.
+                Bij de laatste vraag komt u terecht op het eindscherm. Dit betekent dat u uw rondleiding succesvol heeft
+                beeïndigd.
+                Hier krijgt de groep de optie op de applicatie te stoppen of om nog een <b>extra ronde</b> te doorlopen
+                van de rondleiding.
+              </p>
+            </div>
+          </div>
+        </li>
+        <li class="timeline-inverted">
+          <div class="timeline-image">
+            <img class="img-circle img-responsive" src="../../assets/keuzeRondleiding.JPG" alt="">
+          </div>
+          <div class="timeline-panel">
+            <div class="timeline-heading">
+              <h4 class="subheading">Exposant bezoeken & opdracht indienen</h4>
+            </div>
+            <div class="timeline-body">
+              <p class="text-muted rechts">
+                In deze extra ronde kan de groep nog een opdracht maken door:
+                op een categorie te kiezen, of door een specifieke exposant aan te klikken.
+                Er is een mogelijkheid om zelf een exposant toe te voegen die een groep interessant vindt,
+                als deze niet werd teruggevonden in de lijs.
+                We hebben er voor gezorgd dat een groep nooit twee maal dezelfde opdracht krijgt, waardoor ze dus
+                verschillende
+                exposanten zullen bezoeken.
+                Deze extra rondes kunnen blijven uitgevoerd worden, tot alle opdrachten gemaakt zijn.
+              </p>
             </div>
           </div>
         </li>
