@@ -10,9 +10,11 @@
       <input class="form-control" type="text" id="name" formControlName='name'>
     </div>
   </div>
-  <div class='alert alert-danger'
-       *ngIf='user.get("name").errors?.required && user.get("name").touched'>
-    Gelieve uw voornaam in te vullen.
+  <div class="row">
+    <div class="col-sm-offset-2 col-sm-10 col-md-3 alert alert-danger"
+         *ngIf='user.get("name").errors?.required && user.get("name").touched'>
+      Gelieve uw voornaam in te vullen.
+    </div>
   </div>
 
   <!--Surname-->
@@ -22,9 +24,11 @@
       <input class="form-control" type="text" id="surname" formControlName='surname'>
     </div>
   </div>
-  <div class='alert alert-danger'
-       *ngIf='user.get("surname").errors?.required && user.get("surname").touched'>
-    Gelieve uw familienaam in te vullen.
+  <div class="row">
+    <div class="col-sm-offset-2 col-sm-10 col-md-3 alert alert-danger"
+         *ngIf='user.get("surname").errors?.required && user.get("surname").touched'>
+      Gelieve uw familienaam in te vullen.
+    </div>
   </div>
 
   <!--SchoolName-->
@@ -34,32 +38,46 @@
       <input class="form-control" type="text" id="schoolName" formControlName='schoolName'>
     </div>
   </div>
-
-  <div class='alert alert-danger'
-       *ngIf='user.get("schoolName").errors?.required && user.get("schoolName").touched'>
-    Een schoolnaam is vereist.
+  <div class="row">
+    <div class="col-sm-offset-2 col-sm-10 col-md-3 alert alert-danger"
+         *ngIf='user.get("schoolName").errors?.required && user.get("schoolName").touched'>
+      Een schoolnaam is vereist.
+    </div>
   </div>
-  <div class='alert alert-danger'
-       *ngIf='user.get("schoolName").errors?.minlength && user.get("schoolName").touched'>
-    De schoolnaam moet ten minste {{user.get("schoolName").errors?.minlength.requiredLength }} letters bevatten.
-    U heeft momenteel {{user.get("schoolName").errors?.minlength.actualLength}} lettertekens gebruikt.
+  <div class="row">
+    <div class="col-sm-offset-2 col-sm-10 col-md-3 alert alert-danger"
+         *ngIf='user.get("schoolName").errors?.minlength && user.get("schoolName").touched'>
+      De schoolnaam moet ten minste {{user.get("schoolName").errors?.minlength.requiredLength }} letters bevatten.
+      U heeft momenteel {{user.get("schoolName").errors?.minlength.actualLength}} lettertekens gebruikt.
+    </div>
   </div>
-  <div class='alert alert-danger'
-       *ngIf='user.get("schoolName").errors?.schoolAlreadyExists && user.get("schoolName").touched'>
-    Er is al een school teruggevonden met deze schoolnaam. Als u toegang wil tot het platform met deze school zal u dit
-    in het 'opmerking' veld moeten vermelden. <b>Vergeet niet om de schoolnaam ook in het 'opmerking' veld te vermelden én tijdelijk een
-  cijfer achter de schoolnaam in het huidige veld te plaatsen om te kunnen indienen (bijv. {{user.get("schoolName").value}}2</b>)
-    Er zal vervolgens contact opgenomen worden met de leerkracht die op dit platform beheerder is van deze school, en er zal een email
-    naar uw email adres ({{user.get("email").value}}) gestuurd worden als deze beheerder dit aanvaardt.
-    <!--<strong>-->
+  <div class="row">
+    <div class="col-sm-offset-2 col-sm-10 col-md-3 alert alert-danger"
+         *ngIf='user.get("schoolName").errors?.schoolAlreadyExists && user.get("schoolName").touched'>
+      Er is al een school teruggevonden met deze schoolnaam. Als u toegang wil tot het platform met deze school zal u
+      dit
+      in het 'opmerking' veld moeten vermelden. <b>Vergeet niet om de schoolnaam ook in het 'opmerking' veld te
+      vermelden
+      én tijdelijk een
+      cijfer achter de schoolnaam in het huidige veld te plaatsen om te kunnen indienen (bijv.
+      {{user.get("schoolName").value}}2</b>)
+      Er zal vervolgens contact opgenomen worden met de leerkracht die op dit platform beheerder is van deze school,
+      en er
+      zal een email
+      naar uw email adres ({{user.get("email").value}}) gestuurd worden als deze beheerder dit aanvaardt.
+      <!--<strong>-->
       <!--<a> &lt;!&ndash; //TODO email versturen met email die verbonden is met deze school.&ndash;&gt;-->
-        <!--contact moeten opnemen-->
+      <!--contact moeten opnemen-->
       <!--</a>-->
-    <!--</strong>-->
-    <!--met de beheerder van het account.-->
+      <!--</strong>-->
+      <!--met de beheerder van het account.-->
+    </div>
   </div>
-  <div class='alert alert-danger' *ngIf='user.get("schoolName").errors?.wrongInput && user.get("schoolName").touched'>
-    De schoolnaam mag geen <strong>punt</strong> (<b style="font-weight: bold; font-size: 1.8em;">.</b>) bevatten.
+  <div class="row">
+    <div class="col-sm-offset-2 col-sm-10 col-md-3 alert alert-danger"
+         *ngIf='user.get("schoolName").errors?.wrongInput && user.get("schoolName").touched'>
+      De schoolnaam mag geen <strong>punt</strong> (<b style="font-weight: bold; font-size: 1.8em;">.</b>) bevatten.
+    </div>
   </div>
 
   <!--Email-->
@@ -69,17 +87,24 @@
       <input class="form-control" id="email" formControlName="email" type="email">
     </div>
   </div>
-
-  <div class='alert alert-danger' *ngIf='user.get("email").errors?.required && user.get("email").touched'>
-    Uw emailadres is verplicht.
+  <div class="row">
+    <div class="col-sm-offset-2 col-sm-10 col-md-3 alert alert-danger"
+         *ngIf='user.get("email").errors?.required && user.get("email").touched'>
+      Uw emailadres is verplicht.
+    </div>
+    <div class="row">
+      <div class="col-sm-offset-2 col-sm-10 col-md-3 alert alert-danger"
+           *ngIf='user.get("email").errors?.emailAlreadyExists && user.get("email").touched'>
+        Er is al een gebruiker teruggevonden met dit emailadres
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-sm-offset-2 col-sm-10 col-md-3 alert alert-danger"
+           *ngIf='user.get("email").errors?.wrongInput && user.get("email").touched'>
+        Gelieve een geldig emailadres in te vullen.
+      </div>
+    </div>
   </div>
-  <div class='alert alert-danger' *ngIf='user.get("email").errors?.emailAlreadyExists && user.get("email").touched'>
-    Er is al een gebruiker teruggevonden met dit emailadres
-  </div>
-  <div class='alert alert-danger' *ngIf='user.get("email").errors?.wrongInput && user.get("email").touched'>
-    Gelieve een geldig emailadres in te vullen.
-  </div>
-
 
   <!--Note-->
   <div class="form-group">

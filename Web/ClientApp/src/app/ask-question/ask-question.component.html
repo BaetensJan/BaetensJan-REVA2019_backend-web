@@ -10,12 +10,17 @@
       <input class="form-control" type="text" id="email" formControlName='email'>
     </div>
   </div>
-  <div class='alert alert-danger' *ngIf='question.get("email").errors?.required && question.get("email").touched'>
-    Uw emailadres is verplicht.
+  <div class="row">
+    <div class="col-sm-offset-2 col-sm-10 col-md-3 alert alert-danger"
+         *ngIf='question.get("email").errors?.required && question.get("email").touched'>
+      Uw emailadres is verplicht.
+    </div>
   </div>
-  <div class='alert alert-danger'
-       *ngIf='question.get("email").errors?.wrongInput && question.get("email").touched && !question.get("email").errors?.required'>
-    Gelieve een geldig emailadres in te vullen.
+  <div class="row">
+    <div class="col-sm-offset-2 col-sm-10 col-md-3 alert alert-danger"
+         *ngIf='question.get("email").errors?.wrongInput && question.get("email").touched && !question.get("email").errors?.required'>
+      Gelieve een geldig emailadres in te vullen.
+    </div>
   </div>
 
   <!--Subject-->
@@ -25,9 +30,11 @@
       <input class="form-control" type="text" id="subject" formControlName='subject'>
     </div>
   </div>
-  <div class='alert alert-danger'
-       *ngIf='question.get("subject").errors?.required && question.get("subject").touched'>
-    Gelieve een onderwerp in te vullen.
+  <div class="row">
+    <div class="col-sm-offset-2 col-sm-10 col-md-3 alert alert-danger"
+         *ngIf='question.get("subject").errors?.required && question.get("subject").touched'>
+      Gelieve een onderwerp in te vullen.
+    </div>
   </div>
 
   <!--Note-->
@@ -37,9 +44,11 @@
       <textarea rows=5 class="form-control" id="message" formControlName="message" type="message"></textarea>
     </div>
   </div>
-  <div class='alert alert-danger'
-       *ngIf='question.get("message").errors?.required && question.get("message").touched'>
-    Gelieve een vraag in te vullen.
+  <div class="row">
+    <div class="col-sm-offset-2 col-sm-10 col-md-3 alert alert-danger"
+         *ngIf='question.get("message").errors?.required && question.get("message").touched'>
+      Gelieve een vraag in te vullen.
+    </div>
   </div>
 
   <div class="row form-group" style="margin-top: 1em;">
