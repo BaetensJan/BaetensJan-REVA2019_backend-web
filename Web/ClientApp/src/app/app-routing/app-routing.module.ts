@@ -16,6 +16,7 @@ import {RouteMapComponent} from "../route-map/route-map.component";
 import {RequestsComponent} from "../user/invitation/pending-requests/requests.component";
 import {InviteRequestComponent} from "../user/invitation/send-request/invite-request.component";
 import {AskQuestionComponent} from "../ask-question/ask-question.component";
+import {UploadCsvComponent} from "../upload-csv/upload-csv.component";
 
 const appRoutes: Routes = [
   {path: 'home', component: HomeComponent},
@@ -32,6 +33,7 @@ const appRoutes: Routes = [
   {path: 'exposanten', canActivate: [AuthGuardService], component: ExhibitorsComponent},
   {path: 'assignmentdetail', canActivate: [AuthGuardService], component: AssignmentDetailComponent},
   {path: 'exposant', canActivate: [AuthGuardService], component: ExhibitorComponent},
+  {path: 'upload-csv', canActivate: [AuthGuardService], component: UploadCsvComponent},
   {path: 'questions', canActivate: [AuthGuardService], component: QuestionsComponent},
   {path: 'question', canActivate: [AuthGuardService], component: QuestionComponent},
   {path: 'routeMap', canActivate: [AuthGuardService], component: RouteMapComponent},

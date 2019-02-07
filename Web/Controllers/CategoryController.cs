@@ -31,6 +31,15 @@ namespace Web.Controllers
         {
             return _categoryRepository.All();
         }
+        
+        /**
+         * returns category with name equal to parameter categoryname.
+         */
+        [HttpGet("[action]/{categoryName}")]
+        public async Task<Category> CategorieByName(string categoryName)
+        {
+            return await _categoryRepository.GetByName(categoryName);
+        }
 
         /**
          * Returns the Categories that were not yet picker if isExtraRound (normal tour, with 8 assignments has been finished),
@@ -119,7 +128,8 @@ namespace Web.Controllers
             Category c = new Category()
             {
                 Name = category.Name,
-                Description = category.Description
+                Description = category.Description,
+                Photo = ""        
             };
 
             await _categoryRepository.Add(c);
@@ -136,6 +146,19 @@ namespace Web.Controllers
 
             await _categoryRepository.SaveChanges();
             return category;
+        }
+        
+        [HttpDelete("RemoveCategories")]
+        public async Task<ActionResult> RemoveCategories()
+        {
+            IEnumerable<Category> categories = await _categoryRepository.All();
+            if (categories != null)
+            {
+                _categoryRepository.RemoveAllCategories(categories);
+                await _categoryRepository.SaveChanges();
+            }
+
+            return Ok();
         }
 
         [HttpPut("[action]/{id}")]

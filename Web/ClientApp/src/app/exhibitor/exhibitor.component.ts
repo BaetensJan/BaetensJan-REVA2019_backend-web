@@ -195,12 +195,12 @@ export class ExhibitorComponent implements AfterViewInit {
     // getMousePos
     let rect = (<HTMLCanvasElement>this.canvas.nativeElement).getBoundingClientRect();
     this.paintMarker(evt.clientX - rect.left, evt.clientY - rect.top);
-    this._appShareService.addAlert({
+    /*this._appShareService.addAlert({
       type: 'success',
       msg: `${this.selectedExhibitor.name ? this.selectedExhibitor.name : "De exposant"} heeft nieuwe x coördinaat
        ${this.selectedExhibitor.x} en y coördinaat ${this.selectedExhibitor.y}}`,
       timeout: 5000
-    });
+    });*/
   }
 
   /**

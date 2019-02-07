@@ -5,6 +5,7 @@ import {ExhibitorsDataService} from "./exhibitors-data.service";
 import {ExhibitorShareService} from "../exhibitor/exhibitor-share.service";
 import {Exhibitor} from "../models/exhibitor.model";
 import {Group} from "../models/group.model";
+import {AppShareService} from "../AppShareService";
 
 @Component({
   selector: 'app-exhibitors',
@@ -30,6 +31,12 @@ export class ExhibitorsComponent implements OnInit {
   refModal: BsModalRef;
 
   _filteredExhibitors: Exhibitor[];
+  filterValue: string = "";
+  successMessage = "";
+  showMessage = false;
+  showMessageFail = false;
+  teller = 0;
+  tellertotaal = 0;
 
   /**
    * Constructor
@@ -41,6 +48,24 @@ export class ExhibitorsComponent implements OnInit {
    */
   ngOnInit() {
     this._exhibitorsDataService.exhibitors.subscribe(exhibitors => {
+      for(let exhib of exhibitors){
+        console.log(exhib);
+        if(exhib.x == 0 && exhib.y == 0) {
+          this.teller++;
+        }
+      }
+      console.log(this.teller);
+      this.tellertotaal = exhibitors.length;
+      if(this.teller > 0) {
+        this._appShareService.addAlert({
+          type: 'success',
+          msg: `U heeft nog ${this.teller} van de ${this.tellertotaal} exposanten niet aangeduid op de kaart.`,
+          timeout: 5000
+        });
+      }
+    });
+    this.filterValue = "";
+    this._exhibitorsDataService.exhibitors.subscribe(exhibitors => {
       this._exhibitors = exhibitors.sort((a, b) => a.name > b.name ? 1 : -1);
       this._contentArray = this._exhibitors;
       this._filteredExhibitors = this._exhibitors
@@ -49,6 +74,7 @@ export class ExhibitorsComponent implements OnInit {
 
   constructor(private router: Router,
               private modalService: BsModalService,
+              private _appShareService: AppShareService,
               private _exhibitorsDataService: ExhibitorsDataService,
               private _exhibitorShareService: ExhibitorShareService
   ) {

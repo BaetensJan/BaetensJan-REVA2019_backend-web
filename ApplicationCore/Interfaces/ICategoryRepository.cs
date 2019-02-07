@@ -9,9 +9,11 @@ namespace ApplicationCore.Interfaces
         Task<IEnumerable<Category>> All();
         Task<List<Category>> ExhibitorsCategoryComboWithQuestion(int exhibitorId);
         Task<Category> GetById(int id);
+        Task<Category> GetByName(string categoryName);
         Task Add(Category category);
         void Update(Category category);
         void Remove(Category category);
+        void RemoveAllCategories(IEnumerable<Category> categories);  
         Task SaveChanges();
     }
 }

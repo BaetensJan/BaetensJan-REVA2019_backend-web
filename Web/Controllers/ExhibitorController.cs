@@ -30,6 +30,15 @@ namespace Web.Controllers
             //.Exhibitors().ToList(); Todo: infinite recursive loop (has catExhibitor with exhibitors that have catExhibs and so on).
             return exhbs;
         }
+        
+        /**
+         * returns exhibitor with name equal to parameter exhibitorname.
+         */
+        [HttpGet("[action]/{exhibitorName}")]
+        public async Task<Exhibitor> ExhibitorByName(string exhibitorName)
+        {
+            return await _exhibitorRepository.GetByName(exhibitorName);
+        }
 
         [HttpGet("[action]")]
         public Task<IEnumerable<Exhibitor>> ExhibitorsLight()
@@ -57,6 +66,19 @@ namespace Web.Controllers
         {
             return _exhibitorManager.RemoveExhibitor(id);
         }
+        
+        [HttpDelete("RemoveExhibitors")]
+        public async Task<ActionResult> RemoveExhibitors()
+        {
+            IEnumerable<Exhibitor> exhibitors = await _exhibitorRepository.All();
+            if (exhibitors != null)
+            {
+                _exhibitorRepository.RemoveAllExhibitors(exhibitors);
+                await _exhibitorRepository.SaveChanges();
+            }
+
+            return Ok();
+        }
 
         [HttpPost("[action]")]
         public async Task<Exhibitor> AddExhibitor([FromBody] ExhibitorDTO exhibitordto)
@@ -71,7 +93,10 @@ namespace Web.Controllers
                 Categories = CreateCategories(exhibitordto.CategoryIds)
             };
 
-            await _exhibitorManager.AddExhibitor(exhibitor);
+            //_exhibitorManager.AddExhibitor(exhibitor);
+            await _exhibitorRepository.Add(exhibitor);
+            await _exhibitorRepository.SaveChanges();
+            
             return exhibitor;
         }
 

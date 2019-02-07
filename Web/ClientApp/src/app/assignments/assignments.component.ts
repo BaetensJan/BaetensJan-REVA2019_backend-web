@@ -40,6 +40,7 @@ export class AssignmentsComponent {
   contentArray: Group[]; // array containing the groups that fits the filter.
   returnedArray: Group[]; // array containing the groups (maxNumberOfGroupsPerPage) that are showed on the current page.
   private _filteredGroups: Group[];
+  filterValue = "";
 
   /**
    * Constructor
@@ -56,6 +57,7 @@ export class AssignmentsComponent {
      * Gets the school object of the teacher that is logged in.
      * This school object consists of the finished assignments from the backend for each group and adds this to the table
      */
+    this.filterValue = "";
     let currentUser = parseJwt(localStorage.getItem("currentUser"));
     let schoolId = currentUser.school;
     let isAdmin = currentUser.isAdmin;

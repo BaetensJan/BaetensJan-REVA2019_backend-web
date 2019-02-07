@@ -39,13 +39,14 @@ import {ImageDataService} from "./image-data-service/image-data.service";
 import { PageNotFoundComponent } from './page-not-found/page-not-found.component';
 import {AppRoutingModule} from "./app-routing/app-routing.module";
 import { AskQuestionComponent } from './ask-question/ask-question.component';
+import { UploadCsvComponent } from './upload-csv/upload-csv.component';
 
 @NgModule({
   declarations: [
     AppComponent,
     PageNotFoundComponent, HomeComponent, AssignmentsComponent, InformatieschermComponent,
     CategoriesComponent, CategoryComponent, ExhibitorComponent, ExhibitorsComponent, AssignmentDetailComponent,
-    QuestionComponent, QuestionsComponent, RouteMapComponent, NavMenuComponent, AskQuestionComponent
+    QuestionComponent, QuestionsComponent, RouteMapComponent, NavMenuComponent, AskQuestionComponent, UploadCsvComponent
   ],
   imports: [
     BrowserModule.withServerTransition({appId: 'ng-cli-universal'}),

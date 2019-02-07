@@ -62,6 +62,16 @@ export class QuestionDataService {
   }
 
   /**
+   * Makes call to the backend and removes all the questions
+   * @param rec
+   */
+  removeQuestions(): Observable<Question[]> {
+    return this.http
+      .delete(`${this._appUrl}/deleteQuestions`)
+      .pipe(map((list: any[]): Question[] => list.map(Question.fromJSON)));
+  }
+
+  /**
    * Makes call to the backend and returns a question
    *
    * @param id

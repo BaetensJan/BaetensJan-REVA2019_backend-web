@@ -7,6 +7,8 @@ import {QuestionSharedService} from "./question-shared.service";
 import {Category} from "../models/category.model";
 import {Exhibitor} from "../models/exhibitor.model";
 import {CategoriesDataService} from "../categories/categories-data.service";
+import {ExhibitorsDataService} from "../exhibitors/exhibitors-data.service";
+import {forEach} from "@angular/router/src/utils/collection";
 
 @Component({
   selector: 'app-questions',
@@ -24,7 +26,7 @@ export class QuestionsComponent implements OnInit {
    * @param _questionSharedService: QuestionShareService
    * @param _questionDataService: QuestionDataService
    */
-  constructor(private _categoryDataService: CategoriesDataService, private _questionSharedService: QuestionSharedService,
+  constructor(private _categoryDataService: CategoriesDataService,private _exhibitorDataService: ExhibitorsDataService, private _questionSharedService: QuestionSharedService,
               private _questionDataService: QuestionDataService, private router: Router,
               private modalService: BsModalService) {
   }

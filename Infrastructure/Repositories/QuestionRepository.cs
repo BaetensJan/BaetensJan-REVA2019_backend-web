@@ -137,7 +137,12 @@ namespace Infrastructure.Repositories
         {
             _questions.Remove(question);
         }
-
+        
+        public void RemoveAllQuestions(IEnumerable<Question> questions)
+        {
+            _questions.RemoveRange(questions);
+        }
+        
         public Task SaveChanges()
         {
             return _dbContext.SaveChangesAsync();

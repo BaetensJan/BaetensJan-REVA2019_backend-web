@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Data.SqlClient;
 using System.Threading.Tasks;
 using ApplicationCore.Entities;
 using ApplicationCore.Interfaces;
@@ -45,7 +46,6 @@ namespace Web.Controllers
                     CategoryExhibitor = ce
                 };
                 await _questionRepository.Add(question);
-                //_categoryExhibitorRepository.Add(question.CategoryExhibitor);
                 await _questionRepository.SaveChanges();
                 return Ok(question);
             }
@@ -57,6 +57,13 @@ namespace Web.Controllers
                 });
         }
 
+        /*public void TruncateTable()
+        {
+            string sqlTrunc = "TRUNCATE TABLE Question";
+            SqlCommand cmd = new SqlCommand(sqlTrunc);
+            cmd.ExecuteNonQuery();
+        }*/
+        
         [HttpPut("[action]/{id}")]
         public async Task<ActionResult> EditQuestion([FromRoute] int id,[FromBody] QuestionUpdateDTO model)
         {
@@ -121,5 +128,20 @@ namespace Web.Controllers
                     Id = question.Id,
                 });
         }
+        
+        [HttpDelete("DeleteQuestions")]
+        public async Task<ActionResult> DeleteQuestions()
+        {
+            IEnumerable<Question> questions = await _questionRepository.GetAll();
+            if (questions != null)
+            {
+                _questionRepository.RemoveAllQuestions(questions);
+                await _questionRepository.SaveChanges();
+            }
+
+            return Ok();
+        }
+        
+        
     }
 }

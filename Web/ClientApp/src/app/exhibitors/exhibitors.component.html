@@ -22,7 +22,7 @@
     <div class="input-group">
       <span class="input-group-addon">Zoekfilter
        </span>
-      <input class="form-control" type="text" placeholder="filter" (ngModelChange)="filter($event)">
+      <input class="form-control" type="text" placeholder="filter" (ngModelChange)="filter($event)" [(ngModel)]="filterValue">
     </div>
   </div>
 </div>
@@ -52,6 +52,15 @@
                 (click)="onAanpassenExhibitor(exhibitor)"></span>
           <span class="btn glyphicon glyphicon-trash" aria-hidden="true"
                 (click)="openModal(template, exhibitor)"></span>
+        </td>
+        <td >
+          <div *ngIf="exhibitor.x == 0 && exhibitor.y == 0; then nietAangeduid else aangeduid"></div>
+          <ng-template #nietAangeduid>
+            niet aangeduid op de kaart
+          </ng-template>
+          <ng-template #aangeduid>
+            aangeduid op de kaart
+          </ng-template>
         </td>
       </tr>
       </tbody>

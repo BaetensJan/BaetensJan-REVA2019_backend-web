@@ -51,7 +51,7 @@ export class GroupsComponent {
   filteredGroups: Group[];
   groupForm: FormGroup;
   private _applicationStartDate: Date;
-  private filterValue: string = "";
+  filterValue: string = "";
 
   /**
    * Constructor

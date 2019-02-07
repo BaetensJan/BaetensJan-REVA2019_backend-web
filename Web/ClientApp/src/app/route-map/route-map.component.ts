@@ -3,6 +3,7 @@ import {ImageDataService} from "../image-data-service/image-data.service";
 import { Subscription } from 'rxjs/Subscription';
 import { Observable } from 'rxjs/Observable';
 import 'rxjs/add/observable/timer';
+import {AppShareService} from "../AppShareService";
 
 @Component({
   selector: 'app-route-map',
@@ -33,7 +34,7 @@ export class RouteMapComponent implements AfterViewInit, OnInit {
    *
    * @param _imageDataService
    */
-  constructor(private _imageDataService: ImageDataService) {
+  constructor(private _imageDataService: ImageDataService, private _appShareService: AppShareService) {
   }
 
   ngOnInit() {
@@ -49,19 +50,17 @@ export class RouteMapComponent implements AfterViewInit, OnInit {
     console.log(formData);
     this._imageDataService.UpdateRoutePlanImage(formData).subscribe((value: boolean) => {
       if (value == false) {
-        this.fileSelected = false;
-        this.successMessage = "Het beursplan is succesvol geupload";
-        this.showMessage = true;
-        setTimeout(()=>{
-          this.showMessage = false;
-        }, 3000);
+        this._appShareService.addAlert({
+          type: 'success',
+          msg: `Het beursplan is succesvol geupload`,
+          timeout: 5000
+        });
       } else {
-        this.fileSelected = true;
-        this.successMessage = "Het uploaden van het beursplan is mislukt";
-        this.showMessageFail = true;
-        setTimeout(()=>{
-          this.showMessage = false;
-        }, 3000);
+        this._appShareService.addAlert({
+          type: 'success',
+          msg: `Het uploaden van het beursplan is mislukt`,
+          timeout: 5000
+        });
       }
     });
   }

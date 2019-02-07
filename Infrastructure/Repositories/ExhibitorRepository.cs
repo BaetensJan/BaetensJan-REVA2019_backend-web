@@ -72,6 +72,13 @@ namespace Infrastructure.Repositories
                 .SingleOrDefaultAsync(c => c.Id == id);
             return exhibitor;
         }
+        
+        public Task<Exhibitor> GetByName(string exhibitorName)
+        {
+            var exhibitor = _exhibitors.Include(e => e.Categories).ThenInclude(ce => ce.Category)
+                .SingleOrDefaultAsync(c => c.Name == exhibitorName);
+            return exhibitor;
+        }
 
 //        public IEnumerable<Exhibitor> GetByCategory(Category category)
 //        {
@@ -91,6 +98,11 @@ namespace Infrastructure.Repositories
         public void Remove(Exhibitor Exhibitor)
         {
             _exhibitors.Remove(Exhibitor);
+        }
+        
+        public void RemoveAllExhibitors(IEnumerable<Exhibitor> exhibitors)
+        {
+            _exhibitors.RemoveRange(exhibitors);
         }
 
         public Task SaveChanges()

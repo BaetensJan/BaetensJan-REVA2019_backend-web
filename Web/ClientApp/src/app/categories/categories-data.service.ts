@@ -3,6 +3,7 @@ import {HttpClient} from "@angular/common/http";
 import {Observable} from "rxjs";
 import {map} from "rxjs/operators";
 import {Category} from "../models/category.model";
+import {Exhibitor} from "../models/exhibitor.model";
 
 @Injectable({
   providedIn: 'root'
@@ -31,6 +32,15 @@ export class CategoriesDataService {
   }
 
   /**
+   * Makes call to backend and returns Category
+   */
+  categorieByName(categoryName: string): Observable<Category> {
+    return this.http
+      .get(`${this._appUrl}/CategorieByName/${categoryName}`)
+      .pipe(map(Category.fromJSON));
+  }
+
+  /**
    * Makes call to backend and adds a Category
    *
    * @param categorie
@@ -50,6 +60,16 @@ export class CategoriesDataService {
     return this.http
       .delete(`${this._appUrl}/RemoveCategory/${rec.id}`)
       .pipe(map(Category.fromJSON));
+  }
+
+  /**
+   * Makes call to the backend and removes all the exhibitors
+   * @param rec
+   */
+  removeCategories(): Observable<Category[]> {
+    return this.http
+      .delete(`${this._appUrl}/RemoveCategories`)
+      .pipe(map((list: any[]): Category[] => list.map(Category.fromJSON)));
   }
 
   /**

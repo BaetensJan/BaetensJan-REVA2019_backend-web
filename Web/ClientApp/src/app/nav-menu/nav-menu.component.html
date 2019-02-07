@@ -68,6 +68,12 @@
             </a>
           </li>
 
+          <li [routerLinkActive]='["link-active"]'>
+            <a (click)='collapse()' [routerLink]='["upload-csv"]'>
+              <span class='glyphicon glyphicon-plus'></span> Uploaden CSV
+            </a>
+          </li>
+
           <ng-container class='clearfix' style="margin-bottom: 1.5em;"></ng-container>
 
           <li [routerLinkActive]='["link-active"]'>

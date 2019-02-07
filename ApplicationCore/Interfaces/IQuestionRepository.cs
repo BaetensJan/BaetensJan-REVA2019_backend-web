@@ -13,6 +13,7 @@ namespace ApplicationCore.Interfaces
         Task Add(Question Question);
         Task<Question> EditQuestion(int questionId, string questionText, string answerText, CategoryExhibitor ce);
         void Remove(Question Question);
+        void RemoveAllQuestions(IEnumerable<Question> questions);
         Task SaveChanges();
     }
 }

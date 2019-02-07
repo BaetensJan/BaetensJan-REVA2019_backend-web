@@ -62,6 +62,12 @@ namespace Infrastructure.Repositories
             var cat = _categories.SingleOrDefaultAsync(c => c.Id == id);
             return cat;
         }
+        
+        public Task<Category> GetByName(string categoryName)
+        {
+            var cat = _categories.SingleOrDefaultAsync(c => c.Name == categoryName);
+            return cat;
+        }
 
         private Category MapCategory(Category category)
         {
@@ -103,6 +109,12 @@ namespace Infrastructure.Repositories
         {
             _categories.Remove(category);
         }
+        
+        public void RemoveAllCategories(IEnumerable<Category> categories)
+        {
+            _categories.RemoveRange(categories);
+        }
+        
         
         public void Update(Category category)
         {

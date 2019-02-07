@@ -3,6 +3,8 @@ import {HttpClient} from "@angular/common/http";
 import {Observable} from "rxjs";
 import {map} from "rxjs/operators";
 import {Exhibitor} from "../models/exhibitor.model";
+import {Category} from "../models/category.model";
+import {Question} from "../models/question.model";
 
 @Injectable({
   providedIn: 'root'
@@ -31,6 +33,15 @@ export class ExhibitorsDataService {
   }
 
   /**
+   * Makes call to backend and returns Exhibitor
+   */
+  exhibitorByName(exhibitorName: string): Observable<Exhibitor> {
+    return this.http
+      .get(`${this._appUrl}/ExhibitorByName/${exhibitorName}`)
+      .pipe(map(Exhibitor.fromJSON));
+  }
+
+  /**
    * Makes call to the backend and removes an exhibitor
    *
    * @param rec
@@ -41,6 +52,18 @@ export class ExhibitorsDataService {
       .pipe(map(Exhibitor.fromJSON));
   }
 
+
+  /**
+   * Makes call to the backend and removes all the exhibitors
+   * @param rec
+   */
+  removeExhibitors(): Observable<Exhibitor[]> {
+    return this.http
+      .delete(`${this._appUrl}/RemoveExhibitors`)
+      .pipe(map((list: any[]): Exhibitor[] => list.map(Exhibitor.fromJSON)));
+  }
+
+
   /**
    * Makes call to backend and adds an exhibitor
    *
@@ -48,7 +71,6 @@ export class ExhibitorsDataService {
    * @constructor
    */
   voegExhibitorToe(exhibitor: Exhibitor): Observable<Exhibitor> {
-    console.log(exhibitor);
     return this.http
       .post(`${this._appUrl}/AddExhibitor/`, this.exhibitorToDTO(exhibitor))
       .pipe(map(Exhibitor.fromJSON));
@@ -74,7 +96,6 @@ export class ExhibitorsDataService {
       "ExhibitorNumber": exhibitor.exhibitorNumber,
       "categoryIds": exhibitor.categories.map(e => e.id)
     };
-    console.log(exh);
     return exh;
   }
 }
