@@ -24,6 +24,7 @@ namespace Infrastructure.Configurations
             builder.Property(t => t.Photo); // wordt apart opgeslaan (ik heb van ignore naar Property gezet)
             builder.HasOne(t => t.Question);
             builder.Property(t => t.Answer).HasColumnName("Answer");
+            builder.Property(t => t.Extra);
             builder.Property(t => t.Submitted).HasColumnName("Submitted");
             builder.Property(t => t.CreationDate);
             builder.Property(t => t.SubmissionDate);

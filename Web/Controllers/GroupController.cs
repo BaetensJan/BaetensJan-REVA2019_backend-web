@@ -41,10 +41,10 @@ namespace Web.Controllers
         /**
         * Returns group status/info to android (current assignment, number of assignments done by group,
         * if group already has an assignment and the coordinates of the previous exhibitor if existing).
-        * Gets groupId via token -> groepId
+        * Gets groupId via token -> groupId
         */
         [HttpGet("[action]")]
-        public async Task<IActionResult> GroupInfo( /*int groupId*/)
+        public async Task<IActionResult> GroupInfo()
         {
             // get username from jwt token.
             var groupId = User.Claims.ElementAt(5).Value;
@@ -67,15 +67,30 @@ namespace Web.Controllers
             }
 
             var currentAssignment = group.Assignments.LastOrDefault();
-            var numberOfSubmittedAssignments = currentAssignment == null ? 0 : 
-                currentAssignment.Submitted ? numberOfAssignments : numberOfAssignments - 1;
+            var isCreatedExhibitor = false;
+            var numberOfSubmittedAssignments = 0;
+
+            if (currentAssignment != null)
+            {
+                if (!currentAssignment.Submitted)
+                {
+                    numberOfSubmittedAssignments = numberOfAssignments - 1;
+                    isCreatedExhibitor =
+                        currentAssignment.WithCreatedExhibitor(
+                            _configuration.GetValue<int>("CreatedExhibitorQuestionId"));
+                }
+            }
+
             var hasNoAssignments = numberOfAssignments == 0;
 
             return Ok(new
             {
-                hasNoAssignments,
+                startDate = _configuration.GetValue<DateTime>("StartDate"), // <= DateTime.Now,
+                hasNoAssignments, // we need this attribute, because numberOfAssignments != numberOfSubmittedAssignments
+                // (and the app only knows the latter) 
                 numberOfSubmittedAssignments,
                 currentAssignment, // last assignment
+                isCreatedExhibitor,
                 previousExhibitorXCoordinate,
                 previousExhibitorYCoordinate
             });

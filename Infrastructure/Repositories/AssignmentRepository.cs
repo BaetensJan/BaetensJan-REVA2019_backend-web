@@ -84,7 +84,8 @@ namespace Infrastructure.Repositories
                 Question = e.Question,
                 Notes = e.Notes,
                 Photo = e.Photo,
-                Submitted = e.Submitted
+                Submitted = e.Submitted,
+                Extra = e.Extra
             };
         }
 

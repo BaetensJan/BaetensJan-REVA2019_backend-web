@@ -31,7 +31,7 @@ namespace Web.Controllers
         {
             return _categoryRepository.All();
         }
-        
+
         /**
          * returns category with name equal to parameter categoryname.
          */
@@ -42,70 +42,56 @@ namespace Web.Controllers
         }
 
         /**
-         * Returns the Categories that were not yet picker if isExtraRound (normal tour, with 8 assignments has been finished),
-         * or returns the categories of which the exhibitors were not all yet picked.
+         * Returns only the Categories of which not all related Questions were answered by a Group.
+         *
+         * Parameter exhibitorId: when a Group wants all Categories, of which not all related Questions were answered, 
+         * of Exhibitor with id == exhibitorId.
          */
         [HttpGet("[action]/{exhibitorId}")]
         public async Task<IEnumerable<Category>> GetUnpickedCategories(int exhibitorId)
         {
             var group = await _groupRepository.GetById(Convert.ToInt32(User.Claims.ElementAt(5).Value));
             var assignments = group.Assignments;
-            
+
+            var questions = await _questionRepository.GetAll();
             IEnumerable<Category> categories;
+            var unpickedCategories = new List<Category>();
+
+            // check if an exhibitorId was given as parameter (if not, then it is equals to -1)
             if (exhibitorId != -1)
             {
                 var exhibitor = await _exhibitorRepository.GetById(exhibitorId);
-                categories = exhibitor.Categories.Select(ce => ce.Category);
-            } else categories = await _categoryRepository.All();
-            
-            var unpickedCategories = new List<Category>();
-
-            var counter = 0;
-            var found = false;
-
-            // check if extra round (when a group has already finished the max number of assignments in a normal tour)
-            if (assignments.Count >= 8) //TODO maxNumberOfRounds uit conf file halen
-            {
-                foreach (var category in categories)
-                {
-                    foreach (var categoryExhibitor in category.Exhibitors)
-                    {
-                        foreach (var assignment in assignments)
-                        {
-                            var categoryId = categoryExhibitor.Exhibitor.Id;
-                            var exhibitorId2 = category.Id;
-
-                            if (exhibitorId == assignment.Question.CategoryExhibitor.Exhibitor.Id
-                                && categoryId == assignment.Question.CategoryExhibitor.Category.Id
-                                && await _questionRepository.GetQuestion(categoryId, exhibitorId2) != null)
-
-                                counter++;
-                        }
-                    }
-
-                    // not all exhibitors of a certain Category were picked by the group (otherwise all Exhibitors of a
-                    // certain Category would be found in the submitted assignments  (where the chosen Category AND
-                    // Exhibitor would match). 
-                    if (counter != category.Exhibitors.Count) unpickedCategories.Add(category);
-                    counter = 0; // reset counter
-                }
+                categories = exhibitor.Categories.Select(categoryExhibitor => categoryExhibitor.Category);
+                questions = questions.Where(q => q.CategoryExhibitor.ExhibitorId == exhibitorId).ToList();
             }
             else
             {
-                foreach (var category in categories)
+                categories = await _categoryRepository.All();
+            }
+
+            var counter = 0;
+
+            foreach (var category in categories)
+            {
+                // we only need to check the questions related to the current category
+                var categoryQuestions = questions.Where(q => q.CategoryExhibitor.CategoryId == category.Id).ToList();
+
+                // loop over every Question related to the current Category of the loop.
+                foreach (var question in categoryQuestions)
                 {
+                    // check if all questions of the current Category of the loop have already been answered by this Group.
                     foreach (var assignment in assignments)
                     {
-                        // current Category was already chosen. Break in order to not add it to unpickedCategories.
-                        if (assignment.Question.CategoryExhibitor.Category.Id != category.Id) continue;
-                        found = true;
-                        break;
+                        if (assignment.Question.Id == question.Id)
+                        {
+                            counter++;
+                        }
                     }
-
-                    // all assignments were checked and none had current Category as chosen Category.
-                    if (!found) unpickedCategories.Add(category);
-                    found = false;
                 }
+
+                // not all categoryQuestions were answered by the Group already, so we can add this Category to UnpickedCategories.
+                if (counter < categoryQuestions.Count) unpickedCategories.Add(category);
+                counter = 0;
             }
 
             return unpickedCategories;
@@ -129,7 +115,7 @@ namespace Web.Controllers
             {
                 Name = category.Name,
                 Description = category.Description,
-                Photo = ""        
+                Photo = ""
             };
 
             await _categoryRepository.Add(c);
@@ -147,7 +133,7 @@ namespace Web.Controllers
             await _categoryRepository.SaveChanges();
             return category;
         }
-        
+
         [HttpDelete("RemoveCategories")]
         public async Task<ActionResult> RemoveCategories()
         {
@@ -167,8 +153,8 @@ namespace Web.Controllers
             Category c = await _categoryRepository.GetById(category.Id);
             c.Name = category.Name;
             c.Description = category.Description;
-
             _categoryRepository.Update(c);
+
             await _categoryRepository.SaveChanges();
             return category;
         }
