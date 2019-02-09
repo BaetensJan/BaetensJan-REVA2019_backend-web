@@ -83,6 +83,10 @@ export class AuthenticationService {
     return this._isAdmin$;
   }
 
+  get isLoggedIn(): boolean {
+    return this._user$.getValue() != null;
+  }
+
 
   /**
    * Getter for token
