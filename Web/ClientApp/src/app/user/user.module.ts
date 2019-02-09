@@ -20,7 +20,8 @@ import {ForgotPasswordComponent} from './forgot-password/forgot-password.compone
 const routes = [
   {path: 'login', canActivate: [AuthGuardService], component: LoginComponent},
   {path: 'logout', canActivate: [AuthGuardService], component: LogoutComponent},
-  {path: 'register', canActivate: [AuthGuardService], component: RegisterComponent}
+  {path: 'register', canActivate: [AuthGuardService], component: RegisterComponent},
+  {path: 'wachtwoord-vergeten', canActivate: [AuthGuardService], component: ForgotPasswordComponent}
 ];
 
 @NgModule({
