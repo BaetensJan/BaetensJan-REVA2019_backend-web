@@ -125,7 +125,7 @@ export class QuestionsComponent implements OnInit {
    */
   addQuestion() {
     this._questionSharedService.question = null;
-    this.router.navigate(["/question"]);
+    this.router.navigate(["/vraag"]);
   }
 
   /**
@@ -136,7 +136,7 @@ export class QuestionsComponent implements OnInit {
   editQuestion(row: Question) {
     this._questionSharedService.question = row;
     this._questionSharedService.edit = true;
-    this.router.navigate(["/question"]);
+    this.router.navigate(["/vraag"]);
   }
 
   /**

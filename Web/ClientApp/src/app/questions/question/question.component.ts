@@ -116,7 +116,7 @@ export class QuestionComponent implements OnInit {
   }
 
   goToQuestions() {
-    this.router.navigate(["/questions"]);
+    this.router.navigate(["/vragen"]);
   }
 
   get exhibitors() {

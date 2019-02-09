@@ -12,14 +12,15 @@ import {LogoutComponent} from "./logout/logout.component";
 import {InvitationService} from "./invitation/invitation.service";
 import {RequestsComponent} from "./invitation/pending-requests/requests.component";
 import {InviteRequestComponent} from "./invitation/send-request/invite-request.component";
+import {ForgotPasswordComponent} from './forgot-password/forgot-password.component';
 
 /**
  * Routing for user login and registration
  */
 const routes = [
-  {path: 'login', component: LoginComponent},
-  {path: 'logout', component: LogoutComponent},
-  {path: 'register', component: RegisterComponent}
+  {path: 'login', canActivate: [AuthGuardService], component: LoginComponent},
+  {path: 'logout', canActivate: [AuthGuardService], component: LogoutComponent},
+  {path: 'register', canActivate: [AuthGuardService], component: RegisterComponent}
 ];
 
 @NgModule({
@@ -29,7 +30,7 @@ const routes = [
     ReactiveFormsModule,
     RouterModule.forChild(routes)
   ],
-  declarations: [LoginComponent, LogoutComponent, RegisterComponent, InviteRequestComponent, RequestsComponent],
+  declarations: [LoginComponent, LogoutComponent, RegisterComponent, InviteRequestComponent, RequestsComponent, ForgotPasswordComponent],
   providers: [
     httpInterceptorProviders,
     InvitationService,

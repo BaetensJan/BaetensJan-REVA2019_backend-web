@@ -13,7 +13,8 @@ export class NavMenuComponent {
    */
   isExpanded = false;
 
-  constructor(private authService: AuthenticationService) {}
+  constructor(private authService: AuthenticationService) {
+  }
 
   /**
    * Click event to collapse navbar menu
