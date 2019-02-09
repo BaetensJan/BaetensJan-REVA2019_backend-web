@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using ApplicationCore.Entities;
 using ApplicationCore.Interfaces;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Configuration;
 
 namespace Web.Controllers
 {
@@ -16,14 +17,18 @@ namespace Web.Controllers
         private readonly IGroupRepository _groupRepository;
         private readonly IQuestionRepository _questionRepository;
         private readonly IExhibitorRepository _exhibitorRepository;
+        private readonly IConfiguration _configuration;
 
         public CategoryController(ICategoryRepository categoryRepository, IGroupRepository groupRepository,
-            IQuestionRepository questionRepository, IExhibitorRepository exhibitorRepository)
+            IQuestionRepository questionRepository, IExhibitorRepository exhibitorRepository,
+            IConfiguration configuration)
+
         {
             _categoryRepository = categoryRepository;
             _groupRepository = groupRepository;
             _questionRepository = questionRepository;
             _exhibitorRepository = exhibitorRepository;
+            _configuration = configuration;
         }
 
         [HttpGet("[action]")]
@@ -53,48 +58,67 @@ namespace Web.Controllers
             var group = await _groupRepository.GetById(Convert.ToInt32(User.Claims.ElementAt(5).Value));
             var assignments = group.Assignments;
 
-            var questions = await _questionRepository.GetAll();
-            IEnumerable<Category> categories;
-            var unpickedCategories = new List<Category>();
+            var assignmentsLength = assignments.Count;
 
-            // check if an exhibitorId was given as parameter (if not, then it is equals to -1)
-            if (exhibitorId != -1)
+            // Check if Group is not doing an Extra Round
+            if (assignmentsLength < _configuration.GetValue<int>("AmountOfQuestions"))
             {
-                var exhibitor = await _exhibitorRepository.GetById(exhibitorId);
-                categories = exhibitor.Categories.Select(categoryExhibitor => categoryExhibitor.Category);
-                questions = questions.Where(q => q.CategoryExhibitor.ExhibitorId == exhibitorId).ToList();
+                var temp = await _categoryRepository.All();
+                var categories = temp.ToList(); // todo can dit in 1 regel? Of breekt await _categoryRepository.All().Result.toList() de async? 
+                
+                foreach (var assignment in assignments)
+                {
+                    categories.Remove(assignment.Question.CategoryExhibitor.Category);
+                }
+
+                return categories;
             }
             else
             {
-                categories = await _categoryRepository.All();
-            }
+                IEnumerable<Category> categories;
+                var questions = await _questionRepository.GetAll();
 
-            var counter = 0;
-
-            foreach (var category in categories)
-            {
-                // we only need to check the questions related to the current category
-                var categoryQuestions = questions.Where(q => q.CategoryExhibitor.CategoryId == category.Id).ToList();
-
-                // loop over every Question related to the current Category of the loop.
-                foreach (var question in categoryQuestions)
+                // check if an exhibitorId was given as parameter (if not, then it is equals to -1)
+                if (exhibitorId == -1)
                 {
-                    // check if all questions of the current Category of the loop have already been answered by this Group.
-                    foreach (var assignment in assignments)
-                    {
-                        if (assignment.Question.Id == question.Id)
-                        {
-                            counter++;
-                        }
-                    }
+                    categories = await _categoryRepository.All();
+                }
+                else
+                {
+                    var exhibitor = await _exhibitorRepository.GetById(exhibitorId);
+                    categories = exhibitor.Categories.Select(categoryExhibitor => categoryExhibitor.Category);
+                    questions = questions.Where(q => q.CategoryExhibitor.ExhibitorId == exhibitorId).ToList();
                 }
 
-                // not all categoryQuestions were answered by the Group already, so we can add this Category to UnpickedCategories.
-                if (counter < categoryQuestions.Count) unpickedCategories.Add(category);
-                counter = 0;
-            }
+                var unpickedCategories = new List<Category>();
+                var counter = 0;
 
-            return unpickedCategories;
+                foreach (var category in categories)
+                {
+                    // we only need to check the questions related to the current category
+                    var categoryQuestions =
+                        questions.Where(q => q.CategoryExhibitor.CategoryId == category.Id).ToList();
+
+                    // loop over every Question related to the current Category of the loop.
+                    foreach (var question in categoryQuestions)
+                    {
+                        // check if all questions of the current Category of the loop have already been answered by this Group.
+                        foreach (var assignment in assignments)
+                        {
+                            if (assignment.Question.Id == question.Id)
+                            {
+                                counter++;
+                            }
+                        }
+                    }
+
+                    // not all categoryQuestions were answered by the Group already, so we can add this Category to UnpickedCategories.
+                    if (counter < categoryQuestions.Count) unpickedCategories.Add(category);
+                    counter = 0;
+                }
+
+                return unpickedCategories;
+            }
         }
 
         /**

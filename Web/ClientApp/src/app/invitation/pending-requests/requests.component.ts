@@ -1,7 +1,7 @@
 import {Component, OnInit, TemplateRef} from '@angular/core';
 import {InvitationService} from "../invitation.service";
-import {TeacherRequest} from "../../../models/teacherRequest.model";
 import {BsModalRef, BsModalService} from "ngx-bootstrap";
+import {TeacherRequest} from "../../models/teacherRequest.model";
 
 @Component({
   selector: 'app-requests',

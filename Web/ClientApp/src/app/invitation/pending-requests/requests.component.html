@@ -8,15 +8,17 @@
     <table class="full-width-table table">
       <thead>
       <tr>
+        <th style="font-size: 1.2em; padding-bottom: 1.4em;">Aanvraagdatum</th>
         <th style="font-size: 1.2em; padding-bottom: 1.4em;">Naam</th>
         <th style="font-size: 1.2em; padding-bottom: 1.4em;">Familienaam</th>
-        <th style="font-size: 1.2em; padding-bottom: 1.4em;">Email</th>
+        <th style="font-size: 1.2em; padding-bottom: 1.4em;">E-mailadres</th>
         <th style="font-size: 1.2em; padding-bottom: 1.4em;">School</th>
         <th style="font-size: 1.2em; padding-bottom: 1.4em;">Opmerking</th>
       </tr>
       </thead>
       <tbody>
       <tr *ngFor="let request of requests">
+        <td style="text-transform:capitalize;">{{request.creationDate.toLocaleDateString()}}</td>
         <td style="text-transform:capitalize;">{{request.name}}</td>
         <td style="text-transform:capitalize;">{{request.surname}}</td>
         <td>{{request.email}}</td>

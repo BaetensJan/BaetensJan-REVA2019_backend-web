@@ -7,14 +7,14 @@ export class TeacherRequest {
    * @param email
    * @param schoolName
    * @param note
+   * @param creationDate
    */
   constructor(
     name: string,
     surname: string,
     email: string,
     schoolName: string,
-    note: string,
-  ) {
+    note: string) {
     this._name = name;
     this._surname = surname;
     this._email = email;
@@ -99,6 +99,21 @@ export class TeacherRequest {
     this._note = note;
   }
 
+  private _creationDate: Date;
+
+  /**
+   * Getter
+   */
+  get creationDate(): Date {
+    return this._creationDate;
+  }
+
+  set creationDate(creationDate) {
+    this._creationDate = creationDate;
+  }
+
+
+
   /**
    * Static JSON to Object parser
    *
@@ -110,8 +125,9 @@ export class TeacherRequest {
       json.surname,
       json.email,
       json.schoolName,
-      json.note
+      json.note,
     );
+    rec.creationDate = json.creationDate;
     rec._id = json.id;
     return rec;
   }
@@ -127,6 +143,7 @@ export class TeacherRequest {
       email: this._email,
       schoolName: this._schoolName,
       note: this._note,
+      creationDate: this._creationDate
     };
   }
 }

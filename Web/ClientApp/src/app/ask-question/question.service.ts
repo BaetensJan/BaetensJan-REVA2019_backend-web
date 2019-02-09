@@ -35,23 +35,4 @@ export class QuestionService {
         })
       );
   }
-
-  /**
-   * Invite Request to join the web platform
-   *
-   * @param email
-   * @param name
-   * @param surname
-   * @param note
-   * @param schoolName
-   */
-  inviteRequest(email: string, name: string, surname: string, schoolName: string, note: string): Observable<boolean> {
-    console.log({email, name, surname, schoolName, note});
-    let teacherReq = new TeacherRequest(name, surname, email, schoolName, note);
-    return this.http.post(`${this._url}/teacherRequest/sendRequest`, teacherReq).pipe(
-      map((res: any) => {
-        return true;
-      })
-    );
-  }
 }

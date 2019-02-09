@@ -4,7 +4,6 @@ import {Group} from "../models/group.model";
 import {Observable} from "rxjs/Rx";
 import {PageChangedEvent} from 'ngx-bootstrap/pagination';
 import {AbstractControl, FormBuilder, FormGroup, Validators} from "@angular/forms";
-import {TypeaheadMatch} from 'ngx-bootstrap/typeahead/typeahead-match.class';
 import {BsModalRef, BsModalService} from "ngx-bootstrap";
 import {AppShareService} from "../AppShareService";
 import {School} from "../models/school.model";
@@ -42,13 +41,15 @@ export class GroupsComponent {
   filterOption = "name"; // current filter option: 'groupName' = name or 'groupMembers' = members.
   filterText = "Groepsnaam"; // current text in filterOption button
   filterOnGroupName = true; // if current filter option is filtering on 'groupName' or on 'groupMembers'
+
   contentArray: Group[]; // array containing the groups that fits the filter.
   returnedArray: Group[]; // array containing the groups (maxNumberOfGroupsPerPage) that are showed on the current page.
+  filteredGroups: Group[];
+
   maxNumberOfGroupsPerPage = 5; // amount of groups that will be showed on the current page, to keep the page neat.
   newMemberName: string = ""; // value of input-field in an already existing group. Will be used to add a new member to an existing group.
   createGroupClicked: boolean = false; // if the + button (for creating a group) was clicked.
   groupMembers: string[]; // members that were added to the newly created group.
-  filteredGroups: Group[];
   groupForm: FormGroup;
   private _applicationStartDate: Date;
   filterValue: string = "";
@@ -137,7 +138,7 @@ export class GroupsComponent {
       this.memberToRemove.group = group;
       console.log(groupId);
 
-      this.modalMessage = `Ben je zeker dat de groep met groepsnaam ${group.name} verwijderd mag worden?`;
+      this.modalMessage = `Ben je zeker dat de groep met groepsnaam ${group.name} verwijderd mag worden? De ingediende opdrachten van deze groep worden hierdoor ook verwijderd.`;
 
     }
     this.modalRef = this.modalService.show(template, {class: 'modal-sm'});
@@ -198,7 +199,7 @@ export class GroupsComponent {
     this.appShareService.addAlert(
       {
         type: 'success',
-        msg: `De nieuwe groep met groepsnaam ${groupName} werd succesvol toegevoegd op ${new Date().toLocaleTimeString()}`,
+        msg: `De nieuwe groep met groepsnaam ${groupName} werd succesvol toegevoegd.}`,
         timeout: 5000
       });
   }
@@ -247,7 +248,7 @@ export class GroupsComponent {
   }
 
   /**
-   * When a used clicks on the next page pagination button,
+   * When a user clicks on the next page pagination button,
    * it will show the next groups.
    * @param event
    */
@@ -316,10 +317,10 @@ export class GroupsComponent {
     console.log(this.filteredGroups);
     this.filteredGroups = this._groups.filter((group: Group) => {
       return group.name.toLowerCase().startsWith(token.toLowerCase());
-
       //return question.categoryExhibitor.exhibitor.name.toLowerCase().startsWith(token.toLowerCase()) ||
       //  question.categoryExhibitor.category.name.toLowerCase().startsWith(token.toLowerCase());
     });
+    this.returnedArray = this.filteredGroups.slice(0, this.maxNumberOfGroupsPerPage);
   }
 
   /**
@@ -339,26 +340,6 @@ export class GroupsComponent {
       this.contentArray = this._groups;
     }
     this.initiateReturnedArray();
-  }
-
-  /**
-   * On enter of click on typeAHeadMatch, the chosen group will be displayed.
-   * @param event
-   */
-  onSelect(event: TypeaheadMatch): void {
-    let group = event.item;
-    this.contentArray = [];
-    this.contentArray.push(group);
-    this.initiateReturnedArray()
-  }
-
-  /**
-   * No result matching the searchterm in the filter.
-   * @param event
-   */
-  typeaheadNoResults(event: boolean): void {
-    console.log("no result" + event);
-    this.executeFilterQuery();
   }
 
   private findGroupWithId(groupId: number) {

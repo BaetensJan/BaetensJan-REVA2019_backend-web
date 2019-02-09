@@ -13,10 +13,9 @@ import {ExhibitorComponent} from "../exhibitor/exhibitor.component";
 import {QuestionsComponent} from "../questions/questions.component";
 import {QuestionComponent} from "../questions/question/question.component";
 import {RouteMapComponent} from "../route-map/route-map.component";
-import {RequestsComponent} from "../user/invitation/pending-requests/requests.component";
-import {InviteRequestComponent} from "../user/invitation/send-request/invite-request.component";
 import {AskQuestionComponent} from "../ask-question/ask-question.component";
-import {UploadCsvComponent} from "../upload-csv/upload-csv.component";
+import {InviteRequestComponent} from "../invitation/send-request/invite-request.component";
+import {RequestsComponent} from "../invitation/pending-requests/requests.component";
 
 const appRoutes: Routes = [
   {path: 'home', component: HomeComponent},
@@ -33,7 +32,7 @@ const appRoutes: Routes = [
   {path: 'exposanten', canActivate: [AuthGuardService], component: ExhibitorsComponent},
   {path: 'assignmentdetail', canActivate: [AuthGuardService], component: AssignmentDetailComponent},
   {path: 'exposant', canActivate: [AuthGuardService], component: ExhibitorComponent},
-  {path: 'upload-csv', canActivate: [AuthGuardService], component: UploadCsvComponent},
+  // {path: 'upload-csv', canActivate: [AuthGuardService], component: UploadCsvComponent},
   {path: 'vragen', canActivate: [AuthGuardService], component: QuestionsComponent},
   {path: 'vraag', canActivate: [AuthGuardService], component: QuestionComponent},
   {path: 'beursplan', canActivate: [AuthGuardService], component: RouteMapComponent},

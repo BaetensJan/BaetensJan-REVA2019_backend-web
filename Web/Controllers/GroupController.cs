@@ -89,6 +89,7 @@ namespace Web.Controllers
                 hasNoAssignments, // we need this attribute, because numberOfAssignments != numberOfSubmittedAssignments
                 // (and the app only knows the latter) 
                 numberOfSubmittedAssignments,
+                maxNumberOfAssignments = _configuration.GetValue<int>("AmountOfQuestions"),
                 currentAssignment, // last assignment
                 isCreatedExhibitor,
                 previousExhibitorXCoordinate,

@@ -13,7 +13,7 @@ export class NavMenuComponent {
    */
   isExpanded = false;
 
-  constructor(private authService: AuthenticationService) {
+  constructor(private _authService: AuthenticationService) {
   }
 
   /**
@@ -31,11 +31,10 @@ export class NavMenuComponent {
   }
 
   get user(): Observable<string> {
-    return this.authService.user$;
+    return this._authService.user$;
   }
 
   get isAdmin(): Observable<boolean> {
-    return this.authService.isModerator$;
+    return this._authService.isModerator$;
   }
-
 }

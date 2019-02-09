@@ -5,8 +5,8 @@ import {AbstractControl, FormBuilder, FormGroup, ValidatorFn, Validators} from '
 import {HttpErrorResponse} from '@angular/common/http';
 import {map} from 'rxjs/operators';
 import {InvitationService} from "../invitation.service";
-import {SchoolDataService} from "../../../schools/school-data.service";
-import {AuthenticationService} from "../../authentication.service";
+import {SchoolDataService} from "../../schools/school-data.service";
+import {AuthenticationService} from "../../user/authentication.service";
 
 @Component({
   selector: 'app-invite-request',

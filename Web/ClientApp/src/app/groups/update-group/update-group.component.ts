@@ -122,7 +122,7 @@ export class UpdateGroupComponent implements OnInit {
       this.memberToRemove.group = this._group;
       console.log(groupId);
 
-      this.modalMessage = `Ben je zeker dat de groep met groepsnaam ${this._group.name} verwijderd mag worden?`;
+      this.modalMessage = `Ben je zeker dat de groep met groepsnaam ${this._group.name} verwijderd mag worden? De ingediende opdrachten van deze groep worden hierdoor ook verwijderd.`;
 
     }
     this.modalRef = this.modalService.show(template, {class: 'modal-sm'});
