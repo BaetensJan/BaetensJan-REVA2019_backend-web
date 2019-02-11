@@ -50,6 +50,9 @@ export class ForgotPasswordComponent implements OnInit {
 
   onSubmit() {
     //Todo: Sent to backend
+    this._authenticationService.forgotPassword(this.user.value.email).subscribe(
+      () => {
+      });
   }
 
 }

@@ -154,6 +154,14 @@ export class AuthenticationService {
     }
   }
 
+  forgotPassword(email: string): Observable<boolean> {
+    return this.http.post(`${this._url}/ForgotPassword`, {email}).pipe(
+      map((res: any) => {
+        return true;
+      })
+    );
+  }
+
   /**
    * Checks username availability using backend
    *

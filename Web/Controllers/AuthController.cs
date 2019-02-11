@@ -388,12 +388,46 @@ namespace Web.Controllers
             return Ok(true);
         }
 
-        [HttpPost("[action]/{email}")]
-        public async Task<IActionResult> ForgotPassword(string email)
+        [HttpPost("[action]")]
+        public async Task<IActionResult> ForgotPassword([FromBody] ResetPasswordDTO model)
         {
-            var user = await _userManager.FindByEmailAsync(email);
-            var code = await _userManager.GeneratePasswordResetTokenAsync(user);
-            return Ok(code);
+            var user = await _userManager.FindByEmailAsync(model.Email);
+            if (user != null)
+            {
+                var code = await _userManager.GeneratePasswordResetTokenAsync(user);
+            }
+
+            return Ok();
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordDTO model)
+        {
+            var errors = new List<string>();
+            if (!ModelState.IsValid)
+            {
+                return BadRequest();
+            }
+
+            var user = await _userManager.FindByEmailAsync(model.Email);
+            if (user == null)
+            {
+                // Don't reveal that the user does not exist
+                return Ok();
+            }
+
+            var result = await _userManager.ResetPasswordAsync(user, model.Code, model.Password);
+            if (result.Succeeded)
+            {
+                return Ok();
+            }
+
+            foreach (var error in result.Errors)
+            {
+                errors.Add(error.Description);
+            }
+
+            return BadRequest(errors);
         }
 
         [HttpPost("[action]")]
