@@ -16,7 +16,7 @@
   </button>
 </div>
 
-<table class="table" *ngIf="groups">
+<table class="table" *ngIf="groups; else noGroups">
   <thead>
   <tr>
     <th scope="col">#</th>
@@ -35,8 +35,8 @@
       <td>
 
         <button class="" (click)="pdfDownload(group)"><img id="imageid" src="../../assets/logopdf.png" alt="logo pdf"
-                                                           width="50"
-                                                           height="50"></button>
+        width="50" height="50">
+        </button>
       </td>
       <td>
         <p>{{group.assignments.length}}</p>
@@ -49,6 +49,7 @@
   </tr>
   </tbody>
 </table>
-<h3 *ngIf="returnedArray && returnedArray.length < 1">Er zijn nog geen door groepen ingediende opdrachten.</h3>
-
+<ng-template #noGroups>
+<h3 >Er zijn nog geen door groepen ingediende opdrachten.</h3>
+</ng-template>
 

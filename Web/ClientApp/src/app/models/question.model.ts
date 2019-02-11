@@ -35,7 +35,6 @@ export class Question {
    * @param json
    */
   static fromJSON(json: any): Question {
-    console.log(json);
     const rec = new Question(json.questionText, json.answer, json.categoryExhibitor.category, json.categoryExhibitor.exhibitor);
     rec._id = json.id;
     return rec;

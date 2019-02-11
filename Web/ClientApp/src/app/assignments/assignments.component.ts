@@ -68,6 +68,7 @@ export class AssignmentsComponent {
     } else {
       this._groupsDataService.groupsBySchoolId(schoolId).subscribe(value => {
         this.groups = value;
+        console.log(this.groups);
         this.maxNumberOfGroupsPerPage = this.groups.length;
         this.contentArray = this.groups;
         this.initiateReturnedArray();
