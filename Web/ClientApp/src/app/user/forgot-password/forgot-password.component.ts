@@ -49,10 +49,8 @@ export class ForgotPasswordComponent implements OnInit {
   }
 
   onSubmit() {
-    //Todo: Sent to backend
-    this._authenticationService.forgotPassword(this.user.value.email).subscribe(
-      () => {
-      });
+    this._authenticationService.forgotPassword(this.user.value.email).subscribe();
+    this.router.navigate(['/wachtwoord-vergeten-confirmation']);
   }
 
 }

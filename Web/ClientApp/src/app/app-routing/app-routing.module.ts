@@ -17,6 +17,7 @@ import {RequestsComponent} from "../user/invitation/pending-requests/requests.co
 import {InviteRequestComponent} from "../user/invitation/send-request/invite-request.component";
 import {AskQuestionComponent} from "../ask-question/ask-question.component";
 import {UploadCsvComponent} from "../upload-csv/upload-csv.component";
+import {ForgotPasswordConfirmationComponent} from "../user/forgot-password-confirmation/forgot-password-confirmation.component";
 
 const appRoutes: Routes = [
   {path: 'home', component: HomeComponent},
@@ -40,6 +41,11 @@ const appRoutes: Routes = [
   {path: 'invite-request', canActivate: [AuthGuardService], component: InviteRequestComponent},
   {path: 'aanvragen', canActivate: [AuthGuardService], component: RequestsComponent},
   {path: 'ask-question', component: AskQuestionComponent},
+  {
+    path: 'wachtwoord-vergeten-confirmation',
+    canActivate: [AuthGuardService],
+    component: ForgotPasswordConfirmationComponent
+  },
   {path: '', redirectTo: 'home', pathMatch: 'full'},
   {path: '**', component: PageNotFoundComponent}
 ];
