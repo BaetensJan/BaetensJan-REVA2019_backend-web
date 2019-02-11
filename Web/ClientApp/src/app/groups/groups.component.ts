@@ -25,10 +25,22 @@ export class GroupsComponent {
   modalRef: BsModalRef; // modal that appears asking for confirmation to remove a member from a group.
   modalMessage: string;
 
-  contentArray: Group[]; // array containing the groups that fits the filter.
-  returnedArray: Group[]; // array containing the groups (maxNumberOfGroupsPerPage) that are showed on the current page.
-  filteredGroups: Group[];
-
+  currentPage; // the current page in the pagination (e.g. page 1, 2 ...)
+  private _groups: Group[]; // array containing the groups that fits the filter.
+  private _returnedArray: Group[]; // array containing the groups (maxNumberOfGroupsPerPage) that are shown on the current page.
+  /**
+   * Getter for groups
+   */
+  get returnedArray(): Group[] {
+    return this._returnedArray;
+  }
+  private _filteredGroups: Group[]; // array containing all groups that meet the filter
+  /**
+   * Getter for groups
+   */
+  get filteredGroups(): Group[] {
+    return this._filteredGroups;
+  }
   maxNumberOfGroupsPerPage = 5; // amount of groups that will be showed on the current page, to keep the page neat.
   newMemberName: string = ""; // value of input-field in an already existing group. Will be used to add a new member to an existing group.
   createGroupClicked: boolean = false; // if the + button (for creating a group) was clicked.
@@ -80,15 +92,6 @@ export class GroupsComponent {
     return this._school;
   }
 
-  _groups: Group[]; // array containing ALL the groups.
-
-  /**
-   * Getter for groups
-   */
-  get groups(): Group[] {
-    return this._groups;
-  }
-
   ngOnInit(): void {
     let currentUser = AuthenticationService.parseJwt(localStorage.getItem("currentUser"));
     let schoolId = currentUser.school;
@@ -96,9 +99,7 @@ export class GroupsComponent {
     if (isAdmin == "True") {
       this._groupsDataService.allGroups.subscribe(value => {
         this._groups = value;
-        this.contentArray = this._groups;
-        this.filteredGroups = this._groups;
-        this.initiateReturnedArray();
+        this.initiateArrays();
       });
     } else {
       this._schoolDataService.getSchool(schoolId).subscribe(value => {
@@ -106,9 +107,7 @@ export class GroupsComponent {
         this._school = value;
         this.prepareFormGroup();
         this._groups = this._school.groups;
-        this.contentArray = this._groups;
-        this.initiateReturnedArray();
-        this.filteredGroups = this._groups
+        this.initiateArrays();
       });
     }
     this.groupMembers = [];
@@ -137,9 +136,9 @@ export class GroupsComponent {
       if (index > -1) {
         this._groups.splice(index, 1);
       }
-      index = this.returnedArray.indexOf(group, 0);
+      index = this._returnedArray.indexOf(group, 0);
       if (index > -1) {
-        this.returnedArray.splice(index, 1);
+        this._returnedArray.splice(index, 1);
       }
     });
   }
@@ -176,38 +175,19 @@ export class GroupsComponent {
   public filter(token: string) {
     console.log(token);
     if (this.filterText == "Groepsnaam") {
-      this.filteredGroups = this._groups.filter((group: Group) => {
+      this._filteredGroups = this._groups.filter((group: Group) => {
         return group.name.toLowerCase().startsWith(token.toLowerCase());
       });
     } else {
-      this.filteredGroups = this._groups.filter((group: Group) => {
+      this._filteredGroups = this._groups.filter((group: Group) => {
         return group.members.find((member: string) => member.toLowerCase().startsWith(token.toLowerCase()));
       });
     }
-    this.returnedArray = this.filteredGroups.slice(0, this.maxNumberOfGroupsPerPage);
-  }
-
-  /**
-   * Edits the contentArray (array that represents all the groups that should be presented) to
-   * the current filter value (text that user typed in the filter field).
-   */
-  executeFilterQuery(filter?: string) {
-    this.contentArray = [];
-    if (filter) {
-      this._groups.forEach(group => {
-        let sub = group.name.toLowerCase().substr(0, filter.length);
-        if (sub == filter.toLocaleLowerCase() /*|| group.members.includes(filter)*/) { //TODO eens members geimplementeerd is in backend, uit commentaar halen.
-          this.contentArray.push(group);
-        }
-      });
-    } else {
-      this.contentArray = this._groups;
-    }
-    this.initiateReturnedArray();
+    this._returnedArray = this._filteredGroups.slice(0, this.maxNumberOfGroupsPerPage);
+    this.currentPage = 1; // switches current page in pagination back to page 1
   }
 
   /** MODAL / POPUP **/
-
   openModal(template: TemplateRef<any>, groupId: number, memberName?: string) {
     if (memberName) {
       if (groupId != -1) {
@@ -227,6 +207,9 @@ export class GroupsComponent {
     this.modalRef = this._modalService.show(template, {class: 'modal-sm'});
   }
 
+  /**
+   * When Teacher confirms to remove a group / member of group in the Modal (popup).
+   */
   confirm(): void {
     if (this.memberToRemove.name != "") {
       if (this.memberToRemove.group != null) {
@@ -246,10 +229,12 @@ export class GroupsComponent {
   }
 
   /**
-   * initiates the returnedArray with the groups that should be presented on the current page.
+   * Sorts the groups alphabetically
    */
-  initiateReturnedArray() {
-    this.returnedArray = this.contentArray.sort((a, b) => a.name > b.name ? 1 : -1).slice(0, this.maxNumberOfGroupsPerPage);
+  initiateArrays() {
+    this._groups.sort((a, b) => a.name > b.name ? 1 : -1);
+    this._filteredGroups = this._groups;
+    this._returnedArray = this._filteredGroups.slice(0, this.maxNumberOfGroupsPerPage);
   }
 
   prepareFormGroup() {
@@ -285,7 +270,7 @@ export class GroupsComponent {
   pageChanged(event: PageChangedEvent): void {
     const startItem = (event.page - 1) * event.itemsPerPage;
     const endItem = event.page * event.itemsPerPage;
-    this.returnedArray = this.contentArray.slice(startItem, endItem);
+    this._returnedArray = this._filteredGroups.slice(startItem, endItem);
   }
 
   /**
@@ -332,7 +317,7 @@ export class GroupsComponent {
     this._groupsDataService.addNewGroup(this.school.id, newGroup).subscribe(value => {
       console.log(value);
       this._groups.push(value);
-      this.executeFilterQuery();
+      this.initiateArrays();
       this.groupMembers = [];
       this.groupForm.controls['groupName'].setValue("");
       this.groupForm.controls['groupPassword'].setValue("");

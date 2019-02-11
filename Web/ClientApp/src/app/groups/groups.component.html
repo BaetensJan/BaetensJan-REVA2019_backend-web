@@ -24,11 +24,6 @@
   </div>
 </div>
 
-
-<div #noGroupsYet *ngIf="groups == null || groups.length < 1">
-  <h4>U heeft nog geen groepen aangemaakt. Zodra u groepen aanmaakt zullen deze hier zichtbaar worden.</h4>
-</div>
-
 <!--Search Filter Bar-->
 <div class="row">
   <div class="col-md-10">
@@ -115,16 +110,15 @@
         <button type='submit' [disabled]='!groupForm.valid' class="btn btn-success">Groep aanmaken</button>
       </div>
     </form>
-
   </div>
 </div>
 
 <!--Overview of groups-->
-<div class="row" *ngIf="groups != null && groups.length > 0">
+<div class="row" *ngIf="returnedArray; else noGroups">
   <div class="col-xs-12 col-12">
     <div class="content-wrapper">
       <accordion [closeOthers]="true">
-        <accordion-group *ngFor="let group of filteredGroups; let i = index" [isOpen]="i == 0">
+        <accordion-group *ngFor="let group of returnedArray; let i = index" [isOpen]="i == 0">
           <div class="row" accordion-heading>
             <div class="col-md-9">
               <b>{{group.name}}</b>
@@ -182,10 +176,14 @@
     </div>
 
     <!--Pagination-->
-    <pagination [totalItems]="contentArray.length" (pageChanged)="pageChanged($event)"
-                [itemsPerPage]=maxNumberOfGroupsPerPage></pagination>
+    <pagination [totalItems]="filteredGroups.length" (pageChanged)="pageChanged($event)"
+                [itemsPerPage]=maxNumberOfGroupsPerPage   [(ngModel)]="currentPage"></pagination>
   </div>
 </div>
+
+<ng-template #noGroups>
+  <h4>U heeft nog geen groepen aangemaakt. Zodra u groepen aanmaakt zullen deze hier zichtbaar worden.</h4>
+</ng-template>
 
 <!-- delete member of group modal -->
 <ng-template #template>

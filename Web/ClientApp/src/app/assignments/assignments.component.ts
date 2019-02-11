@@ -7,12 +7,7 @@ import {Router} from "@angular/router";
 import {School} from "../models/school.model";
 import {GroupsDataService} from "../groups/groups-data.service";
 import * as html2canvas from 'html2canvas';
-import * as pdfcrowd from 'pdfcrowd';
 import {Observable, Observer} from "rxjs";
-import {Question} from "../models/question.model";
-import {Assignment} from "../models/assignment.model";
-import {$} from "protractor";
-import {AssignmentDetailComponent} from "../assignment-detail/assignment-detail.component";
 
 function parseJwt(token) {
   if (!token) {
