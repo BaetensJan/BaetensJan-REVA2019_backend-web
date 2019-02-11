@@ -30,7 +30,7 @@ export class AuthGuardService implements CanActivate {
       return false;
     }
     if (this.isLoggedInPage(state.url)) {
-      if (this.authService.isLoggedIn$) {
+      if (this.authService.isLoggedIn$.getValue()) {
         return true
       }
       this.authService.redirectUrl = state.url;
