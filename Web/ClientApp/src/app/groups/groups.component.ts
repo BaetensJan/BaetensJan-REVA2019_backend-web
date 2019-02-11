@@ -13,6 +13,7 @@ import {Router} from "@angular/router";
 import {map} from "rxjs/operators";
 import {AssignmentDataService} from "../assignments/assignment-data.service";
 import {AuthenticationService} from "../user/authentication.service";
+import {forEach} from "@angular/router/src/utils/collection";
 
 @Component({
   selector: 'groups',
@@ -34,6 +35,7 @@ export class GroupsComponent {
   get returnedArray(): Group[] {
     return this._returnedArray;
   }
+
   private _filteredGroups: Group[]; // array containing all groups that meet the filter
   /**
    * Getter for groups
@@ -41,6 +43,7 @@ export class GroupsComponent {
   get filteredGroups(): Group[] {
     return this._filteredGroups;
   }
+
   maxNumberOfGroupsPerPage = 5; // amount of groups that will be showed on the current page, to keep the page neat.
   newMemberName: string = ""; // value of input-field in an already existing group. Will be used to add a new member to an existing group.
   createGroupClicked: boolean = false; // if the + button (for creating a group) was clicked.
@@ -77,10 +80,14 @@ export class GroupsComponent {
     return this._applicationStartDate;
   }
 
-  private _filterText: string = "Groepsnaam"; // current text in filterOption button
+  private _filterOnGroupName: boolean = true; // current text in filterOption button
 
-  get filterText(): string {
-    return this._filterText;
+  get filterOnGroupName(): boolean {
+    return this._filterOnGroupName;
+  }
+
+  set filterOnGroupName(value) {
+    this._filterOnGroupName = value;
   }
 
   private _school: School;
@@ -164,24 +171,29 @@ export class GroupsComponent {
 
   /** FILTER **/
 
-  changeFilter() {
-    if (this.filterText == "Groepslid") {
-      this._filterText = "Groepsnaam";
-    } else {
-      this._filterText = "Groepslid";
-    }
-  }
-
   public filter(token: string) {
-    console.log(token);
-    if (this.filterText == "Groepsnaam") {
-      this._filteredGroups = this._groups.filter((group: Group) => {
-        return group.name.toLowerCase().startsWith(token.toLowerCase());
-      });
+    token = token.toLowerCase();
+    if (!token) {
+      this._filteredGroups = this._groups;
     } else {
-      this._filteredGroups = this._groups.filter((group: Group) => {
-        return group.members.find((member: string) => member.toLowerCase().startsWith(token.toLowerCase()));
-      });
+      if (this._filterOnGroupName) {
+        this._filteredGroups = this._groups.filter((group: Group) => {
+          return group.name.toLowerCase().includes(token);
+        });
+      } else {
+        this._filteredGroups = [];
+        this._groups.forEach((group: Group) => {
+          for (let i in group.members) {
+            let member = group.members[i];
+            if (member.toLowerCase().includes(token)) {
+              console.log(member);
+              this._filteredGroups.push(group);
+              break;
+            }
+          }
+          // return group.members.toString().includes(token);
+        });
+      }
     }
     this._returnedArray = this._filteredGroups.slice(0, this.maxNumberOfGroupsPerPage);
     this.currentPage = 1; // switches current page in pagination back to page 1

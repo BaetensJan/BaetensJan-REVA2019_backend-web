@@ -5,8 +5,8 @@
 
 <div class="panel panel-default">
   <div class="panel-body">
-  <h3 *ngIf="applicationStartDate">De app zal pas gebruikt kunnen worden door studenten vanaf:
-    <strong>{{applicationStartDate.toLocaleDateString()}}</strong></h3>
+    <h3 *ngIf="applicationStartDate">De app zal pas gebruikt kunnen worden door studenten vanaf:
+      <strong>{{applicationStartDate.toLocaleDateString()}}</strong></h3>
   </div>
 </div>
 
@@ -35,8 +35,8 @@
     </div>
   </div>
   <div class="col-md-2">
-    <button class="btn btn-info" (click)="changeFilter()">
-      <span class="glyphicon glyphicon-check"></span> {{filterText}}
+    <button class="btn btn-info" (click)="filterOnGroupName = !filterOnGroupName">
+      <span class="glyphicon glyphicon-check"></span> {{filterOnGroupName ? "Groepsnaam" : "Groepsleden"}}
     </button>
   </div>
 </div>
@@ -177,7 +177,7 @@
 
     <!--Pagination-->
     <pagination [totalItems]="filteredGroups.length" (pageChanged)="pageChanged($event)"
-                [itemsPerPage]=maxNumberOfGroupsPerPage   [(ngModel)]="currentPage"></pagination>
+                [itemsPerPage]=maxNumberOfGroupsPerPage [(ngModel)]="currentPage"></pagination>
   </div>
 </div>
 

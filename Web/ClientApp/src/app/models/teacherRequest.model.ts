@@ -112,7 +112,9 @@ export class TeacherRequest {
     this._creationDate = creationDate;
   }
 
-
+  get creationDateString(): string {
+    return this._creationDate.toLocaleDateString()
+  }
 
   /**
    * Static JSON to Object parser
@@ -127,7 +129,7 @@ export class TeacherRequest {
       json.schoolName,
       json.note,
     );
-    rec.creationDate = json.creationDate;
+    rec.creationDate = new Date(json.creationDate);
     rec._id = json.id;
     return rec;
   }
