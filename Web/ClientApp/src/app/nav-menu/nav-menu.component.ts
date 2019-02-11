@@ -30,6 +30,10 @@ export class NavMenuComponent {
     this.isExpanded = !this.isExpanded;
   }
 
+  get isLoggedIn(): Observable<boolean> {
+    return this._authService.isLoggedIn$;
+  }
+
   get user(): Observable<string> {
     return this._authService.user$;
   }

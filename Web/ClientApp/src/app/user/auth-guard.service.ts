@@ -13,10 +13,10 @@ export class AuthGuardService implements CanActivate {
     console.debug(`Admin Required: ${this.isAdminRequired(state.url)}`);
     console.debug(`Login Required: ${this.isLoggedInPage(state.url)}`);
     console.debug(`NonLogin Required: ${this.isNonLoggedInPage(state.url)}`);
-    console.debug(`Logged in: ${this.authService.isLoggedIn}`);
+    console.debug(`Logged in: ${this.authService.isLoggedIn$.getValue()}`);
     console.debug(`Is Admin: ${this.authService.isModerator$.getValue()}`);
     if (this.isAdminRequired(state.url)) {
-      if (this.authService.isLoggedIn) {
+      if (this.authService.isLoggedIn$.getValue()) {
         if (this.authService.isModerator$.getValue()) {
           return true;
         } else {
@@ -30,7 +30,7 @@ export class AuthGuardService implements CanActivate {
       return false;
     }
     if (this.isLoggedInPage(state.url)) {
-      if (this.authService.isLoggedIn) {
+      if (this.authService.isLoggedIn$) {
         return true
       }
       this.authService.redirectUrl = state.url;
@@ -38,7 +38,7 @@ export class AuthGuardService implements CanActivate {
       return false;
     }
     if (this.isNonLoggedInPage(state.url)) {
-      if (this.authService.isLoggedIn) {
+      if (this.authService.isLoggedIn$.getValue()) {
         this.router.navigate(['/home']);
         return false;
       }

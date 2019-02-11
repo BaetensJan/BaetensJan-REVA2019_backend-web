@@ -65,8 +65,8 @@ export class AuthenticationService {
     return this._isAdmin$;
   }
 
-  get isLoggedIn(): boolean {
-    return this._user$.getValue() != null;
+  get isLoggedIn$(): BehaviorSubject<boolean> {
+    return new BehaviorSubject<boolean>(this._user$.getValue() != null);
   }
 
 
@@ -85,7 +85,6 @@ export class AuthenticationService {
    * @param password
    */
   login(username: string, password: string): Observable<boolean> {
-    //TODO check if token already exist (then api call to backend is unnecessary) => if (localStorage.getItem(this._tokenKey)*/
     return this.http.post(`${this._url}/LoginWebTeacher`, {username, password}).pipe(
       map((res: any) => {
         const token = res.token;

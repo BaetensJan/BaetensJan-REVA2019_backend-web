@@ -18,17 +18,17 @@
             <span class='glyphicon glyphicon-home'></span> Home
           </a>
         </li>
-        <li *ngIf='(!user | async)' [routerLinkActive]='["link-active"]'>
+        <li *ngIf='(!(isLoggedIn | async))' [routerLinkActive]='["link-active"]'>
           <a (click)='collapse()' [routerLink]='["invite-request"]'>
             <span class='glyphicon glyphicon-plus'></span> Aanvraag indienen
           </a>
         </li>
-        <li *ngIf='(user | async)' [routerLinkActive]='["link-active"]'>
+        <li *ngIf='(isLoggedIn | async)' [routerLinkActive]='["link-active"]'>
           <a (click)='collapse()' [routerLink]='["/groepen"]'>
             <span class='glyphicon glyphicon-user'></span> Groepen
           </a>
         </li>
-        <li *ngIf='(user | async)' [routerLinkActive]='["link-active"]'>
+        <li *ngIf='(isLoggedIn | async)' [routerLinkActive]='["link-active"]'>
           <a (click)='collapse()' [routerLink]='["opdrachten"]'>
             <span class='glyphicon glyphicon-th-list'></span> Opdrachten
           </a>
@@ -85,7 +85,7 @@
 
         <div class='clearfix' style="margin-bottom: 1.5em;"></div>
 
-        <li *ngIf='(user | async); else loginlink' [routerLinkActive]='["link-active"]'>
+        <li *ngIf='(isLoggedIn | async); else loginlink' [routerLinkActive]='["link-active"]'>
           <a (click)='collapse()' [routerLink]='["logout"]'>
             <span class="glyphicon glyphicon-user"></span> Logout
           </a>
