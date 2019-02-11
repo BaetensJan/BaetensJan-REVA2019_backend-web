@@ -4,8 +4,10 @@
 </div>
 
 <div class="panel panel-default">
-  <h2 *ngIf="applicationStartDate">De app zal pas gebruikt kunnen worden door studenten vanaf:
-    <strong>{{applicationStartDate.toLocaleDateString()}}</strong></h2>
+  <div class="panel-body">
+  <h3 *ngIf="applicationStartDate">De app zal pas gebruikt kunnen worden door studenten vanaf:
+    <strong>{{applicationStartDate.toLocaleDateString()}}</strong></h3>
+  </div>
 </div>
 
 <div class="panel panel-default container-fluid" *ngIf="school" id="app-credentials">

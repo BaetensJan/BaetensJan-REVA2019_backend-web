@@ -58,7 +58,7 @@ namespace Web.Controllers
 
             if (numberOfAssignments > 1)
             {
-                group.Assignments.Sort((ass1, ass2) => ass1.Id.CompareTo(ass2.Id));
+                group.Assignments.Sort((ass1, ass2) => ass1.CreationDate.CompareTo(ass2.CreationDate));
 
                 previousExhibitorXCoordinate =
                     group.Assignments[numberOfAssignments - 2].Question.CategoryExhibitor.Exhibitor.X;
@@ -68,18 +68,15 @@ namespace Web.Controllers
 
             var currentAssignment = group.Assignments.LastOrDefault();
             var isCreatedExhibitor = false;
-            var numberOfSubmittedAssignments = 0;
+            var numberOfSubmittedAssignments = numberOfAssignments;
 
-            if (currentAssignment != null)
-            {
-                if (!currentAssignment.Submitted)
+            if (currentAssignment != null && !currentAssignment.Submitted)
                 {
                     numberOfSubmittedAssignments = numberOfAssignments - 1;
                     isCreatedExhibitor =
                         currentAssignment.WithCreatedExhibitor(
                             _configuration.GetValue<int>("CreatedExhibitorQuestionId"));
                 }
-            }
 
             var hasNoAssignments = numberOfAssignments == 0;
 

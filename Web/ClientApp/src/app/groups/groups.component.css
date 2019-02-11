@@ -1,10 +1,7 @@
-#schoolLogin, #schoolPassword,
-.form-control[disabled], fieldset[disabled] .form-control{
+#schoolLogin, #schoolPassword{
   cursor: default !important;
 }
-.panel {
-  background: #f0f9fa;
-}
+
 #header + div {
   margin-top: 2.5em;
 }

@@ -5,24 +5,6 @@ import {Injectable} from '@angular/core';
 import {map} from 'rxjs/operators';
 import {Router} from '@angular/router';
 
-/**
- * Parser for jwt token when authenticating user
- *
- * @param token
- */
-function parseJwt(token) {
-  if (!token) {
-    return null;
-  }
-  try {
-    const base64Url = token.split('.')[1];
-    const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
-    return JSON.parse(window.atob(base64));
-  } catch (err) {
-    return null;
-  }
-}
-
 @Injectable()
 export class AuthenticationService {
   /**
@@ -51,7 +33,7 @@ export class AuthenticationService {
   constructor(private http: HttpClient, private router: Router) {
     // localStorage.removeItem(this._tokenKey); //TODO if error with can't parse jwt -> remove the key
 
-    let parsedToken = parseJwt(localStorage.getItem(this._tokenKey));
+    let parsedToken = AuthenticationService.parseJwt(localStorage.getItem(this._tokenKey));
     if (parsedToken) {
       const expires =
         new Date(parseInt(parsedToken.exp, 10) * 1000) < new Date();
@@ -109,7 +91,7 @@ export class AuthenticationService {
         const token = res.token;
         if (token) {
           const token = res.token;
-          let parsedToken = parseJwt(token);
+          let parsedToken = AuthenticationService.parseJwt(token);
           if (this.checkUserRole(parsedToken)) { // check if user is a teacher
             this.setTokenAndUsername(res.token, username);
             return true;
@@ -194,5 +176,23 @@ export class AuthenticationService {
 
     // check if user is a group. Groups have no access to web.
     return !(parsedToken && parsedToken.group);
+  }
+
+  /**
+   * Parser for jwt token when authenticating user
+   *
+   * @param token
+   */
+  static parseJwt(token) {
+    if (!token) {
+      return null;
+    }
+    try {
+      const base64Url = token.split('.')[1];
+      const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+      return JSON.parse(window.atob(base64));
+    } catch (err) {
+      return null;
+    }
   }
 }

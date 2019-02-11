@@ -34,7 +34,7 @@ namespace ApplicationCore.Services
         /**
          * Finds the "fittest" Exhibitor, holding in account how occupied with visitors and far the exhibitors are.
          */
-        public async Task<Exhibitor> FindNextExhibitor(int exhibitorIdStart, int categoryId)
+        public async Task<Exhibitor> FindNextExhibitor(int exhibitorIdStart, int categoryId, List<Exhibitor> potentialExhibitors)
         {
             Exhibitor start = null;
             // The first time the tour starts, the exhibitorId will be -1
@@ -55,12 +55,7 @@ namespace ApplicationCore.Services
                 startY = start.Y;
             }
 
-            /*Todo enkel categoryExhibitor objecten nemen waaraan een question verbonden is. en een methode in de repo daarvoor voorzien.*/
-            var questions = await _questionRepository.GetAll();
-            var potentialExhibitors =
-                questions.Where(q => q.CategoryExhibitor.CategoryId == categoryId)
-                    .Select(e => e.CategoryExhibitor.Exhibitor)
-                    .ToList();
+           
             var nextExhibitor = potentialExhibitors[0];
             potentialExhibitors.RemoveAt(0);
             var lowestWeight = GetWeight(nextExhibitor, startX, startY);

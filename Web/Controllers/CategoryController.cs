@@ -64,11 +64,16 @@ namespace Web.Controllers
             if (assignmentsLength < _configuration.GetValue<int>("AmountOfQuestions"))
             {
                 var temp = await _categoryRepository.All();
-                var categories = temp.ToList(); // todo can dit in 1 regel? Of breekt await _categoryRepository.All().Result.toList() de async? 
-                
+                var categories =
+                    temp.ToList(); // todo can dit in 1 regel? Of breekt await _categoryRepository.All().Result.toList() de async? 
+
                 foreach (var assignment in assignments)
                 {
-                    categories.Remove(assignment.Question.CategoryExhibitor.Category);
+                    var category = categories.SingleOrDefault(c => c.Id == assignment.Question.CategoryExhibitor.CategoryId);
+                    if (category != null)
+                    {
+                        categories.Remove(category);
+                    }
                 }
 
                 return categories;

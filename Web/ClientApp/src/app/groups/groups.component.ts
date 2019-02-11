@@ -12,20 +12,7 @@ import {GroupSharedService} from "./group-shared.service";
 import {Router} from "@angular/router";
 import {map} from "rxjs/operators";
 import {AssignmentDataService} from "../assignments/assignment-data.service";
-
-
-function parseJwt(token) {
-  if (!token) {
-    return null;
-  }
-  try {
-    const base64Url = token.split('.')[1];
-    const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
-    return JSON.parse(window.atob(base64));
-  } catch (err) {
-    return null;
-  }
-}
+import {AuthenticationService} from "../user/authentication.service";
 
 @Component({
   selector: 'groups',
@@ -38,10 +25,6 @@ export class GroupsComponent {
   modalRef: BsModalRef; // modal that appears asking for confirmation to remove a member from a group.
   modalMessage: string;
 
-  filterOption = "name"; // current filter option: 'groupName' = name or 'groupMembers' = members.
-  filterText = "Groepsnaam"; // current text in filterOption button
-  filterOnGroupName = true; // if current filter option is filtering on 'groupName' or on 'groupMembers'
-
   contentArray: Group[]; // array containing the groups that fits the filter.
   returnedArray: Group[]; // array containing the groups (maxNumberOfGroupsPerPage) that are showed on the current page.
   filteredGroups: Group[];
@@ -51,7 +34,6 @@ export class GroupsComponent {
   createGroupClicked: boolean = false; // if the + button (for creating a group) was clicked.
   groupMembers: string[]; // members that were added to the newly created group.
   groupForm: FormGroup;
-  private _applicationStartDate: Date;
   filterValue: string = "";
 
   /**
@@ -62,16 +44,31 @@ export class GroupsComponent {
    * @param _assignmentDataService
    * @param _schoolDataService
    * @param fb
-   * @param modalService
-   * @param appShareService
+   * @param _modalService
+   * @param _appShareService
+   * @param _authService
    */
   constructor(private router: Router,
               private _groupsDataService: GroupsDataService,
               private _groupsSharedService: GroupSharedService,
               private _schoolDataService: SchoolDataService,
               private _assignmentDataService: AssignmentDataService,
-              private fb: FormBuilder, private modalService: BsModalService,
-              private appShareService: AppShareService) {
+              private fb: FormBuilder,
+              private _modalService: BsModalService,
+              private _appShareService: AppShareService,
+              private _authService: AuthenticationService) {
+  }
+
+  private _applicationStartDate: Date;
+
+  get applicationStartDate(): Date {
+    return this._applicationStartDate;
+  }
+
+  private _filterText: string = "Groepsnaam"; // current text in filterOption button
+
+  get filterText(): string {
+    return this._filterText;
   }
 
   private _school: School;
@@ -93,7 +90,7 @@ export class GroupsComponent {
   }
 
   ngOnInit(): void {
-    let currentUser = parseJwt(localStorage.getItem("currentUser"));
+    let currentUser = AuthenticationService.parseJwt(localStorage.getItem("currentUser"));
     let schoolId = currentUser.school;
     let isAdmin = currentUser.isAdmin;
     if (isAdmin == "True") {
@@ -123,44 +120,6 @@ export class GroupsComponent {
     this.router.navigate(["groepen/updateGroup"]);
   }
 
-  openModal(template: TemplateRef<any>, groupId: number, memberName?: string) {
-    if (memberName) {
-      if (groupId != -1) {
-        let group = this.findGroupWithId(groupId);
-        this.memberToRemove.group = group;
-        this.modalMessage = `Ben je zeker dat ${memberName} verwijderd mag worden uit ${group.name}?`;
-      } else { // delete member of not-yet-created group.
-        this.modalMessage = `Ben je zeker dat ${memberName} verwijderd mag worden uit de groep?`;
-      }
-      this.memberToRemove.name = memberName;
-    } else { // deleting of a group.
-      let group = this.findGroupWithId(groupId);
-      this.memberToRemove.group = group;
-      console.log(groupId);
-
-      this.modalMessage = `Ben je zeker dat de groep met groepsnaam ${group.name} verwijderd mag worden? De ingediende opdrachten van deze groep worden hierdoor ook verwijderd.`;
-
-    }
-    this.modalRef = this.modalService.show(template, {class: 'modal-sm'});
-  }
-
-  confirm(): void {
-    if (this.memberToRemove.name != "") {
-      if (this.memberToRemove.group != null) {
-        this.removeMemberFromAlreadyCreatedGroup(this.memberToRemove.group, this.memberToRemove.name);
-      }
-      const index = this.groupMembers.indexOf(this.memberToRemove.name, 0);
-      if (index > -1) {
-        this.groupMembers.splice(index, 1);
-      }
-    } else { // member to remove is from an already existing group.
-      this.removeGroup(this.memberToRemove.group);
-    }
-    this.memberToRemove.name = "";
-    this.memberToRemove.group = null;
-
-    this.modalRef.hide();
-  }
 
   removeMemberFromAlreadyCreatedGroup(group, memberName) {
     this._groupsDataService.removeMember(group.id, memberName).subscribe(value => {
@@ -196,7 +155,7 @@ export class GroupsComponent {
    * @param groupName
    */
   public add(groupName: string): void {
-    this.appShareService.addAlert(
+    this._appShareService.addAlert(
       {
         type: 'success',
         msg: `De nieuwe groep met groepsnaam ${groupName} werd succesvol toegevoegd.}`,
@@ -204,15 +163,86 @@ export class GroupsComponent {
       });
   }
 
+  /** FILTER **/
+
   changeFilter() {
-    this.filterOnGroupName = !this.filterOnGroupName;
-    if (this.filterOnGroupName) {
-      this.filterOption = "name";
-      this.filterText = "Groepsnaam";
+    if (this.filterText == "Groepslid") {
+      this._filterText = "Groepsnaam";
     } else {
-      this.filterOption = "members";
-      this.filterText = "Groepslid";
+      this._filterText = "Groepslid";
     }
+  }
+
+  public filter(token: string) {
+    console.log(token);
+    if (this.filterText == "Groepsnaam") {
+      this.filteredGroups = this._groups.filter((group: Group) => {
+        return group.name.toLowerCase().startsWith(token.toLowerCase());
+      });
+    } else {
+      this.filteredGroups = this._groups.filter((group: Group) => {
+        return group.members.find((member: string) => member.toLowerCase().startsWith(token.toLowerCase()));
+      });
+    }
+    this.returnedArray = this.filteredGroups.slice(0, this.maxNumberOfGroupsPerPage);
+  }
+
+  /**
+   * Edits the contentArray (array that represents all the groups that should be presented) to
+   * the current filter value (text that user typed in the filter field).
+   */
+  executeFilterQuery(filter?: string) {
+    this.contentArray = [];
+    if (filter) {
+      this._groups.forEach(group => {
+        let sub = group.name.toLowerCase().substr(0, filter.length);
+        if (sub == filter.toLocaleLowerCase() /*|| group.members.includes(filter)*/) { //TODO eens members geimplementeerd is in backend, uit commentaar halen.
+          this.contentArray.push(group);
+        }
+      });
+    } else {
+      this.contentArray = this._groups;
+    }
+    this.initiateReturnedArray();
+  }
+
+  /** MODAL / POPUP **/
+
+  openModal(template: TemplateRef<any>, groupId: number, memberName?: string) {
+    if (memberName) {
+      if (groupId != -1) {
+        let group = this.findGroupWithId(groupId);
+        this.memberToRemove.group = group;
+        this.modalMessage = `Ben je zeker dat ${memberName} verwijderd mag worden uit ${group.name}?`;
+      } else { // delete member of not-yet-created group.
+        this.modalMessage = `Ben je zeker dat ${memberName} verwijderd mag worden uit de groep?`;
+      }
+      this.memberToRemove.name = memberName;
+    } else { // deleting of a group.
+      let group = this.findGroupWithId(groupId);
+      this.memberToRemove.group = group;
+      this.modalMessage = `Ben je zeker dat de groep met groepsnaam ${group.name} verwijderd mag worden? 
+      De ingediende opdrachten van deze groep worden hierdoor ook verwijderd.`;
+    }
+    this.modalRef = this._modalService.show(template, {class: 'modal-sm'});
+  }
+
+  confirm(): void {
+    if (this.memberToRemove.name != "") {
+      if (this.memberToRemove.group != null) {
+        this.removeMemberFromAlreadyCreatedGroup(this.memberToRemove.group, this.memberToRemove.name);
+      }
+      const index = this.groupMembers.indexOf(this.memberToRemove.name, 0);
+      if (index > -1) {
+        this.groupMembers.splice(index, 1);
+      }
+    } else { // member to remove is from an already existing group.
+      this.removeGroup(this.memberToRemove.group);
+    }
+    this.memberToRemove.name = "";
+    this.memberToRemove.group = null;
+
+    this.modalRef.hide();
   }
 
   /**
@@ -311,48 +341,8 @@ export class GroupsComponent {
     });
   }
 
-  public filter(token: string) {
-    console.log(token);
-    console.log(this._groups);
-    console.log(this.filteredGroups);
-    this.filteredGroups = this._groups.filter((group: Group) => {
-      return group.name.toLowerCase().startsWith(token.toLowerCase());
-      //return question.categoryExhibitor.exhibitor.name.toLowerCase().startsWith(token.toLowerCase()) ||
-      //  question.categoryExhibitor.category.name.toLowerCase().startsWith(token.toLowerCase());
-    });
-    this.returnedArray = this.filteredGroups.slice(0, this.maxNumberOfGroupsPerPage);
-  }
-
-  /**
-   * Edits the contentArray (array that represents all the groups that should be presented) to
-   * the current filter value (text that user typed in the filter field).
-   */
-  executeFilterQuery(filter?: string) {
-    this.contentArray = [];
-    if (filter) {
-      this._groups.forEach(group => {
-        let sub = group.name.toLowerCase().substr(0, filter.length);
-        if (sub == filter.toLocaleLowerCase() /*|| group.members.includes(filter)*/) { //TODO eens members geimplementeerd is in backend, uit commentaar halen.
-          this.contentArray.push(group);
-        }
-      });
-    } else {
-      this.contentArray = this._groups;
-    }
-    this.initiateReturnedArray();
-  }
-
   private findGroupWithId(groupId: number) {
     let group = this._groups.find(g => g.id == groupId);
     return group;
-  }
-
-
-  get applicationStartDate(): Date {
-    return this._applicationStartDate;
-  }
-
-  set applicationStartDate(value: Date) {
-    this._applicationStartDate = value;
   }
 }

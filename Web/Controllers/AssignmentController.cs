@@ -6,6 +6,7 @@ using ApplicationCore.Interfaces;
 using ApplicationCore.Services;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore.Internal;
 using Microsoft.Extensions.Configuration;
 using Web.DTOs;
 
@@ -64,6 +65,11 @@ namespace Web.Controllers
             });
         }
 
+        public async Task<Group> GetGroup()
+        {
+            return await _groupRepository.GetById(Convert.ToInt32(User.Claims.ElementAt(5).Value));
+        }
+
         /**
         * Gets the closest exhibitor with a certain category, starting from previous exhibitor. (Normal Tour)
         * 
@@ -77,19 +83,56 @@ namespace Web.Controllers
         [HttpGet("[Action]/{categoryId}/{previousExhibitorId}/{isExtraRound}")]
         public async Task<IActionResult> CreateAssignment(int categoryId, int previousExhibitorId, bool isExtraRound)
         {
-            // FindNextExhibitor already checks if the categoryId and ExhibitorId combo has a question in the DB.
-            var exhibitor = await _exhibitorManager.FindNextExhibitor(previousExhibitorId, categoryId);
+            var group = await GetGroup();
+            var questions = await _questionRepository.GetAll();
+            var assignments = group.Assignments;
+
+            // Only get Exhibitors of which there exists a Question with given categoryId. 
+            questions = questions.Where(q => q.CategoryExhibitor.CategoryId == categoryId).ToList();
+
+            // Check if group is doing an Extra Round
+            if (assignments != null && assignments.Count >= _configuration.GetValue<int>("AmountOfQuestions"))
+            {
+                // Only get Questions of chosen Category, that were not yet answered by the Group.
+                foreach (var assignment in assignments)
+                {
+                    var questionTemp = assignment.Question;
+                    if (questionTemp.CategoryExhibitor.CategoryId != categoryId) continue;
+                    var qstn = questions.SingleOrDefault(q => q.Id == questionTemp.Id);
+
+                    if (qstn != null)
+                    {
+                        questions.Remove(qstn);
+                    }
+                }
+            }
+
+            if (questions.Count < 1)
+                return Ok(new
+                {
+                    Message =
+                        "Alle vragen voor deze Categorie zijn al beantwoord. Deze Categorie mocht niet worden weergegeven" +
+                        " in de CategoryChoiceFragment"
+                });
+            
+            var potentialExhibitors = questions
+                .Select(e => e.CategoryExhibitor.Exhibitor)
+                .ToList();
+
+            // FindNextExhibitor 
+            var exhibitor =
+                await _exhibitorManager.FindNextExhibitor(previousExhibitorId, categoryId, potentialExhibitors);
 
             exhibitor.GroupsAtExhibitor++;
 
             var question = await _questionRepository.GetQuestion(categoryId, exhibitor.Id);
 
-            var assignment = await CreateAssignment(question, isExtraRound);
-            assignment =
+            var newAssignment = await CreateAssignment(question, isExtraRound, group);
+            newAssignment =
                 await _assignmentRepository
-                    .GetByIdLight(assignment.Id); //Todo temporary, otherwise we have recursive catExh data
+                    .GetByIdLight(newAssignment.Id); //Todo temporary, otherwise we have recursive catExh data
 
-            return Ok(assignment);
+            return Ok(newAssignment);
         }
 
         /**
@@ -103,7 +146,7 @@ namespace Web.Controllers
             var question = await _questionRepository.GetById(127);
 
             // get group object via schoolId and groupName
-            var group = await _groupRepository.GetById(Convert.ToInt32(User.Claims.ElementAt(5).Value));
+            var group = await GetGroup();
 
             // Create assignment and Add to the groups assignments.
             var assignment = new Assignment(question, true);
@@ -149,7 +192,7 @@ namespace Web.Controllers
         {
             var question = await _questionRepository.GetQuestion(categoryId, exhibitorId);
 
-            var assignment = await CreateAssignment(question, true);
+            var assignment = await CreateAssignment(question, true, await GetGroup());
 
             assignment =
                 await _assignmentRepository
@@ -158,11 +201,8 @@ namespace Web.Controllers
             return Ok(assignment);
         }
 
-        private async Task<Assignment> CreateAssignment(Question question, bool isExtraRound)
+        private async Task<Assignment> CreateAssignment(Question question, bool isExtraRound, Group group)
         {
-            // get group object via schoolId and groupName
-            var group = await _groupRepository.GetById(Convert.ToInt32(User.Claims.ElementAt(5).Value));
-
             // Create assignment and Add to the groups assignments.
             var assignment = new Assignment(question, isExtraRound);
             group.AddAssignment(assignment);

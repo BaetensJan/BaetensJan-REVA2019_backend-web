@@ -1,6 +1,4 @@
-using System;
 using System.Collections.Generic;
-using System.Data.SqlClient;
 using System.Threading.Tasks;
 using ApplicationCore.Entities;
 using ApplicationCore.Interfaces;
@@ -16,13 +14,10 @@ namespace Web.Controllers
         private readonly IQuestionRepository _questionRepository;
 
         private readonly ICategoryExhibitorRepository _categoryExhibitorRepository;
-//        private readonly UserManager<ApplicationUser> _userManager;
 
         public QuestionController(IQuestionRepository repository,
-            ICategoryExhibitorRepository categoryExhibitorRepository
-            /*, UserManager<ApplicationUser> userManager*/)
+            ICategoryExhibitorRepository categoryExhibitorRepository)
         {
-//            _userManager = userManager;
             _questionRepository = repository;
             _categoryExhibitorRepository = categoryExhibitorRepository;
         }
