@@ -15,22 +15,24 @@ namespace Web.Controllers
     {
         private readonly ExhibitorManager _exhibitorManager;
         private readonly IExhibitorRepository _exhibitorRepository;
+        private readonly ICategoryRepository _categoryRepository;
 
         public ExhibitorController(IExhibitorRepository exhibitorRepository, ICategoryRepository categoryRepository,
             ICategoryExhibitorRepository categoryExhibitorRepository, IQuestionRepository questionRepository)
         {
             _exhibitorRepository = exhibitorRepository;
             _exhibitorManager = new ExhibitorManager(exhibitorRepository, categoryRepository, questionRepository);
+            _categoryRepository = categoryRepository;
         }
 
         [HttpGet("[action]")]
-        public Task<IEnumerable<Exhibitor>> Exhibitors()
+        public async Task<List<Exhibitor>> Exhibitors()
         {
-            var exhbs = _exhibitorManager.ExhibitorsLight();
+            var exhbs = _exhibitorManager.Exhibitors();
             //.Exhibitors().ToList(); Todo: infinite recursive loop (has catExhibitor with exhibitors that have catExhibs and so on).
-            return exhbs;
+            return await exhbs;
         }
-        
+
         /**
          * returns exhibitor with name equal to parameter exhibitorname.
          */
@@ -39,15 +41,15 @@ namespace Web.Controllers
         {
             return await _exhibitorRepository.GetByName(exhibitorName);
         }
-
+/*
         [HttpGet("[action]")]
         public Task<IEnumerable<Exhibitor>> ExhibitorsLight()
         {
             return _exhibitorManager.ExhibitorsLight();
-        }
-        
+        }*/
+
         [HttpPut("[action]/{id}")]
-        public Task<Exhibitor> UpdateExhibitor([FromRoute] int id, [FromBody] ExhibitorDTO exhibitordto)
+        public async Task<Exhibitor> UpdateExhibitor([FromRoute] int id, [FromBody] ExhibitorDTO exhibitordto)
         {
             var exhibitor = new Exhibitor
             {
@@ -56,9 +58,13 @@ namespace Web.Controllers
                 X = exhibitordto.X,
                 Y = exhibitordto.Y,
                 GroupsAtExhibitor = 0,
-                Categories = CreateCategories(exhibitordto.CategoryIds)
             };
-            return _exhibitorManager.UpdateExhibitor(id,exhibitor);
+            foreach (var i in exhibitordto.CategoryIds)
+            {
+                exhibitor.Categories.Add(await _categoryRepository.GetById(i));
+            }
+
+            return await _exhibitorManager.UpdateExhibitor(id, exhibitor);
         }
 
         [HttpDelete("[action]/{id}")]
@@ -66,7 +72,7 @@ namespace Web.Controllers
         {
             return _exhibitorManager.RemoveExhibitor(id);
         }
-        
+
         [HttpDelete("RemoveExhibitors")]
         public async Task<ActionResult> RemoveExhibitors()
         {
@@ -90,20 +96,22 @@ namespace Web.Controllers
                 X = exhibitordto.X,
                 Y = exhibitordto.Y,
                 GroupsAtExhibitor = 0,
-                Categories = CreateCategories(exhibitordto.CategoryIds)
             };
 
-            //_exhibitorManager.AddExhibitor(exhibitor);
+            foreach (var i in exhibitordto.CategoryIds)
+            {
+                exhibitor.Categories.Add(await _categoryRepository.GetById(i));
+            }
+
             await _exhibitorRepository.Add(exhibitor);
             await _exhibitorRepository.SaveChanges();
-            
+
             return exhibitor;
         }
 
         [HttpPost("[action]")]
         public async Task<Exhibitor> UpdateExhibitor([FromBody] ExhibitorDTO exhibitordto)
         {
-            
             Exhibitor e = await _exhibitorRepository.GetById(exhibitordto.Id);
             e.Id = exhibitordto.Id;
             e.Name = exhibitordto.Name;

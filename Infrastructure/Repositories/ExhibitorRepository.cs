@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 using ApplicationCore.Entities;
 using ApplicationCore.Interfaces;
@@ -17,7 +16,7 @@ namespace Infrastructure.Repositories
             _dbContext = dbContext;
             _exhibitors = dbContext.Exhibitors;
         }
-
+/*
         private Exhibitor MapExhibitor(Exhibitor exhibitor)
         {
 //            var categoryExhibitors = exhibitor?.Categories;
@@ -48,34 +47,36 @@ namespace Infrastructure.Repositories
             };
             return exh;
         }
-
+*/
         /**
          * Light data
          */
+        /*
         public async Task<IEnumerable<Exhibitor>> AllLight()
         {
             // Abstractie: zorgt ervoor dat enkel de nodige data opgehaald wordt (geen recursieve loop).
             var exhibitors = (await _exhibitors.Include(c=>c.Categories).ThenInclude(ce=>ce.Category).ToListAsync()).Select(MapExhibitor);
             return exhibitors;
-        }
+        }*/
 
         public Task<List<Exhibitor>> All()
         {
-            var exhibitors = _exhibitors.Include(e => e.Categories).ThenInclude(c => c.Category).ToListAsync();
+            var exhibitors = _exhibitors.Include("CategoryExhibitors.Category")
+                .ToListAsync();
 //            .Select(MapExhibitor);
             return exhibitors;
         }
 
         public Task<Exhibitor> GetById(int id)
         {
-            var exhibitor = _exhibitors.Include(e => e.Categories).ThenInclude(ce => ce.Category)
+            var exhibitor = _exhibitors.Include("CategoryExhibitors.Category")
                 .SingleOrDefaultAsync(c => c.Id == id);
             return exhibitor;
         }
-        
+
         public Task<Exhibitor> GetByName(string exhibitorName)
         {
-            var exhibitor = _exhibitors.Include(e => e.Categories).ThenInclude(ce => ce.Category)
+            var exhibitor = _exhibitors.Include("CategoryExhibitors.Category")
                 .SingleOrDefaultAsync(c => c.Name == exhibitorName);
             return exhibitor;
         }
@@ -94,12 +95,12 @@ namespace Infrastructure.Repositories
         {
             _exhibitors.Update(exhibitor);
         }
-        
+
         public void Remove(Exhibitor Exhibitor)
         {
             _exhibitors.Remove(Exhibitor);
         }
-        
+
         public void RemoveAllExhibitors(IEnumerable<Exhibitor> exhibitors)
         {
             _exhibitors.RemoveRange(exhibitors);

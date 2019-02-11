@@ -31,17 +31,18 @@ namespace Infrastructure.Repositories
                 new Category
                 {
                     Id = q.CategoryExhibitor.CategoryId,
-                    Exhibitors = null,
+                    //Exhibitors = null, //TODO: This has been changed
                     Name = q.CategoryExhibitor.Category.Name,
                     Description = q.CategoryExhibitor.Category.Description,
                     Photo = q.CategoryExhibitor.Category.Photo
                 }).ToListAsync();
             return questionCategories;
         }
-
+        /*
         /**
          * Light data.
          */
+        /*
         public async Task<IEnumerable<Category>> GetBasic()
         {
             // Abstractie: zorgt ervoor dat enkel de nodige data opgehaald wordt (geen recursieve loop).
@@ -49,12 +50,13 @@ namespace Infrastructure.Repositories
                 (await _categories.Include(c => c.Exhibitors).ThenInclude(ce => ce.Exhibitor).ToListAsync()).Select(
                     MapCategory);
             return categories;
-        }
+        }*/
 
         public async Task<IEnumerable<Category>> All()
         {
-            return await GetBasic();
-            // return _categories.ToList(); //Todo: infinite recursive loop (has catExhibitor with exhibitors that have catExhibs and so on).
+            //return await GetBasic();
+            return
+                _categories.ToList(); //Todo: infinite recursive loop (has catExhibitor with exhibitors that have catExhibs and so on).
         }
 
         public Task<Category> GetById(int id)
@@ -62,13 +64,14 @@ namespace Infrastructure.Repositories
             var cat = _categories.SingleOrDefaultAsync(c => c.Id == id);
             return cat;
         }
-        
+
         public Task<Category> GetByName(string categoryName)
         {
             var cat = _categories.SingleOrDefaultAsync(c => c.Name == categoryName);
             return cat;
         }
 
+/*
         private Category MapCategory(Category category)
         {
 //            var categoryExhibitors = category.Exhibitors;
@@ -98,7 +101,7 @@ namespace Infrastructure.Repositories
                 Description = category.Description
             };
             return cat;
-        }
+        }*/
 
         public Task Add(Category category)
         {
@@ -109,13 +112,13 @@ namespace Infrastructure.Repositories
         {
             _categories.Remove(category);
         }
-        
+
         public void RemoveAllCategories(IEnumerable<Category> categories)
         {
             _categories.RemoveRange(categories);
         }
-        
-        
+
+
         public void Update(Category category)
         {
             _categories.Update(category);

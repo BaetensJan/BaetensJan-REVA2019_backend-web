@@ -69,7 +69,8 @@ namespace Web.Controllers
 
                 foreach (var assignment in assignments)
                 {
-                    var category = categories.SingleOrDefault(c => c.Id == assignment.Question.CategoryExhibitor.CategoryId);
+                    var category =
+                        categories.SingleOrDefault(c => c.Id == assignment.Question.CategoryExhibitor.CategoryId);
                     if (category != null)
                     {
                         categories.Remove(category);
@@ -91,7 +92,7 @@ namespace Web.Controllers
                 else
                 {
                     var exhibitor = await _exhibitorRepository.GetById(exhibitorId);
-                    categories = exhibitor.Categories.Select(categoryExhibitor => categoryExhibitor.Category);
+                    categories = exhibitor.Categories; //.Select(categoryExhibitor => categoryExhibitor.Category);
                     questions = questions.Where(q => q.CategoryExhibitor.ExhibitorId == exhibitorId).ToList();
                 }
 

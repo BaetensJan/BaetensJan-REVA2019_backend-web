@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 using ApplicationCore.Entities;
 using ApplicationCore.Interfaces;
@@ -25,16 +24,17 @@ namespace ApplicationCore.Services
         {
             return _exhibitorRepository.All();
         }
-
+/*
         public Task<IEnumerable<Exhibitor>> ExhibitorsLight()
         {
             return _exhibitorRepository.AllLight();
         }
-
+*/
         /**
          * Finds the "fittest" Exhibitor, holding in account how occupied with visitors and far the exhibitors are.
          */
-        public async Task<Exhibitor> FindNextExhibitor(int exhibitorIdStart, int categoryId, List<Exhibitor> potentialExhibitors)
+        public async Task<Exhibitor> FindNextExhibitor(int exhibitorIdStart, int categoryId,
+            List<Exhibitor> potentialExhibitors)
         {
             Exhibitor start = null;
             // The first time the tour starts, the exhibitorId will be -1
@@ -55,7 +55,7 @@ namespace ApplicationCore.Services
                 startY = start.Y;
             }
 
-           
+
             var nextExhibitor = potentialExhibitors[0];
             potentialExhibitors.RemoveAt(0);
             var lowestWeight = GetWeight(nextExhibitor, startX, startY);
@@ -102,12 +102,16 @@ namespace ApplicationCore.Services
             exhibitor.Y = exhibitorLast.Y;
             exhibitor.ExhibitorNumber = exhibitorLast.ExhibitorNumber;
             exhibitor.GroupsAtExhibitor = exhibitorLast.GroupsAtExhibitor;
-            exhibitor.Categories = exhibitorLast.Categories;
-            _exhibitorRepository.Update(exhibitor);
+            exhibitor.Categories.Clear();
+            foreach (var category in exhibitorLast.Categories)
+            {
+                exhibitor.Categories.Add(category);
+            }
+
             await _exhibitorRepository.SaveChanges();
             return exhibitor;
-        } 
-        
+        }
+
         public async Task<Exhibitor> RemoveExhibitor(int id)
         {
             Exhibitor exhibitor = await _exhibitorRepository.GetById(id);
@@ -123,7 +127,12 @@ namespace ApplicationCore.Services
             e.Name = exhibitor.Name;
             e.X = exhibitor.X;
             e.Y = exhibitor.Y;
-            e.Categories = exhibitor.Categories;
+            e.Categories.Clear();
+            foreach (var category in exhibitor.Categories)
+            {
+                e.Categories.Add(category);
+            }
+
             e.ExhibitorNumber = exhibitor.ExhibitorNumber;
 
             await _exhibitorRepository.SaveChanges();

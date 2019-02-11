@@ -1,6 +1,7 @@
 using System;
-using System.Collections;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations.Schema;
+using ApplicationCore.Services;
 
 namespace ApplicationCore.Entities
 {
@@ -9,9 +10,8 @@ namespace ApplicationCore.Entities
         public int Id { get; set; }
 
         public string Name { get; set; }
-
-        public IEnumerable<CategoryExhibitor> Categories { get; set; }
-
+        private ICollection<CategoryExhibitor> CategoryExhibitors { get; } = new List<CategoryExhibitor>();
+        [NotMapped] public ICollection<Category> Categories { get; }
         public double X { get; set; }
         public double Y { get; set; }
         public int GroupsAtExhibitor { get; set; }
@@ -23,10 +23,11 @@ namespace ApplicationCore.Entities
 
         public Exhibitor()
         {
+            Categories = new JoinCollectionFacade<Category, Exhibitor, CategoryExhibitor>(this, CategoryExhibitors);
+
             GroupsAtExhibitor = 0;
             TotalNumberOfVisits = 0;
             Name = "";
-            Categories = new List<CategoryExhibitor>();
             CreationDate = DateTime.Now;
         }
 

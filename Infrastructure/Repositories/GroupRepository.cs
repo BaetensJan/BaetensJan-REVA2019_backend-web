@@ -36,7 +36,7 @@ namespace Infrastructure.Repositories
                 .Where(s => s.Id == schoolId).Select(s => s.Groups).FirstOrDefaultAsync();
             return groups;
         }
-
+/*
         public IEnumerable<Group> GetAllBySchoolIdLight(int schoolId)
         {
             var groups = _schools.Include(s => s.Groups).ThenInclude(g => g.Assignments).ThenInclude(f => f.Question)
@@ -46,7 +46,7 @@ namespace Infrastructure.Repositories
                 .SingleOrDefault(s => s.Id == schoolId)
                 ?.Groups.Select(MapGroup);
             return groups;
-        }
+        }*/
 
         public Task<List<Group>> GetAll()
         {
@@ -68,7 +68,7 @@ namespace Infrastructure.Repositories
                     => ce.Exhibitor)
                 .Include(g => g.Assignments).ThenInclude(f => f.Question).ThenInclude(q => q.CategoryExhibitor)
                 .ThenInclude(ce
-                    => ce.Category).Select(g => MapGroup(g)).ToListAsync();
+                    => ce.Category).ToListAsync();//TODO: Changed
             return groups;
         }
 
@@ -84,12 +84,12 @@ namespace Infrastructure.Repositories
 
             return group;
         }
-        
+
         public void Update(Group group)
         {
             _groups.Update(group);
         }
-
+/*
         private Group MapGroup(Group group)
         {
 //            group?.Assignments?.ForEach(a =>
@@ -115,7 +115,7 @@ namespace Infrastructure.Repositories
                 Assignments = assignments
             };
             return gr;
-        }
+        }*/
 
         public Task Add(Group group)
         {

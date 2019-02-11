@@ -24,6 +24,7 @@ namespace Infrastructure.Repositories
             //.Select(s => MapSchool(s)).ToList();
         }
 
+/*
         private School MapSchool(School school)
         {
             var groups = new List<Group>(school.Groups);
@@ -46,7 +47,7 @@ namespace Infrastructure.Repositories
 
             return sch;
         }
-
+*/
         public Task<School> GetById(int id)
         {
             var school = _schools.Include(a => a.Groups).ThenInclude(g => g.Assignments)
@@ -61,7 +62,7 @@ namespace Infrastructure.Repositories
                 .Include(a => a.Groups).ThenInclude(g => g.Assignments).ThenInclude(a => a.Question)
                 .ThenInclude(q => q.CategoryExhibitor).ThenInclude(ce => ce.Category)
                 .SingleOrDefault(c => c.Id == id);
-            return MapSchool(school);
+            return school;
         }
 
         public Task<School> GetByName(string schoolName)

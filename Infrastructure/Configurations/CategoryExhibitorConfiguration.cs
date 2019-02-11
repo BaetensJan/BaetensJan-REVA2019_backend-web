@@ -13,11 +13,11 @@ namespace Infrastructure.Configurations
                 .HasKey(ce => new {ce.CategoryId, ce.ExhibitorId});
 
             builder
-                .HasOne(ce => ce.Category);
+                .HasOne(ce => ce.Category)
+                .WithMany("CategoryExhibitors");
             builder
                 .HasOne(ce => ce.Exhibitor)
-                .WithMany(c => c.Categories)
-                .HasForeignKey(ce => ce.ExhibitorId);
+                .WithMany("CategoryExhibitors");
         }
     }
 }
