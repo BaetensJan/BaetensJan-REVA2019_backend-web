@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Security.Claims;
 using System.Text;
+using System.Text.Encodings.Web;
 using System.Threading.Tasks;
 using ApplicationCore.Entities;
 using ApplicationCore.Interfaces;
@@ -395,12 +396,22 @@ namespace Web.Controllers
             if (user != null)
             {
                 var code = await _userManager.GeneratePasswordResetTokenAsync(user);
+                await _emailSender.SendMailAsync(_configuration["Email:Smtp:From"],
+                    $"Reva App Wachtwoord Reset",
+                    $@"
+                            <p>Beste,<p>
+                            <p>Er werd zojuist een aanvraag gedaan om je wachtwoord te veranderen.</p>
+                            <p>Als je deze aanvraag gemaakt hebt, <a href='http://app.reva.be/reset-wachtwoord?code={HtmlEncoder.Default.Encode(code)}&email={model.Email}'>Klik hier om je wachtwoord te veranderen</a></p>
+                            
+                            <p>Als je deze aanvraag niet gemaakt hebt, kan je deze email negeren.</p>
+                    ", new[] {model.Email});
+                Console.Error.WriteLine(code);
             }
 
             return Ok();
         }
 
-        [HttpPost]
+        [HttpPost("[action]")]
         public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordDTO model)
         {
             var errors = new List<string>();
@@ -415,6 +426,8 @@ namespace Web.Controllers
                 // Don't reveal that the user does not exist
                 return Ok();
             }
+
+            Console.Error.WriteLine(model.Code);
 
             var result = await _userManager.ResetPasswordAsync(user, model.Code, model.Password);
             if (result.Succeeded)

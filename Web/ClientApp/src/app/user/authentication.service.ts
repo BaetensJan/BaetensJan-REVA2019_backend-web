@@ -162,6 +162,14 @@ export class AuthenticationService {
     );
   }
 
+  resetPassword(email: string, code: string, password: string) {
+    return this.http.post(`${this._url}/ResetPassword`, {code, email, password}).pipe(
+      map((res: any) => {
+        return true;
+      })
+    );
+  }
+
   /**
    * Checks username availability using backend
    *
