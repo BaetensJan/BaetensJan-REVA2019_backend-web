@@ -59,11 +59,11 @@ namespace Infrastructure.Repositories
             return exhibitors;
         }
 
-        public Task<List<Exhibitor>> All()
+        public async Task<List<Exhibitor>> All()
         {
             var exhibitors = _exhibitors.Include(e => e.Categories).ThenInclude(c => c.Category).ToListAsync();
 //            .Select(MapExhibitor);
-            return exhibitors;
+            return await exhibitors;
         }
 
         public Task<Exhibitor> GetById(int id)

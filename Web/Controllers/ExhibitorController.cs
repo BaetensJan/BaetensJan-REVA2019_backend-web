@@ -24,11 +24,10 @@ namespace Web.Controllers
         }
 
         [HttpGet("[action]")]
-        public Task<IEnumerable<Exhibitor>> Exhibitors()
+        public async Task<IEnumerable<Exhibitor>> Exhibitors()
         {
-            var exhbs = _exhibitorManager.ExhibitorsLight();
-            //.Exhibitors().ToList(); Todo: infinite recursive loop (has catExhibitor with exhibitors that have catExhibs and so on).
-            return exhbs;
+//            var exhbs = _exhibitorManager.ExhibitorsLight();
+            return await _exhibitorRepository.All();
         }
         
         /**

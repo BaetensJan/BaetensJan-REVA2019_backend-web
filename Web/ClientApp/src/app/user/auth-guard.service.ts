@@ -16,6 +16,7 @@ export class AuthGuardService implements CanActivate {
     console.debug(`Logged in: ${this.authService.isLoggedIn$.getValue()}`);
     console.debug(`Is Admin: ${this.authService.isModerator$.getValue()}`);
     if (this.isAdminRequired(state.url)) {
+      console.log("administrator page");
       if (this.authService.isLoggedIn$.getValue()) {
         if (this.authService.isModerator$.getValue()) {
           return true;
@@ -29,22 +30,23 @@ export class AuthGuardService implements CanActivate {
       this.router.navigate(['/login']);
       return false;
     }
-    if (this.isLoggedInPage(state.url)) {
-      if (this.authService.isLoggedIn$) {
+    else if (this.isLoggedInPage(state.url)) {
+      console.log("logged in page");
+      if (this.authService.isLoggedIn$.getValue()) {
         return true
       }
       this.authService.redirectUrl = state.url;
       this.router.navigate(['/login']);
       return false;
     }
-    if (this.isNonLoggedInPage(state.url)) {
+    else if (this.isNonLoggedInPage(state.url)) {
+      console.log("not logged in page");
       if (this.authService.isLoggedIn$.getValue()) {
         this.router.navigate(['/home']);
         return false;
       }
       return true;
-    }
-    return true;
+    } else return false;
   }
 
   private isLoggedInPage(url): boolean {
@@ -53,7 +55,7 @@ export class AuthGuardService implements CanActivate {
   }
 
   private isNonLoggedInPage(url): boolean {
-    //Pages logged in users aren't allowed to access anymore
+    //Pages logged-in-users aren't allowed to access anymore
     let pages = ['/login', "/invite-request", "/register"];
     return pages.includes(url);
 
