@@ -29,8 +29,7 @@ export class AuthGuardService implements CanActivate {
       this.authService.redirectUrl = state.url;
       this.router.navigate(['/login']);
       return false;
-    }
-    else if (this.isLoggedInPage(state.url)) {
+    } else if (this.isLoggedInPage(state.url)) {
       console.log("logged in page");
       if (this.authService.isLoggedIn$.getValue()) {
         return true
@@ -38,8 +37,7 @@ export class AuthGuardService implements CanActivate {
       this.authService.redirectUrl = state.url;
       this.router.navigate(['/login']);
       return false;
-    }
-    else if (this.isNonLoggedInPage(state.url)) {
+    } else if (this.isNonLoggedInPage(state.url)) {
       console.log("not logged in page");
       if (this.authService.isLoggedIn$.getValue()) {
         this.router.navigate(['/home']);
