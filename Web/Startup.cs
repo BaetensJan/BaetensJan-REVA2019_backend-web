@@ -1,4 +1,5 @@
 using System;
+using Infrastructure;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Identity;
@@ -31,7 +32,7 @@ namespace Web
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IHostingEnvironment env, IServiceProvider serviceProvider)
+        public void Configure(IApplicationBuilder app, IHostingEnvironment env, ApplicationDbContext context)
         {
             if (env.IsDevelopment())
             {
@@ -43,6 +44,7 @@ namespace Web
                 app.UseHsts();
             }
 
+            context.Database.EnsureCreated();
             //app.UseHttpsRedirection();
             app.UseAuthentication();
             app.UseStaticFiles();

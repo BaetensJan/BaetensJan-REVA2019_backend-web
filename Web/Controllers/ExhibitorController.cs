@@ -26,11 +26,38 @@ namespace Web.Controllers
         }
 
         [HttpGet("[action]")]
-        public async Task<List<Exhibitor>> Exhibitors()
+        public async Task<IEnumerable<Exhibitor>> Exhibitors()
         {
-            var exhbs = _exhibitorManager.Exhibitors();
-            //.Exhibitors().ToList(); Todo: infinite recursive loop (has catExhibitor with exhibitors that have catExhibs and so on).
-            return await exhbs;
+            var result = (await _exhibitorManager.Exhibitors()).Select(e =>
+            {
+                var ex = new Exhibitor
+                {
+                    Id = e.Id,
+                    Name = e.Name,
+                    ExhibitorNumber = e.ExhibitorNumber,
+                    X = e.X,
+                    Y = e.Y,
+                    CreationDate = e.CreationDate,
+                    GroupsAtExhibitor = e.GroupsAtExhibitor,
+                    TotalNumberOfVisits = e.TotalNumberOfVisits
+                };
+                foreach (var c in e.Categories)
+                {
+                    ex.Categories.Add(
+                        new Category
+                        {
+                            Id = c.Id,
+                            Name = c.Name,
+                            CreationDate = c.CreationDate,
+                            Photo = c.Photo,
+                            Description = c.Description
+                        });
+                }
+
+                return ex;
+            }).ToList();
+
+            return result;
         }
 
         /**

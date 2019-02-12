@@ -8,7 +8,6 @@ using Infrastructure.Repositories;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -31,11 +30,11 @@ namespace Web
         public void AddMvc()
         {
             _services.AddMvc()
-                .AddJsonOptions(options =>
+                .AddJsonOptions(opts =>
                 {
-                    options.SerializerSettings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore;
-                })
-                .SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
+                    opts.SerializerSettings.ReferenceLoopHandling
+                        = ReferenceLoopHandling.Ignore;
+                });
         }
 
         public void AddDatabase()

@@ -55,8 +55,9 @@ namespace Infrastructure.Repositories
         public async Task<IEnumerable<Category>> All()
         {
             //return await GetBasic();
-            return
-                _categories.ToList(); //Todo: infinite recursive loop (has catExhibitor with exhibitors that have catExhibs and so on).
+            return await
+                _categories.Include("CategoryExhibitors.Exhibitor")
+                    .ToListAsync(); //Todo: infinite recursive loop (has catExhibitor with exhibitors that have catExhibs and so on).
         }
 
         public Task<Category> GetById(int id)

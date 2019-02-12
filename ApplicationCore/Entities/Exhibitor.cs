@@ -11,7 +11,9 @@ namespace ApplicationCore.Entities
 
         public string Name { get; set; }
         private ICollection<CategoryExhibitor> CategoryExhibitors { get; } = new List<CategoryExhibitor>();
-        [NotMapped] public ICollection<Category> Categories { get; }
+
+        [NotMapped] public virtual ICollection<Category> Categories { get; }
+
         public double X { get; set; }
         public double Y { get; set; }
         public int GroupsAtExhibitor { get; set; }

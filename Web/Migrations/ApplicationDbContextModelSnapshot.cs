@@ -159,6 +159,8 @@ namespace Web.Migrations
                         .HasColumnName("Name")
                         .HasMaxLength(30);
 
+                    b.Property<int>("TotalNumberOfVisits");
+
                     b.Property<double>("X");
 
                     b.Property<double>("Y");
@@ -233,6 +235,29 @@ namespace Web.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("School");
+                });
+
+            modelBuilder.Entity("ApplicationCore.Entities.TeacherRequest", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<DateTime>("CreationDate");
+
+                    b.Property<string>("Email");
+
+                    b.Property<string>("Name");
+
+                    b.Property<string>("Note");
+
+                    b.Property<string>("SchoolName");
+
+                    b.Property<string>("Surname");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("TeacherRequest");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>
@@ -366,12 +391,12 @@ namespace Web.Migrations
             modelBuilder.Entity("ApplicationCore.Entities.CategoryExhibitor", b =>
                 {
                     b.HasOne("ApplicationCore.Entities.Category", "Category")
-                        .WithMany("Exhibitors")
+                        .WithMany("CategoryExhibitors")
                         .HasForeignKey("CategoryId")
                         .OnDelete(DeleteBehavior.Cascade);
 
                     b.HasOne("ApplicationCore.Entities.Exhibitor", "Exhibitor")
-                        .WithMany("Categories")
+                        .WithMany("CategoryExhibitors")
                         .HasForeignKey("ExhibitorId")
                         .OnDelete(DeleteBehavior.Cascade);
                 });

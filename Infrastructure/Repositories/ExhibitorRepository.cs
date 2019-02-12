@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using ApplicationCore.Entities;
 using ApplicationCore.Interfaces;
@@ -59,11 +60,20 @@ namespace Infrastructure.Repositories
             return exhibitors;
         }*/
 
-        public Task<List<Exhibitor>> All()
+        public async Task<List<Exhibitor>> All()
         {
-            var exhibitors = _exhibitors.Include("CategoryExhibitors.Category")
-                .ToListAsync();
+            List<Exhibitor> exhibitors = new List<Exhibitor>();
+            try
+            {
+                exhibitors = await _dbContext.Exhibitors.Include("CategoryExhibitors.Category")
+                    .ToListAsync();
 //            .Select(MapExhibitor);
+            }
+            catch (Exception e)
+            {
+                Console.Error.WriteLine(e.Message);
+            }
+
             return exhibitors;
         }
 

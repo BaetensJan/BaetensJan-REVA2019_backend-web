@@ -14,10 +14,13 @@ namespace Infrastructure.Configurations
 
             builder
                 .HasOne(ce => ce.Category)
-                .WithMany("CategoryExhibitors");
+                .WithMany("CategoryExhibitors")
+                .HasForeignKey(ce => ce.CategoryId);
+
             builder
                 .HasOne(ce => ce.Exhibitor)
-                .WithMany("CategoryExhibitors");
+                .WithMany("CategoryExhibitors")
+                .HasForeignKey(ce => ce.ExhibitorId);
         }
     }
 }

@@ -12,7 +12,9 @@ namespace ApplicationCore.Entities
         public string Photo { get; set; }
         public string Description { get; set; }
         private ICollection<CategoryExhibitor> CategoryExhibitors { get; } = new List<CategoryExhibitor>();
-        [NotMapped] public ICollection<Exhibitor> Exhibitors { get; }
+
+        [NotMapped] public virtual ICollection<Exhibitor> Exhibitors { get; }
+
         public DateTime CreationDate { get; set; }
 
         public Category(int id, string name, string photo, string description)

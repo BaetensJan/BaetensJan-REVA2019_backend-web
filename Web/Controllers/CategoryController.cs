@@ -32,9 +32,38 @@ namespace Web.Controllers
         }
 
         [HttpGet("[action]")]
-        public Task<IEnumerable<Category>> Categories()
+        public async Task<IEnumerable<Category>> Categories()
         {
-            return _categoryRepository.All();
+            var result = (await _categoryRepository.All()).Select(c =>
+            {
+                var cat = new Category
+                {
+                    Id = c.Id,
+                    Name = c.Name,
+                    CreationDate = c.CreationDate,
+                    Photo = c.Photo,
+                    Description = c.Description
+                };
+                foreach (var e in c.Exhibitors)
+                {
+                    cat.Exhibitors.Add(
+                        new Exhibitor
+                        {
+                            Id = e.Id,
+                            Name = e.Name,
+                            ExhibitorNumber = e.ExhibitorNumber,
+                            X = e.X,
+                            Y = e.Y,
+                            CreationDate = e.CreationDate,
+                            GroupsAtExhibitor = e.GroupsAtExhibitor,
+                            TotalNumberOfVisits = e.TotalNumberOfVisits
+                        });
+                }
+
+                return cat;
+            }).ToList();
+
+            return result;
         }
 
         /**
