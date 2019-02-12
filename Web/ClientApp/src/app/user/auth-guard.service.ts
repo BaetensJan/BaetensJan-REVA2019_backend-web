@@ -44,7 +44,10 @@ export class AuthGuardService implements CanActivate {
         return false;
       }
       return true;
-    } else return false;
+    } else {
+      this.router.navigate(['/home']);
+      return false;
+    }
   }
 
   private isLoggedInPage(url): boolean {
