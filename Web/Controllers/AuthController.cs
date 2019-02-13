@@ -366,7 +366,7 @@ namespace Web.Controllers
                 issuer: "http://app.reva.be",
                 audience: "http://app.reva.be",
                 claims: claim,
-                expires: DateTime.UtcNow.AddHours(1),
+                expires: DateTime.UtcNow.AddDays(7),
                 signingCredentials: new SigningCredentials(signInKey, SecurityAlgorithms.HmacSha256));
         }
 
