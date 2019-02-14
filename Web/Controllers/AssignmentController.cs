@@ -19,7 +19,6 @@ namespace Web.Controllers
     [ApiController]
     public class AssignmentController : Controller
     {
-        private readonly UserManager<ApplicationUser> _userManager;
         private readonly IAssignmentRepository _assignmentRepository;
         private readonly IExhibitorRepository _exhibitorRepository;
         private readonly IGroupRepository _groupRepository;
@@ -28,9 +27,10 @@ namespace Web.Controllers
         private readonly ExhibitorManager _exhibitorManager;
         private readonly IImageWriter _imageWriter;
         private readonly IConfiguration _configuration;
+        private readonly QuestionManager _questionManager;
+        private readonly AssignmentManager _assignmentManager;
 
-        public AssignmentController(UserManager<ApplicationUser> userManager,
-            IConfiguration configuration,
+        public AssignmentController(IConfiguration configuration,
             IAssignmentRepository assignmentRepository,
             IExhibitorRepository exhibitorRepository,
             IGroupRepository groupRepository,
@@ -40,14 +40,15 @@ namespace Web.Controllers
         {
             _configuration = configuration;
             _groupRepository = groupRepository;
-            _userManager = userManager;
             _assignmentRepository = assignmentRepository;
             _exhibitorRepository = exhibitorRepository;
             _exhibitorManager =
                 new ExhibitorManager(exhibitorRepository, categoryRepository, questionRepository);
             _questionRepository = questionRepository;
+            _questionManager = new QuestionManager();
             _categoryRepository = categoryRepository;
             _imageWriter = imageWriter;
+            _assignmentManager = new AssignmentManager(assignmentRepository);
         }
 
         [HttpGet("[Action]")]
@@ -93,18 +94,7 @@ namespace Web.Controllers
             // Check if group is doing an Extra Round
             if (assignments != null && assignments.Count >= _configuration.GetValue<int>("AmountOfQuestions"))
             {
-                // Only get Questions of chosen Category, that were not yet answered by the Group.
-                foreach (var assignment in assignments)
-                {
-                    var questionTemp = assignment.Question;
-                    if (questionTemp.CategoryExhibitor.CategoryId != categoryId) continue;
-                    var qstn = questions.SingleOrDefault(q => q.Id == questionTemp.Id);
-
-                    if (qstn != null)
-                    {
-                        questions.Remove(qstn);
-                    }
-                }
+                questions = _questionManager.UnansweredQuestionsOfCategory(categoryId, assignments, questions);
             }
 
             if (questions.Count < 1)
@@ -114,7 +104,7 @@ namespace Web.Controllers
                         "Alle vragen voor deze Categorie zijn al beantwoord. Deze Categorie mocht niet worden weergegeven" +
                         " in de CategoryChoiceFragment"
                 });
-            
+
             var potentialExhibitors = questions
                 .Select(e => e.CategoryExhibitor.Exhibitor)
                 .ToList();
@@ -127,7 +117,7 @@ namespace Web.Controllers
 
             var question = await _questionRepository.GetQuestion(categoryId, exhibitor.Id);
 
-            var newAssignment = await CreateAssignment(question, isExtraRound, group);
+            var newAssignment = await _assignmentManager.CreateAssignment(question, isExtraRound, group);
             newAssignment =
                 await _assignmentRepository
                     .GetByIdLight(newAssignment.Id); //Todo temporary, otherwise we have recursive catExh data
@@ -192,7 +182,7 @@ namespace Web.Controllers
         {
             var question = await _questionRepository.GetQuestion(categoryId, exhibitorId);
 
-            var assignment = await CreateAssignment(question, true, await GetGroup());
+            var assignment = await _assignmentManager.CreateAssignment(question, true, await GetGroup());
 
             assignment =
                 await _assignmentRepository
@@ -201,24 +191,9 @@ namespace Web.Controllers
             return Ok(assignment);
         }
 
-        private async Task<Assignment> CreateAssignment(Question question, bool isExtraRound, Group group)
-        {
-            // Create assignment and Add to the groups assignments.
-            var assignment = new Assignment(question, isExtraRound);
-            group.AddAssignment(assignment);
-
-            var exhibitor = assignment.Question.CategoryExhibitor.Exhibitor;
-            exhibitor.GroupsAtExhibitor++;
-            exhibitor.TotalNumberOfVisits++;
-
-            await _assignmentRepository.SaveChanges();
-
-            return assignment;
-        }
-
         /**
-         * When a group submits an Assignment in the application, this controller method will be called.
-         */
+        * When a group submits an Assignment in the application, this controller method will be called.
+        */
         [HttpPost("SubmitAssignment")]
         public async Task<IActionResult> Submit([FromBody] AssignmentDTO model)
         {

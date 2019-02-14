@@ -107,7 +107,7 @@
         <!--</small>-->
         <!--</li>-->
       </ul>
-      <footer>
+      <footer *ngIf="!(isAdmin | async)">
         <small>Werk gemaakt in het kader van de opleiding toegepaste informatica aan Hogeschool Gent
           door Jan Baetens, Dennis Deroose en Gilles Willemot. U kan contact met ons opnemen via
           <a id="email" href="mailto:reva.app.team@gmail.com?subject=Reva app contact">

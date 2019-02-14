@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using ApplicationCore.Entities;
 using ApplicationCore.Interfaces;
+using ApplicationCore.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 
@@ -18,6 +19,7 @@ namespace Web.Controllers
         private readonly IQuestionRepository _questionRepository;
         private readonly IExhibitorRepository _exhibitorRepository;
         private readonly IConfiguration _configuration;
+        private readonly CategoryManager _categoryManager;
 
         public CategoryController(ICategoryRepository categoryRepository, IGroupRepository groupRepository,
             IQuestionRepository questionRepository, IExhibitorRepository exhibitorRepository,
@@ -29,6 +31,7 @@ namespace Web.Controllers
             _questionRepository = questionRepository;
             _exhibitorRepository = exhibitorRepository;
             _configuration = configuration;
+            _categoryManager = new CategoryManager();
         }
 
         [HttpGet("[action]")]
@@ -63,67 +66,25 @@ namespace Web.Controllers
             // Check if Group is not doing an Extra Round
             if (assignmentsLength < _configuration.GetValue<int>("AmountOfQuestions"))
             {
-                var temp = await _categoryRepository.All();
-                var categories =
-                    temp.ToList(); // todo can dit in 1 regel? Of breekt await _categoryRepository.All().Result.toList() de async? 
+                return _categoryManager.GetCategories(assignments, await _categoryRepository.All());
+            }
 
-                foreach (var assignment in assignments)
-                {
-                    var category = categories.SingleOrDefault(c => c.Id == assignment.Question.CategoryExhibitor.CategoryId);
-                    if (category != null)
-                    {
-                        categories.Remove(category);
-                    }
-                }
+            IEnumerable<Category> categories;
+            var questions = await _questionRepository.GetAll();
 
-                return categories;
+            // check if an exhibitorId was given as parameter (if not, then it is equals to -1)
+            if (exhibitorId == -1)
+            {
+                categories = await _categoryRepository.All();
             }
             else
             {
-                IEnumerable<Category> categories;
-                var questions = await _questionRepository.GetAll();
-
-                // check if an exhibitorId was given as parameter (if not, then it is equals to -1)
-                if (exhibitorId == -1)
-                {
-                    categories = await _categoryRepository.All();
-                }
-                else
-                {
-                    var exhibitor = await _exhibitorRepository.GetById(exhibitorId);
-                    categories = exhibitor.Categories.Select(categoryExhibitor => categoryExhibitor.Category);
-                    questions = questions.Where(q => q.CategoryExhibitor.ExhibitorId == exhibitorId).ToList();
-                }
-
-                var unpickedCategories = new List<Category>();
-                var counter = 0;
-
-                foreach (var category in categories)
-                {
-                    // we only need to check the questions related to the current category
-                    var categoryQuestions =
-                        questions.Where(q => q.CategoryExhibitor.CategoryId == category.Id).ToList();
-
-                    // loop over every Question related to the current Category of the loop.
-                    foreach (var question in categoryQuestions)
-                    {
-                        // check if all questions of the current Category of the loop have already been answered by this Group.
-                        foreach (var assignment in assignments)
-                        {
-                            if (assignment.Question.Id == question.Id)
-                            {
-                                counter++;
-                            }
-                        }
-                    }
-
-                    // not all categoryQuestions were answered by the Group already, so we can add this Category to UnpickedCategories.
-                    if (counter < categoryQuestions.Count) unpickedCategories.Add(category);
-                    counter = 0;
-                }
-
-                return unpickedCategories;
+                var exhibitor = await _exhibitorRepository.GetById(exhibitorId);
+                categories = exhibitor.Categories.Select(categoryExhibitor => categoryExhibitor.Category);
+                questions = questions.Where(q => q.CategoryExhibitor.ExhibitorId == exhibitorId).ToList();
             }
+
+            return _categoryManager.GetCategoriesExtraRound(assignments, categories, questions);
         }
 
         /**
