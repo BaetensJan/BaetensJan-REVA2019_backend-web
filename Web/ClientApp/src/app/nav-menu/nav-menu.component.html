@@ -90,6 +90,11 @@
             <span class="glyphicon glyphicon-user"></span> Logout
           </a>
         </li>
+        <li *ngIf='(!(isAdmin | async) && (isLoggedIn | async))'>
+          <p (click)='collapse()'>
+            <span class="glyphicon glyphicon-none"></span>{{user | async}} - {{school | async}}
+          </p>
+        </li>
         <ng-template #loginlink>
           <li [routerLinkActive]='["link-active"]'>
             <a (click)='collapse()' [routerLink]='["login"]'>

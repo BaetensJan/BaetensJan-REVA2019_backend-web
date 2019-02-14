@@ -38,6 +38,10 @@ export class NavMenuComponent {
     return this._authService.user$;
   }
 
+  get school(): Observable<string> {
+    return this._authService.school$;
+  }
+
   get isAdmin(): Observable<boolean> {
     return this._authService.isModerator$;
   }
