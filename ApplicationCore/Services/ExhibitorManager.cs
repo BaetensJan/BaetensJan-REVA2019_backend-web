@@ -21,7 +21,7 @@ namespace ApplicationCore.Services
             _questionRepository = questionRepository;
         }
 
-        public Task<List<Exhibitor>> Exhibitors()
+        public Task<IEnumerable<Exhibitor>> Exhibitors()
         {
             return _exhibitorRepository.All();
         }

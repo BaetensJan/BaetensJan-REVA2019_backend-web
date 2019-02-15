@@ -6,7 +6,7 @@ namespace ApplicationCore.Interfaces
 {
     public interface IExhibitorRepository
     {
-        Task<List<Exhibitor>> All();
+        Task<IEnumerable<Exhibitor>> All();
         Task<IEnumerable<Exhibitor>> AllLight();
         Task<Exhibitor> GetById(int id);
         Task<Exhibitor> GetByName(string exhibitorName);
