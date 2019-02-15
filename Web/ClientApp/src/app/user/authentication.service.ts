@@ -45,6 +45,9 @@ export class AuthenticationService {
     this._user$ = new BehaviorSubject<string>(
       parsedToken && parsedToken.username
     );
+    this._school$ = new BehaviorSubject<string>(
+      parsedToken && parsedToken.schoolName
+    );
 
     this._isAdmin$ = new BehaviorSubject<boolean>(parsedToken && JSON.parse(parsedToken.isAdmin.toLowerCase()));
   }
@@ -53,12 +56,18 @@ export class AuthenticationService {
    * @ignore
    */
   private _user$: BehaviorSubject<string>;
+  private _school$: BehaviorSubject<string>;
 
   /**
    * Getter for user
    */
   get user$(): BehaviorSubject<string> {
     return this._user$;
+  }
+
+  get school$(): BehaviorSubject<string> {
+    console.log(this._school$.getValue());
+    return this._school$;
   }
 
   get isModerator$(): BehaviorSubject<boolean> {

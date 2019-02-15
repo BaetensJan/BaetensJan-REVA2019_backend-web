@@ -168,6 +168,7 @@ namespace Web.Controllers
         private async Task<Claim[]> CreateClaims(ApplicationUser user)
         {
             var isAdmin = await _userManager.IsInRoleAsync(user, "Admin");
+
             var claims = new List<Claim>()
             {
                 new Claim(JwtRegisteredClaimNames.Sub, user.Email),
@@ -176,6 +177,8 @@ namespace Web.Controllers
                 new Claim("username", user.UserName),
                 new Claim("isAdmin", isAdmin.ToString()),
             };
+            if (await _userManager.IsInRoleAsync(user, "Teacher"))
+                claims.Add(new Claim("schoolName", user.School.Name));
             claims.AddRange((await _userManager.GetRolesAsync(user)).Select(role => new Claim(ClaimTypes.Role, role)));
 
             return claims.ToArray();
