@@ -16,8 +16,6 @@ namespace Web.Controllers
     {
         private readonly ICategoryRepository _categoryRepository;
         private readonly IGroupRepository _groupRepository;
-        private readonly IQuestionRepository _questionRepository;
-        private readonly IExhibitorRepository _exhibitorRepository;
         private readonly IConfiguration _configuration;
         private readonly CategoryManager _categoryManager;
 
@@ -28,10 +26,8 @@ namespace Web.Controllers
         {
             _categoryRepository = categoryRepository;
             _groupRepository = groupRepository;
-            _questionRepository = questionRepository;
-            _exhibitorRepository = exhibitorRepository;
             _configuration = configuration;
-            _categoryManager = new CategoryManager();
+            _categoryManager = new CategoryManager(categoryRepository, exhibitorRepository, questionRepository);
         }
 
         [HttpGet("[action]")]
@@ -52,39 +48,17 @@ namespace Web.Controllers
         /**
          * Returns only the Categories of which not all related Questions were answered by a Group.
          *
-         * Parameter exhibitorId: when a Group wants all Categories, of which not all related Questions were answered, 
-         * of Exhibitor with id == exhibitorId.
+         * Parameter exhibitorId: when a Group choose an exhibitor, of which we send the exhibitorId as parameter,
+         * we return all Categories, for which for every Category not all related Questions were answered by the Group yet. 
+         * 
          */
         [HttpGet("[action]/{exhibitorId}")]
         public async Task<IEnumerable<Category>> GetUnpickedCategories(int exhibitorId)
         {
             var group = await _groupRepository.GetById(Convert.ToInt32(User.Claims.ElementAt(5).Value));
             var assignments = group.Assignments;
-
-            var assignmentsLength = assignments.Count;
-
-            // Check if Group is not doing an Extra Round
-            if (assignmentsLength < _configuration.GetValue<int>("AmountOfQuestions"))
-            {
-                return _categoryManager.GetCategories(assignments, await _categoryRepository.All());
-            }
-
-            IEnumerable<Category> categories;
-            var questions = await _questionRepository.GetAll();
-
-            // check if an exhibitorId was given as parameter (if not, then it is equals to -1)
-            if (exhibitorId == -1)
-            {
-                categories = await _categoryRepository.All();
-            }
-            else
-            {
-                var exhibitor = await _exhibitorRepository.GetById(exhibitorId);
-                categories = exhibitor.Categories.Select(categoryExhibitor => categoryExhibitor.Category);
-                questions = questions.Where(q => q.CategoryExhibitor.ExhibitorId == exhibitorId).ToList();
-            }
-
-            return _categoryManager.GetCategoriesExtraRound(assignments, categories, questions);
+            var extraRound = exhibitorId == -1 && assignments.Count < _configuration.GetValue<int>("AmountOfQuestions");
+            return await _categoryManager.GetUnpickedCategories(exhibitorId, assignments, extraRound);
         }
 
         /**

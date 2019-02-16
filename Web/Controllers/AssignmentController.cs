@@ -43,7 +43,7 @@ namespace Web.Controllers
             _assignmentRepository = assignmentRepository;
             _exhibitorRepository = exhibitorRepository;
             _exhibitorManager =
-                new ExhibitorManager(exhibitorRepository, categoryRepository, questionRepository);
+                new ExhibitorManager(exhibitorRepository);
             _questionRepository = questionRepository;
             _questionManager = new QuestionManager();
             _categoryRepository = categoryRepository;
@@ -88,9 +88,13 @@ namespace Web.Controllers
             var questions = await _questionRepository.GetAll();
             var assignments = group.Assignments;
 
+            //todo make new relation in db where Category knows its Questions.
             // Only get Exhibitors of which there exists a Question with given categoryId. 
-            questions = questions.Where(q => q.CategoryExhibitor.CategoryId == categoryId).ToList();
-
+            if (previousExhibitorId != -1)
+            questions = questions.Where(q => q.CategoryExhibitor.CategoryId == categoryId &&
+                                             q.CategoryExhibitor.Exhibitor.Id != previousExhibitorId).ToList();
+            else  questions = questions.Where(q => q.CategoryExhibitor.CategoryId == categoryId).ToList();
+            
             // Check if group is doing an Extra Round
             if (assignments != null && assignments.Count >= _configuration.GetValue<int>("AmountOfQuestions"))
             {
@@ -111,7 +115,7 @@ namespace Web.Controllers
 
             // FindNextExhibitor 
             var exhibitor =
-                await _exhibitorManager.FindNextExhibitor(previousExhibitorId, categoryId, potentialExhibitors);
+                await _exhibitorManager.FindNextExhibitor(previousExhibitorId, potentialExhibitors);
 
             exhibitor.GroupsAtExhibitor++;
 

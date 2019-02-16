@@ -1,9 +1,6 @@
-using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
 using ApplicationCore.Entities;
-using ApplicationCore.Interfaces;
 
 namespace ApplicationCore.Services
 {
@@ -16,23 +13,26 @@ namespace ApplicationCore.Services
          */
 
         public List<Question> UnansweredQuestionsOfCategory(int categoryId, IEnumerable<Assignment> assignments,
-            IEnumerable<Question> questions)
+            IEnumerable<Question> potentialQuestions)
         {
-            var questions2 = new List<Question>(questions);
+            var unansweredQuestions = new List<Question>(potentialQuestions);
 
             foreach (var assignment in assignments)
             {
-                var questionTemp = assignment.Question;
-                if (questionTemp.CategoryExhibitor.CategoryId != categoryId) continue;
-                var qstn = questions.SingleOrDefault(q => q.Id == questionTemp.Id);
-
-                if (qstn != null)
+                var assignmentQuestion = assignment.Question;
+                
+                // if assignmentQuestion's Category is different of the currently chosen Category -> ignore
+                if (assignmentQuestion.CategoryExhibitor.CategoryId != categoryId) continue;
+                
+                // else, remove this already answered Question out of the unansweredQuestions list.
+                var answeredQuestion = potentialQuestions.SingleOrDefault(q => q.Id == assignmentQuestion.Id);
+                if (answeredQuestion != null)
                 {
-                    questions2.Remove(qstn);
+                    unansweredQuestions.Remove(answeredQuestion);
                 }
             }
 
-            return questions2;
+            return unansweredQuestions;
         }
     }
 }

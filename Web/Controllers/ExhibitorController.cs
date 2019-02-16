@@ -20,7 +20,7 @@ namespace Web.Controllers
             IQuestionRepository questionRepository)
         {
             _exhibitorRepository = exhibitorRepository;
-            _exhibitorManager = new ExhibitorManager(exhibitorRepository, categoryRepository, questionRepository);
+            _exhibitorManager = new ExhibitorManager(exhibitorRepository);
         }
 
         [HttpGet("[action]")]

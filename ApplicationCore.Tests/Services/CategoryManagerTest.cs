@@ -1,211 +1,265 @@
-using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Transactions;
+using System.Threading.Tasks;
 using ApplicationCore.Entities;
 using ApplicationCore.Interfaces;
 using ApplicationCore.Services;
-using ApplicationCore.Tests.Services.Data;
-using Infrastructure;
-using Infrastructure.Repositories;
 using Xunit;
 using Moq;
-using Newtonsoft.Json;
-using Web.Controllers;
-using Web.DTOs;
 
 
 namespace ApplicationCore.Tests.Services
 {
     public class CategoryManagerTest
     {
+        private List<Category> _pickedCategories;
+        private List<Category> _unpickedCategories;
+
         private List<Category> _categories;
-        private List<Exhibitor> _exhibitors;
-        private Mock<IExhibitorRepository> mock;
-        private DummyApplicationDbContext _dummy = new DummyApplicationDbContext();
-        private Mock<ICategoryRepository> categoryMock = new Mock<ICategoryRepository>();
-        private ExhibitorController _controller;
+        private List<Question> _questions;
+        private List<Assignment> _assignments;
+
+        private Mock<IExhibitorRepository> _exhibitorRepo;
+        private Mock<ICategoryRepository> _categoryRepo;
+        private Mock<IQuestionRepository> _questionRepo;
 
         public CategoryManagerTest()
         {
-            /*
-            mock = new Mock<IExhibitorRepository>();
+            #region 9 Categories
 
-            _categories = new List<Category>()
+            _categories = new List<Category>
             {
-                new Category()
+                new Category
                 {
-                    Name = "Rolstoelen",
-                    Id = 0
-                },
-                new Category()
-                {
-                    Name = "Mobile",
                     Id = 1
+                },
+                new Category
+                {
+                    Id = 2
+                },
+                new Category
+                {
+                    Id = 3
+                },
+                new Category
+                {
+                    Id = 4
+                },
+                new Category
+                {
+                    Id = 5
+                },
+                new Category
+                {
+                    Id = 6
+                },
+                new Category
+                {
+                    Id = 7
+                },
+                new Category
+                {
+                    Id = 8
+                },
+                new Category
+                {
+                    Id = 9
                 }
             };
-            _exhibitors = new List<Exhibitor>()
-            {
-                new Exhibitor()
-                {
-                    Categories = _categories,
-                    Id = 1,
-                    Name = "This is exhibitor 1",
-                    X = 20,
-                    Y = 20,
-                    GroupsAtExhibitor = 0
-                },
-                new Exhibitor()
-                {
-                    Categories = _categories,
-                    Id = 2,
-                    Name = "This is exhibitor 2",
-                    X = 200,
-                    Y = 20,
-                    GroupsAtExhibitor = 1
-                },
-                new Exhibitor()
-                {
-                    Category = _categories[0],
-                    Id = 3,
-                    Name = "This is exhibitor 3",
-                    X= 20,
-                    Y= 150,
-                    GroupsAtExhibitor = 2
-                },
-                new Exhibitor()
-                {
-                    Category = _categories[1],
-                    Id = 4,
-                    Name = "This is exhibitor 4",
-                    X= 150,
-                    Y= 20,
-                    GroupsAtExhibitor = 0
-                },
-                new Exhibitor()
-                {
-                    Category = _categories[0],
-                    Id = 5,
-                    Name = "This is exhibitor 5",
-                    X= 400,
-                    Y= 400,
-                    GroupsAtExhibitor = 0
-                }
-        };
-    }
 
-    
-    [Fact]
-    public void ClosestExhibitorOfCategoryTest()
-    {
-        Mock<IExhibitorRepository> mock = new Mock<IExhibitorRepository>();
-        mock.Setup(t => t.All()).Returns(_exhibitors);
-        
-        ExhibitorManager exhibitorManager = new ExhibitorManager(mock.Object);
-        Exhibitor exhibitor = exhibitorManager.ClosestExhibitor(_exhibitors[0], _categories[0]);
-        Assert.True(exhibitor.Id == 2);
-    }*/
-            /*
-            [Fact]
-            public void FindNextExhibitorTest()
-            {
-                mock = new Mock<IExhibitorRepository>();
-                mock.Setup(t => t.All()).Returns(_exhibitors);
-                mock.Setup(t => t.GetById(It.IsAny<int>())).Returns(_exhibitors[0]);
-                categoryMock.Setup(t => t.GetById(It.IsAny<int>())).Returns(_categories[0]);
-        
-                ExhibitorManager exhibitorManager = new ExhibitorManager(mock.Object, categoryMock.Object);
-                Exhibitor exhibitor = exhibitorManager.FindNextExhibitor(_exhibitors[0].Id, _categories[0].Id);
-                Assert.True(exhibitor.Id == 2);
-            }
-        
-            #region Edit
-        
-            [Fact]
-            public void Edit_validEdit_ChangesAndPersistsExhibitor()
-            {
-                Exhibitor ex = new Exhibitor();
-                ex = _dummy.Exhibitors.FirstOrDefault();
-                mock.Setup(t => t.GetById(1)).Returns(ex);
-                categoryMock.Setup(t => t.GetById(1))
-                    .Returns(_dummy.Categories.FirstOrDefault());
-                categoryMock.Setup(t => t.GetById(2))
-                    .Returns(_dummy.Categories.SingleOrDefault(c => c.Id == 2));
-                Exhibitor exhibitor2 = new Exhibitor()
-                {
-                    Id=1,
-                    Categories = _dummy.Categories.ToList(),//.SingleOrDefault(x => x.Id == 2),
-                    Name = "exhibitor gewijzigd",
-                    X = 500,
-                    Y = 200,
-                    Question = "Wat is de functie van een rolstoel?"
-                };
-                _controller = new ExhibitorController(mock.Object, categoryMock.Object);
-                _controller.UpdateExhibitor(exhibitor2);
-                Assert.Equal("exhibitor gewijzigd", ex.Name);
-        //            Assert.Equal(_dummy.Categories.SingleOrDefault(x => x.Id == 2), ex.Category);
-                Assert.Equal(_dummy.Categories.ToList(), ex.Categories);
-                Assert.Equal(500, ex.X);
-                Assert.Equal(200, ex.Y);
-                mock.Verify(m => m.SaveChanges(), Times.Once);
-                
-                
-            }
-        
-            [Fact]
-            public void EditHttpPost_InValidEdit_DoesNotChangeNorPersistExhibitor()
-            {
-                var exhibitorVm = new ExhibitorDTO(_dummy.Exhibitors.FirstOrDefault(x => x.Id == 1)) {Name = ""};
-                categoryMock.Setup(c => c.GetById(1)).Returns(_dummy.Categories.FirstOrDefault(x => x.Id == 1));
-                _controller = new ExhibitorController(mock.Object, categoryMock.Object);
-                Exhibitor exhibitor = new Exhibitor();
-                _controller.UpdateExhibitor(exhibitor);
-                Assert.Equal("Jos Van Elst", exhibitor.Name);
-                mock.Verify(m => m.SaveChanges(), Times.Never());
-            }
             #endregion
-        
-            #region Create
-        
-            [Fact]
-            public void CreateHttpPost_ValidExhibitor_AddsNewExhibitorToRepository()
+
+            #region Questions
+
+            _questions = new List<Question>
             {
-                mock.Setup(c => c.Add(It.IsNotNull<Exhibitor>()));
-                categoryMock.Setup(p => p.GetById(It.IsAny<int>()))
-                    .Returns(_dummy.Categories.FirstOrDefault(x => x.Id == 1));
-                var exhibitorVm = new ExhibitorDTO(new Exhibitor()
+                new Question
                 {
-                    Categories = _dummy.Categories.ToList(),//.FirstOrDefault(x => x.Id == 1),
-                    GroupsAtExhibitor = 20,
+                    Id = 1,
+                    CategoryExhibitor = new CategoryExhibitor
+                    {
+                        CategoryId = 1
+                    }
+                },
+                new Question
+                {
+                    Id = 2,
+                    CategoryExhibitor = new CategoryExhibitor
+                    {
+                        CategoryId = 2
+                    }
+                },
+                new Question
+                {
+                    Id = 3,
+                    CategoryExhibitor = new CategoryExhibitor
+                    {
+                        CategoryId = 3
+                    }
+                },
+                new Question
+                {
                     Id = 4,
-                    Name = "Joris",
-                    Question = "Vraag?", 
-                    X = 9,
-                    Y = 9
-                });
-                _controller = new ExhibitorController(mock.Object, categoryMock.Object);
-               // _controller.Create(exhibitorVm);
-                mock.Verify(x => x.SaveChanges(), Times.Never());
-                mock.Verify(m => m.Add(It.IsAny<Exhibitor>()), Times.Never());
-            }
+                    CategoryExhibitor = new CategoryExhibitor
+                    {
+                        CategoryId = 4
+                    }
+                },
+                new Question
+                {
+                    Id = 5,
+                    CategoryExhibitor = new CategoryExhibitor
+                    {
+                        CategoryId = 5
+                    }
+                },
+                new Question
+                {
+                    Id = 6,
+                    CategoryExhibitor = new CategoryExhibitor
+                    {
+                        CategoryId = 6
+                    }
+                },
+                new Question
+                {
+                    Id = 7,
+                    CategoryExhibitor = new CategoryExhibitor
+                    {
+                        CategoryId = 7
+                    }
+                },
+                new Question
+                {
+                    Id = 8,
+                    CategoryExhibitor = new CategoryExhibitor
+                    {
+                        CategoryId = 8
+                    }
+                },
+                new Question
+                {
+                    Id = 9,
+                    CategoryExhibitor = new CategoryExhibitor
+                    {
+                        CategoryId = 9
+                    }
+                }
+            };
+
             #endregion
-            #region Delete
-        
-            [Fact]
-            public void DeleteHttpPost_ExhibitorFound_DeletesExhibitor()
+
+            #region 7 Assignments
+
+            _assignments = new List<Assignment>
             {
-                Exhibitor ex = _dummy.Exhibitors.FirstOrDefault(x => x.Id == 1); // exhibitor met id 1
-                mock.Setup(p => p.GetById(1)).Returns(ex); // zorgt dat mock exhibitor teruggeeft met id 1
-                categoryMock.Setup(p => p.GetById(1)).Returns(_dummy.Categories.FirstOrDefault(x => x.Id == 1)); 
-                //mock.Setup(p => p.Remove(ex));
-                ExhibitorManager exManager = new ExhibitorManager(mock.Object, categoryMock.Object);
-                exManager.RemoveExhibitor(1);
-                mock.Verify(m => m.Remove(ex), Times.Once());
-                mock.Verify(m => m.SaveChanges(), Times.Once);
-        
-            }
+                new Assignment
+                {
+                    Question = _questions[0]
+                },
+                new Assignment
+                {
+                    Question = _questions[1]
+                },
+                new Assignment
+                {
+                    Question = _questions[2]
+                },
+                new Assignment
+                {
+                    Question = _questions[3]
+                },
+                new Assignment
+                {
+                    Question = _questions[4]
+                },
+                new Assignment
+                {
+                    Question = _questions[5]
+                },
+                new Assignment
+                {
+                    Question = _questions[6]
+                },
+            };
+
             #endregion
-            */
+
+            _categoryRepo = new Mock<ICategoryRepository>();
+            _categoryRepo.Setup(t => t.All()).Returns(Task.FromResult<IEnumerable<Category>>(_categories));
+
+            _exhibitorRepo = new Mock<IExhibitorRepository>();
+
+            _questionRepo = new Mock<IQuestionRepository>();
+            _questionRepo.Setup(t => t.GetAll()).Returns(Task.FromResult(_questions));
+        }
+
+        [Fact]
+        public void GetUnpickedCategoriesNormalTourTest()
+        {
+            var categories = new CategoryManager(_categoryRepo.Object, _exhibitorRepo.Object, _questionRepo.Object)
+                .GetUnpickedCategoriesNormalTour(_assignments, _categories);
+
+            var id = 8;
+            // _assigments contains question with id 1 -> 7
+            // every Question has a Category, with QuestionId == CategoryId
+            // So: Categories 1 -> 7 were picked, Category 8 -> 9 not.
+            foreach (var category in categories)
+            {
+                Assert.Equal(id, category.Id);
+                id++;
+            }
+        }
+
+        [Fact]
+        public void GetUnpickedCategoriesExtraTourTest()
+        {
+            _questions.Add(new Question // this is a question that also (just as Question2) belongs to Category 2
+            {
+                Id = 10,
+                CategoryExhibitor = new CategoryExhibitor
+                {
+                    CategoryId = 2
+                }
+            });
+
+            var categories = new CategoryManager(_categoryRepo.Object, _exhibitorRepo.Object, _questionRepo.Object)
+                .GetUnpickedCategoriesExtraRound(_assignments, _categories, _questions).ToList();
+
+            // Category with id 2 has 2 questions: one that is already answered/picked (question2) by the Group
+            // and one unanswered/unpicked (question10, with Category 2)
+            var ids = new[] {2, 8, 9};
+
+            foreach (var category in categories)
+            {
+                Assert.True(ids.Contains(category.Id));
+            }
+
+            // check if we have only 3 categories.
+            Assert.True(categories.Count == ids.Length);
+            
+            // sort categories on id (asc)
+            categories.Sort((cat1, cat2) => cat1.Id.CompareTo(cat2.Id));
+            
+            // check if category with lowest id == 2 (the one we added in this Test method)
+            Assert.Equal(categories[0].Id, ids[0]);
+        }
+
+        [Theory]
+        [InlineData(false, -1)]
+        [InlineData(true, 2)]
+        public void GetUnpickedCategoriesTest(bool extraRound, int exhibitorId)
+        {
+            _exhibitorRepo.Setup(t => t.GetById(It.IsAny<int>())).Returns(Task.FromResult(new Exhibitor
+            {
+                Categories = new List<CategoryExhibitor>
+                {
+                    new CategoryExhibitor
+                    {
+                        Category = _categories[0]
+                    }
+                }
+            }));
         }
     }
 }
