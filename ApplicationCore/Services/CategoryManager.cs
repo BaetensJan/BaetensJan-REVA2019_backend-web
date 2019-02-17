@@ -46,6 +46,7 @@ namespace ApplicationCore.Services
                 var exhibitor = await _exhibitorRepo.GetById(exhibitorId);
                 if (exhibitor == null) return null;
                 categories = exhibitor.Categories.Select(categoryExhibitor => categoryExhibitor.Category);
+                // todo, category should know its related questions in db (to not get all questions every time).
                 questions = questions.Where(q => q.CategoryExhibitor.ExhibitorId == exhibitorId).ToList();
             }
 

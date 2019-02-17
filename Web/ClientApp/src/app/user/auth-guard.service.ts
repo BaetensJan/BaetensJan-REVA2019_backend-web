@@ -53,6 +53,10 @@ export class AuthGuardService implements CanActivate {
   }
 
   private isLoggedInPage(url): boolean {
+    // assignmentsdetail has queryParams (groupId), e.g. /assignmentdetail?groupId=3
+    console.log(url);
+    if (url.includes( "/assignmentdetail")) return true;
+
     let pages = ['/groepen', "/opdrachten", "/logout"];
     return pages.includes(url);
   }
@@ -65,7 +69,8 @@ export class AuthGuardService implements CanActivate {
   }
 
   private isAdminRequired(url): boolean {
-    let adminPages = ["/categorieen", "/exposanten", "/beursplan", "/aanvragen", "/vragen", "/upload-csv"];
+    let adminPages = ["/categorieen", "/categorie", "/exposanten", "/exposant",
+      "/beursplan", "/aanvragen", "/vragen", "/vraag", "/upload-csv"];
     return adminPages.includes(url);
 
   }

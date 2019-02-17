@@ -26,11 +26,11 @@ const appRoutes: Routes = [
     data: {preload: true}
   },
   {path: 'opdrachten', canActivate: [AuthGuardService], component: AssignmentsComponent},
+  {path: 'assignmentdetail', canActivate: [AuthGuardService], component: AssignmentDetailComponent},
   {path: 'informatiescherm', component: InformatieschermComponent},
   {path: 'categorieen', canActivate: [AuthGuardService], component: CategoriesComponent},
   {path: 'categorie', canActivate: [AuthGuardService], component: CategoryComponent},
   {path: 'exposanten', canActivate: [AuthGuardService], component: ExhibitorsComponent},
-  {path: 'assignmentdetail', canActivate: [AuthGuardService], component: AssignmentDetailComponent},
   {path: 'exposant', canActivate: [AuthGuardService], component: ExhibitorComponent},
   // {path: 'upload-csv', canActivate: [AuthGuardService], component: UploadCsvComponent},
   {path: 'vragen', canActivate: [AuthGuardService], component: QuestionsComponent},

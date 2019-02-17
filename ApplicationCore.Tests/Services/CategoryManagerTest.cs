@@ -12,8 +12,8 @@ namespace ApplicationCore.Tests.Services
 {
     public class CategoryManagerTest
     {
-        private List<Category> _pickedCategories;
-        private List<Category> _unpickedCategories;
+//        private List<Category> _pickedCategories;
+//        private List<Category> _unpickedCategories;
 
         private List<Category> _categories;
         private List<Question> _questions;
@@ -69,7 +69,7 @@ namespace ApplicationCore.Tests.Services
 
             #endregion
 
-            #region Questions
+            #region 9 Questions
 
             _questions = new List<Question>
             {
@@ -78,7 +78,8 @@ namespace ApplicationCore.Tests.Services
                     Id = 1,
                     CategoryExhibitor = new CategoryExhibitor
                     {
-                        CategoryId = 1
+                        CategoryId = 1,
+                        ExhibitorId = 1
                     }
                 },
                 new Question
@@ -86,7 +87,8 @@ namespace ApplicationCore.Tests.Services
                     Id = 2,
                     CategoryExhibitor = new CategoryExhibitor
                     {
-                        CategoryId = 2
+                        CategoryId = 2,
+                        ExhibitorId = 2
                     }
                 },
                 new Question
@@ -94,7 +96,8 @@ namespace ApplicationCore.Tests.Services
                     Id = 3,
                     CategoryExhibitor = new CategoryExhibitor
                     {
-                        CategoryId = 3
+                        CategoryId = 3,
+                        ExhibitorId = 3
                     }
                 },
                 new Question
@@ -102,7 +105,8 @@ namespace ApplicationCore.Tests.Services
                     Id = 4,
                     CategoryExhibitor = new CategoryExhibitor
                     {
-                        CategoryId = 4
+                        CategoryId = 4,
+                        ExhibitorId = 4
                     }
                 },
                 new Question
@@ -110,7 +114,8 @@ namespace ApplicationCore.Tests.Services
                     Id = 5,
                     CategoryExhibitor = new CategoryExhibitor
                     {
-                        CategoryId = 5
+                        CategoryId = 5,
+                        ExhibitorId = 5
                     }
                 },
                 new Question
@@ -118,7 +123,8 @@ namespace ApplicationCore.Tests.Services
                     Id = 6,
                     CategoryExhibitor = new CategoryExhibitor
                     {
-                        CategoryId = 6
+                        CategoryId = 6,
+                        ExhibitorId = 6
                     }
                 },
                 new Question
@@ -126,7 +132,8 @@ namespace ApplicationCore.Tests.Services
                     Id = 7,
                     CategoryExhibitor = new CategoryExhibitor
                     {
-                        CategoryId = 7
+                        CategoryId = 7,
+                        ExhibitorId = 7
                     }
                 },
                 new Question
@@ -134,7 +141,8 @@ namespace ApplicationCore.Tests.Services
                     Id = 8,
                     CategoryExhibitor = new CategoryExhibitor
                     {
-                        CategoryId = 8
+                        CategoryId = 8,
+                        ExhibitorId = 8
                     }
                 },
                 new Question
@@ -142,7 +150,8 @@ namespace ApplicationCore.Tests.Services
                     Id = 9,
                     CategoryExhibitor = new CategoryExhibitor
                     {
-                        CategoryId = 9
+                        CategoryId = 9,
+                        ExhibitorId = 9
                     }
                 }
             };
@@ -201,7 +210,7 @@ namespace ApplicationCore.Tests.Services
                 .GetUnpickedCategoriesNormalTour(_assignments, _categories);
 
             var id = 8;
-            // _assigments contains question with id 1 -> 7
+            // _assignments contains question with id 1 -> 7
             // every Question has a Category, with QuestionId == CategoryId
             // So: Categories 1 -> 7 were picked, Category 8 -> 9 not.
             foreach (var category in categories)
@@ -237,18 +246,88 @@ namespace ApplicationCore.Tests.Services
 
             // check if we have only 3 categories.
             Assert.True(categories.Count == ids.Length);
-            
+
             // sort categories on id (asc)
             categories.Sort((cat1, cat2) => cat1.Id.CompareTo(cat2.Id));
-            
+
             // check if category with lowest id == 2 (the one we added in this Test method)
             Assert.Equal(categories[0].Id, ids[0]);
         }
 
-        [Theory]
-        [InlineData(false, -1)]
-        [InlineData(true, 2)]
-        public void GetUnpickedCategoriesTest(bool extraRound, int exhibitorId)
+        /**
+         * Full method test WITHOUT exhibitorId.
+         * Extra round == true, so nested method GetUnpickedCategoriesExtraTour() will be called
+         */
+        [Fact]
+        public async void GetUnpickedCategoriesWithoutExhibitorTest()
+        {
+            // add new assignment with second-last Question. This way, only the last Question or last category
+            // will be left over and returned.
+            _assignments.Add(new Assignment
+            {
+                Question = _questions[_questions.Count - 2]
+            });
+
+            var categories =
+                await new CategoryManager(_categoryRepo.Object, _exhibitorRepo.Object, _questionRepo.Object)
+                    .GetUnpickedCategories(-1, _assignments, true);
+            Assert.Equal(9, categories.ToList()[0].Id);
+        }
+
+        /**
+         * Full method test WITH an exhibitorId.
+         *
+         * Group wants to get only the categories, of which not all questions were answered, of a specific Exhibitor.
+         * Extra round == true, so nested method GetUnpickedCategoriesExtraTour() will be called
+         */
+        [Fact]
+        public async void GetUnpickedCategoriesWithExhibitorTest()
+        {
+            // we add a new question of Category 1 and ExhibitorId 1 that has not been answered yet (is not in 
+            // _assignments)
+            _questions.Add(new Question
+            {
+                CategoryExhibitor = new CategoryExhibitor
+                {
+                    CategoryId = 1,
+                    ExhibitorId = 1
+                }
+            });
+
+            _exhibitorRepo.Setup(t => t.GetById(It.IsAny<int>())).Returns(Task.FromResult(new Exhibitor
+            {
+                Categories = new List<CategoryExhibitor>
+                {
+                    new CategoryExhibitor
+                    {
+                        Category = _categories[0] // == Category with id 1
+                    }
+                }
+            }));
+
+            var categories =
+                await new CategoryManager(_categoryRepo.Object, _exhibitorRepo.Object, _questionRepo.Object)
+                    .GetUnpickedCategories(1, _assignments, true);
+
+            // Exhibitor, which only has one Category (with CategoryId 1) with 2 question with.
+            // One of these questions (the one we added at the top of this test method) was
+            // not answered by the Group yet(so not in list _assignments).
+            // The Category (with id 1) of this Question should be returned.
+            Assert.True(categories.ToList().Count == 1);
+            Assert.Equal(1, categories.ToList()[0].Id);
+
+            // check if the getById got called
+//            _exhibitorRepo.Verify(repo => repo.GetById(1).IsCompleted);
+        }
+
+        /**
+         * Full method test WITH an exhibitorId and all questions of all categories of that Exhibitor were answered already.
+         *
+         * Group wants to get only the categories, of which not all questions were answered, of a specific Exhibitor.
+         * Extra round == true, so nested method GetUnpickedCategoriesExtraTour() will be called
+         */
+        [Fact]
+        public async void GetUnpickedCategoriesWithExhibitorNoCategoriesLeftTest()
         {
             _exhibitorRepo.Setup(t => t.GetById(It.IsAny<int>())).Returns(Task.FromResult(new Exhibitor
             {
@@ -256,10 +335,19 @@ namespace ApplicationCore.Tests.Services
                 {
                     new CategoryExhibitor
                     {
-                        Category = _categories[0]
+                        Category = _categories[0] // == Category with id 1
                     }
                 }
             }));
+
+            var categories =
+                await new CategoryManager(_categoryRepo.Object, _exhibitorRepo.Object, _questionRepo.Object)
+                    .GetUnpickedCategories(1, _assignments, true);
+
+            // The only Category of the, by the group chosen, Exhibitor is Category with id 1 (_categories[0])
+            // this Category is already added to _assignments, which means it is submitted by the Group already.
+            // This means no Categories are left anymore.
+            Assert.True(categories.ToList().Count == 0);
         }
     }
 }
