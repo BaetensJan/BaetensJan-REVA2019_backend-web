@@ -126,6 +126,92 @@ namespace ApplicationCore.Tests.Services
 
             var exhibitor = await new ExhibitorManager(mock.Object).FindNextExhibitor(startExhibitorId, _exhibitors);
             Assert.Equal(correctExhibitorId, exhibitor.Id);
+        } 
+        
+        [Fact]
+        public async Task FindNextExhibitorTotalVisitsTest()
+        {
+            var exhibitors = new List<Exhibitor>
+            {
+                new Exhibitor
+                {
+                    Id = 1,
+                    TotalNumberOfVisits = 1,
+                    GroupsAtExhibitor = 1,
+                    X = 1,
+                    Y = 1,
+                },
+                new Exhibitor
+                {
+                    Id = 2,
+                    TotalNumberOfVisits = 1,
+                    GroupsAtExhibitor = 1,
+                    X = 1,
+                    Y = 1,
+                },
+                new Exhibitor
+                {
+                    Id = 3,
+                    TotalNumberOfVisits = 2,
+                    GroupsAtExhibitor = 1,
+                    X = 1,
+                    Y = 1,
+                }
+            };
+            
+            // the exhibitor where a group is standing at atm.
+            var startExhibitor = exhibitors[0];
+            //Always check that _exhibitors doesn't contain Exhibitor with id equal to exhibitorIdStart
+            exhibitors.Remove(startExhibitor);
+            
+            var mock = new Mock<IExhibitorRepository>();  
+            mock.Setup(t => t.GetById(It.IsAny<int>())).Returns(Task.FromResult(startExhibitor));
+
+            var exhibitor = await new ExhibitorManager(mock.Object).FindNextExhibitor(startExhibitor.Id, exhibitors);
+            Assert.Equal(2, exhibitor.Id);
+        }  
+        
+        [Fact]
+        public async Task FindNextExhibitorGroupsAtTest()
+        {
+            var exhibitors = new List<Exhibitor>
+            {
+                new Exhibitor
+                {
+                    Id = 1,
+                    TotalNumberOfVisits = 1,
+                    GroupsAtExhibitor = 1,
+                    X = 1,
+                    Y = 1,
+                },
+                new Exhibitor
+                {
+                    Id = 2,
+                    TotalNumberOfVisits = 1,
+                    GroupsAtExhibitor = 1,
+                    X = 1,
+                    Y = 1,
+                },
+                new Exhibitor
+                {
+                    Id = 3,
+                    TotalNumberOfVisits = 1,
+                    GroupsAtExhibitor = 2,
+                    X = 1,
+                    Y = 1,
+                }
+            };
+            
+            // the exhibitor where a group is standing at atm.
+            var startExhibitor = exhibitors[0];
+            //Always check that _exhibitors doesn't contain Exhibitor with id equal to exhibitorIdStart
+            exhibitors.Remove(startExhibitor);
+            
+            var mock = new Mock<IExhibitorRepository>();  
+            mock.Setup(t => t.GetById(It.IsAny<int>())).Returns(Task.FromResult(startExhibitor));
+
+            var exhibitor = await new ExhibitorManager(mock.Object).FindNextExhibitor(startExhibitor.Id, exhibitors);
+            Assert.Equal(2, exhibitor.Id);
         }
     
 //        [Fact]

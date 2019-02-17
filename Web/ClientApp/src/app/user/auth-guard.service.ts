@@ -53,9 +53,15 @@ export class AuthGuardService implements CanActivate {
   }
 
   private isLoggedInPage(url): boolean {
+
     // assignmentsdetail has queryParams (groupId), e.g. /assignmentdetail?groupId=3
-    console.log(url);
-    if (url.includes( "/assignmentdetail")) return true;
+    let detailString = "/assignmentdetail?groupId=";
+    if (url.startsWith(detailString)){
+      let ret = url.replace(detailString,'');
+
+      // check if everything after detailString is a number (groupId)
+      if (!isNaN(Number(ret))) return true;
+    }
 
     let pages = ['/groepen', "/opdrachten", "/logout"];
     return pages.includes(url);
