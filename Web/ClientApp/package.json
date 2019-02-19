@@ -1,12 +1,12 @@
 {
-  "name": "REVA",
+  "name": "reva",
   "version": "0.0.0",
   "license": "MIT",
   "scripts": {
     "compodoc": "./node_modules/.bin/compodoc -p src/tsconfig.app.json",
     "compodoc-serve": "./node_modules/.bin/compodoc -s",
     "ng": "ng",
-    "start": "ng serve",
+    "start": "ng serve --proxy-config proxy.conf.json",
     "build": "ng build --extract-css",
     "build:ssr": "npm run build -- --app=ssr --output-hashing=media",
     "test": "ng test",
