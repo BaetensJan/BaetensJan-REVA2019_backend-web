@@ -11,9 +11,8 @@ import {SchoolDataService} from "../schools/school-data.service";
 import {GroupSharedService} from "./group-shared.service";
 import {Router} from "@angular/router";
 import {map} from "rxjs/operators";
-import {AssignmentDataService} from "../assignments/assignment-data.service";
 import {AuthenticationService} from "../user/authentication.service";
-import {forEach} from "@angular/router/src/utils/collection";
+import {AssignmentDataService} from "../assignment/assignment-data.service";
 
 @Component({
   selector: 'groups',

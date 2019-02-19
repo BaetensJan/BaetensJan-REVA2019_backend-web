@@ -1,10 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import {ActivatedRoute, Router} from "@angular/router";
-import {Group} from "../models/group.model";
-import {Observable} from "rxjs";
-import {GroupsDataService} from "../groups/groups-data.service";
-import * as jsPDF from "jspdf";
-import * as html2canvas from 'html2canvas';
+import {Group} from "../../models/group.model";
+import {GroupsDataService} from "../../groups/groups-data.service";
 
 @Component({
   selector: 'app-assignment-detail',

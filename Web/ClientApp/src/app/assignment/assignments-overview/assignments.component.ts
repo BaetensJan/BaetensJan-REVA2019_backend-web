@@ -1,13 +1,13 @@
 import * as jsPDF from "jspdf";
-import {Group} from "../models/group.model";
 import {Component} from "@angular/core";
 import * as JSZip from "jszip";
 import {saveAs} from 'file-saver';
 import {Router} from "@angular/router";
-import {School} from "../models/school.model";
-import {GroupsDataService} from "../groups/groups-data.service";
 import * as html2canvas from 'html2canvas';
 import {Observable, Observer} from "rxjs";
+import {School} from "../../models/school.model";
+import {Group} from "../../models/group.model";
+import {GroupsDataService} from "../../groups/groups-data.service";
 
 function parseJwt(token) {
   if (!token) {
@@ -29,12 +29,25 @@ function parseJwt(token) {
 })
 export class AssignmentsComponent {
 
-  school: School;
-  groups: Group[];
+  private _school: School;
+  private _groups: Group[];
   maxNumberOfGroupsPerPage = 5; // amount of groups that will be showed on the current page, to keep the page neat.
-  contentArray: Group[]; // array containing the groups that fits the filter.
-  returnedArray: Group[]; // array containing the groups (maxNumberOfGroupsPerPage) that are showed on the current page.
-  private _filteredGroups: Group[];
+  private _returnedArray: Group[]; // array containing the groups (maxNumberOfGroupsPerPage) that are shown on the current page.
+  /**
+   * Getter for groups
+   */
+  get returnedArray(): Group[] {
+    return this._returnedArray;
+  }
+
+  private _filteredGroups: Group[]; // array containing all groups that meet the filter
+  /**
+   * Getter for groups
+   */
+  get filteredGroups(): Group[] {
+    return this._filteredGroups;
+  }
+
   filterValue = "";
 
   /**
@@ -59,29 +72,24 @@ export class AssignmentsComponent {
 
     if (isAdmin == "True") {
       this._groupsDataService.groups.subscribe(value => {
-        this.groups = value;
-        this.maxNumberOfGroupsPerPage = this.groups.length;
-        this.contentArray = this.groups;
-        this._filteredGroups = this.groups;
-        this.initiateReturnedArray();
+        this._groups = value;
+        this.initiateArrays();
       });
     } else {
       this._groupsDataService.groupsBySchoolId(schoolId).subscribe(value => {
-        this.groups = value;
-        console.log(this.groups);
-        this.maxNumberOfGroupsPerPage = this.groups.length;
-        this.contentArray = this.groups;
-        this.initiateReturnedArray();
-        this._filteredGroups = this.groups;
+        this._groups = value;
+        this.initiateArrays();
       });
     }
   }
 
   /**
-   * initiates the returnedArray with the groups that should be presented on the current page.
+   * Sorts the groups alphabetically
    */
-  initiateReturnedArray() {
-    this.returnedArray = this.contentArray.slice(0, this.maxNumberOfGroupsPerPage);
+  initiateArrays() {
+    this._groups.sort((a, b) => a.name > b.name ? 1 : -1);
+    this._filteredGroups = this._groups;
+    this._returnedArray = this._filteredGroups.slice(0, this.maxNumberOfGroupsPerPage);
   }
 
 
@@ -152,8 +160,8 @@ export class AssignmentsComponent {
   downloadAllPDF() {
     let teller = 0;
     var zip = new JSZip();
-    for (let i = 0; i < this.groups.length; i++) {
-      let row = this.groups[teller];
+    for (let i = 0; i < this._groups.length; i++) {
+      let row = this._groups[teller];
       const doc = new jsPDF();
       doc.text("Groep: " + row.name, 10, 10);
       doc.text("Aantal bezochte standen: " + row.assignments.length, 10, 20);
@@ -223,7 +231,7 @@ export class AssignmentsComponent {
   }
 
   public filter(token: string) {
-    this._filteredGroups = this.groups.filter((group: Group) => {
+    this._filteredGroups = this._groups.filter((group: Group) => {
       return group.name.toLowerCase().startsWith(token.toLowerCase());
 
       //return question.categoryExhibitor.exhibitor.name.toLowerCase().startsWith(token.toLowerCase()) ||

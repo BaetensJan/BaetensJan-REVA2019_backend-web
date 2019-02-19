@@ -3,12 +3,10 @@ import {RouterModule, Routes} from "@angular/router";
 import {AuthGuardService} from "../user/auth-guard.service";
 import {PageNotFoundComponent} from "../page-not-found/page-not-found.component";
 import {HomeComponent} from "../home/home.component";
-import {AssignmentsComponent} from "../assignments/assignments.component";
 import {InformatieschermComponent} from "../informatiescherm/informatiescherm.component";
 import {CategoriesComponent} from "../categories/categories.component";
 import {CategoryComponent} from "../category/category.component";
 import {ExhibitorsComponent} from "../exhibitors/exhibitors.component";
-import {AssignmentDetailComponent} from "../assignment-detail/assignment-detail.component";
 import {ExhibitorComponent} from "../exhibitor/exhibitor.component";
 import {QuestionsComponent} from "../questions/questions.component";
 import {QuestionComponent} from "../questions/question/question.component";
@@ -16,6 +14,8 @@ import {RouteMapComponent} from "../route-map/route-map.component";
 import {AskQuestionComponent} from "../ask-question/ask-question.component";
 import {InviteRequestComponent} from "../invitation/send-request/invite-request.component";
 import {RequestsComponent} from "../invitation/pending-requests/requests.component";
+import {AssignmentsComponent} from "../assignment/assignments-overview/assignments.component";
+import {AssignmentDetailComponent} from "../assignment/assignment-detail/assignment-detail.component";
 
 const appRoutes: Routes = [
   {path: 'home', component: HomeComponent},

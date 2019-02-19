@@ -22,8 +22,7 @@ namespace ApplicationCore.Services
         }
 
         public async Task<IEnumerable<Category>> GetUnpickedCategories(int exhibitorId,
-            IEnumerable<Assignment> assignments,
-            bool extraRound)
+            IEnumerable<Assignment> assignments, bool extraRound)
         {
             // Check if Group is doing a normal tour (number of assignments done < max number of assignments to do)
             if (!extraRound)

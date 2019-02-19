@@ -57,7 +57,10 @@ namespace Web.Controllers
         {
             var group = await _groupRepository.GetById(Convert.ToInt32(User.Claims.ElementAt(5).Value));
             var assignments = group.Assignments;
-            var extraRound = exhibitorId == -1 && assignments.Count < _configuration.GetValue<int>("AmountOfQuestions");
+            
+            // Group is doing an extra round if they have submitted more than the amount of questions to be answered
+            // in a normal tour.
+            var extraRound = assignments.Count > _configuration.GetValue<int>("AmountOfQuestions");
             return await _categoryManager.GetUnpickedCategories(exhibitorId, assignments, extraRound);
         }
 
