@@ -57,11 +57,8 @@ export class ExhibitorsComponent implements OnInit {
       console.log(this.teller);
       this.tellertotaal = exhibitors.length;
       if(this.teller > 0) {
-        this._appShareService.addAlert({
-          type: 'success',
-          msg: `U heeft nog ${this.teller} van de ${this.tellertotaal} exposanten niet aangeduid op de kaart.`,
-          timeout: 5000
-        });
+        this.showMessage = true;
+        this.successMessage = "U heeft nog "+this.teller +" van de "+this.tellertotaal +" exposanten niet aangeduid op de kaart.";
       }
     });
     this.filterValue = "";
