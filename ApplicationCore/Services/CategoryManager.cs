@@ -63,13 +63,12 @@ namespace ApplicationCore.Services
             foreach (var assignment in assignments)
             {
                 var category =
-                    categories.SingleOrDefault(c => c.Id == assignment.Question.CategoryExhibitor.CategoryId);
+                    cats.SingleOrDefault(c => c.Id == assignment.Question.CategoryExhibitor.CategoryId);
                 if (category != null)
                 {
                     cats.Remove(category);
                 }
             }
-
             return cats;
         }
 

@@ -66,7 +66,6 @@ export class AuthenticationService {
   }
 
   get school$(): BehaviorSubject<string> {
-    console.log(this._school$.getValue());
     return this._school$;
   }
 
@@ -101,7 +100,7 @@ export class AuthenticationService {
           const token = res.token;
           let parsedToken = AuthenticationService.parseJwt(token);
           if (this.checkUserRole(parsedToken)) { // check if user is a teacher
-            this.setTokenAndUsername(res.token, username);
+            this.setTokenAndInitiateAttributes(res.token, username, parsedToken.schoolName);
             return true;
           }
           return false; // checkUserRole failed => user is a group
@@ -123,7 +122,7 @@ export class AuthenticationService {
       map((res: any) => {
         const token = res.token;
         if (token) {
-          this.setTokenAndUsername(res.token, username);
+          this.setTokenAndInitiateAttributes(res.token, username, schoolName);
           return true;
         }
         return false;
@@ -140,6 +139,7 @@ export class AuthenticationService {
 
       setTimeout(() => this._user$.next(null));
       setTimeout(() => this._isAdmin$.next(null));
+      setTimeout(() => this._school$.next(null));
       this.router.navigate(['/']);
     }
   }
@@ -173,9 +173,11 @@ export class AuthenticationService {
     );
   }
 
-  private setTokenAndUsername(token, username) {
+  private setTokenAndInitiateAttributes(token, username: string, schoolName: string) {
     localStorage.setItem(this._tokenKey, token);
+    console.log("schoolname:" + schoolName);
     this._user$.next(username);
+    this._school$.next(schoolName);
   }
 
   private checkUserRole(parsedToken): boolean {
