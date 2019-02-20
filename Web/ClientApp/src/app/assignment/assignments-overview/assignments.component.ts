@@ -1,13 +1,14 @@
 import * as jsPDF from "jspdf";
-import {Component} from "@angular/core";
+import { Component } from "@angular/core";
 import * as JSZip from "jszip";
-import {saveAs} from 'file-saver';
-import {Router} from "@angular/router";
+import { saveAs } from 'file-saver';
+import { Router } from "@angular/router";
 import * as html2canvas from 'html2canvas';
-import {Observable, Observer} from "rxjs";
-import {School} from "../../models/school.model";
-import {Group} from "../../models/group.model";
-import {GroupsDataService} from "../../groups/groups-data.service";
+import { Observable, Observer } from "rxjs";
+import { School } from "../../models/school.model";
+import { Group } from "../../models/group.model";
+import { GroupsDataService } from "../../groups/groups-data.service";
+import { PageChangedEvent } from 'ngx-bootstrap/pagination';
 
 function parseJwt(token) {
   if (!token) {
@@ -29,6 +30,7 @@ function parseJwt(token) {
 })
 export class AssignmentsComponent {
 
+  currentPage; // the current page in the pagination (e.g. page 1, 2 ...)
   private _school: School;
   private _groups: Group[];
   maxNumberOfGroupsPerPage = 5; // amount of groups that will be showed on the current page, to keep the page neat.
@@ -84,10 +86,21 @@ export class AssignmentsComponent {
   }
 
   /**
+   * When a user clicks on the next page pagination button,
+   * it will show the next groups.
+   * @param event
+   */
+  pageChanged(event: PageChangedEvent): void {
+    const startItem = (event.page - 1) * event.itemsPerPage;
+    const endItem = event.page * event.itemsPerPage;
+    this._returnedArray = this._filteredGroups.slice(startItem, endItem);
+  }
+
+  /**
    * Sorts the groups alphabetically
    */
   initiateArrays() {
-    this._groups.sort((a, b) => a.name > b.name ? 1 : -1);
+    this._groups.sort(/*(a, b) => a.name > b.name ? 1 : -1*/);
     this._filteredGroups = this._groups;
     this._returnedArray = this._filteredGroups.slice(0, this.maxNumberOfGroupsPerPage);
   }
@@ -104,52 +117,52 @@ export class AssignmentsComponent {
     doc.text("Aantal bezochte standen: " + row.assignments.length, 10, 20);
     let i = 0;
     row.assignments.forEach(f => {
-        if (i == 0) {
-          if (i > 0) {
-            doc.addPage();
-          }
-          console.log(f.question.category);
-          doc.text("Stand: " + (i + 1) + " :" + f.question.exhibitor.name, 10, 40);
-
-          if (!f.extra) {
-            doc.text("Categories: " + f.question.category.name, 10, 50);
-            //doc.text("categories: " + f.exhibitor.categories.map(a => a.name).join(", "), 10, 50);
-            doc.text("Vraag: " + f.question.questionText, 10, 60);
-          }
-
-          doc.text("Antwoord: " + f.answer, 10, 70);
-          doc.text("Notities: " + f.notes, 10, 80);
-          if (f.photo != null) {
-            this.addImage(f.photo, doc); //Todo: dit werkt na de 2x keer klikken, prolly iets met caching te maken.
-            setTimeout(() => {
-              console.log('Test');
-              // this.addImage(f.photo, doc);
-            }, 100000);
-          }
-          i++;
+      if (i == 0) {
+        if (i > 0) {
+          doc.addPage();
         }
-        else {
-          if (i > 0) {
-            doc.addPage();
-          }
-          if (!f.extra) {
-            doc.text("Stand " + (i + 1) + " :" + f.question.exhibitor.name, 10, 10);
-            doc.text("Categories: " + f.question.category.name, 10, 20);
-            //doc.text("categories: " + f.exhibitor.categories.map(a => a.name).join(", "), 10, 20);
-            doc.text("Vraag: " + f.question.questionText, 10, 50);
-          }
-          doc.text("Antwoord: " + f.answer, 10, 60);
-          doc.text("Notities: " + f.notes, 10, 70);
-          if (f.photo != null) {
-            this.addImage(f.photo, doc); //Todo: dit werkt na de 2x keer klikken, prolly iets met caching te maken.
-            setTimeout(() => {
-              console.log('Test');
-              // this.addImage(f.photo, doc);
-            }, 100000);
-          }
-          i++;
+        console.log(f.question.category);
+        doc.text("Stand: " + (i + 1) + " :" + f.question.exhibitor.name, 10, 40);
+
+        if (!f.extra) {
+          doc.text("Categories: " + f.question.category.name, 10, 50);
+          //doc.text("categories: " + f.exhibitor.categories.map(a => a.name).join(", "), 10, 50);
+          doc.text("Vraag: " + f.question.questionText, 10, 60);
         }
+
+        doc.text("Antwoord: " + f.answer, 10, 70);
+        doc.text("Notities: " + f.notes, 10, 80);
+        if (f.photo != null) {
+          this.addImage(f.photo, doc); //Todo: dit werkt na de 2x keer klikken, prolly iets met caching te maken.
+          setTimeout(() => {
+            console.log('Test');
+            // this.addImage(f.photo, doc);
+          }, 100000);
+        }
+        i++;
       }
+      else {
+        if (i > 0) {
+          doc.addPage();
+        }
+        if (!f.extra) {
+          doc.text("Stand " + (i + 1) + " :" + f.question.exhibitor.name, 10, 10);
+          doc.text("Categories: " + f.question.category.name, 10, 20);
+          //doc.text("categories: " + f.exhibitor.categories.map(a => a.name).join(", "), 10, 20);
+          doc.text("Vraag: " + f.question.questionText, 10, 50);
+        }
+        doc.text("Antwoord: " + f.answer, 10, 60);
+        doc.text("Notities: " + f.notes, 10, 70);
+        if (f.photo != null) {
+          this.addImage(f.photo, doc); //Todo: dit werkt na de 2x keer klikken, prolly iets met caching te maken.
+          setTimeout(() => {
+            console.log('Test');
+            // this.addImage(f.photo, doc);
+          }, 100000);
+        }
+        i++;
+      }
+    }
     );
     doc.save(row.name + "_antwoorden.pdf");
   }
@@ -220,24 +233,31 @@ export class AssignmentsComponent {
 
       teller++;
     }
-    zip.generateAsync({type: "blob"}).then(function (content) {
+    zip.generateAsync({ type: "blob" }).then(function (content) {
       // see FileSaver.js
       saveAs(content, "alle_antwoorden.zip");
     });
   }
 
   detailAssignment(group: Group) {
-    this.router.navigate(["/assignmentdetail"], {queryParams: {groupId: group.id}});
+    this.router.navigate(["/assignmentdetail"], { queryParams: { groupId: group.id } });
   }
 
+  /** FILTER **/
   public filter(token: string) {
-    this._filteredGroups = this._groups.filter((group: Group) => {
-      return group.name.toLowerCase().startsWith(token.toLowerCase());
-
-      //return question.categoryExhibitor.exhibitor.name.toLowerCase().startsWith(token.toLowerCase()) ||
-      //  question.categoryExhibitor.category.name.toLowerCase().startsWith(token.toLowerCase());
-    });
+    token = token.toLowerCase();
+    console.log(token);
+    if (!token) {
+      this._filteredGroups = this._groups;
+    } else {
+      this._filteredGroups = this._groups.filter((group: Group) => {
+        return group.name.toLowerCase().includes(token);
+      });
+    }
+    this._returnedArray = this._filteredGroups.slice(0, this.maxNumberOfGroupsPerPage);
+    this.currentPage = 1; // switches current page in pagination back to page 1
   }
+
 
   private getBase64ImageFromURL(url: string) {
     return Observable.create((observer: Observer<string>) => {

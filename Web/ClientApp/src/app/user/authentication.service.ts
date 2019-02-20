@@ -175,7 +175,6 @@ export class AuthenticationService {
 
   private setTokenAndInitiateAttributes(token, username: string, schoolName: string) {
     localStorage.setItem(this._tokenKey, token);
-    console.log("schoolname:" + schoolName);
     this._user$.next(username);
     this._school$.next(schoolName);
   }

@@ -1,5 +1,5 @@
 <div id="header">
-  <h1>Ingediende opdrachten!hekezreezerzs</h1>
+  <h1>Ingediende opdrachten</h1>
 </div>
 
 <div>
@@ -46,7 +46,7 @@
   </tr>
   </tbody>
 </table>
-<pagination [totalItems]="filteredGroups.length" (pageChanged)="pageChanged($event)"
+<pagination *ngIf="filteredGroups" [totalItems]="filteredGroups.length" (pageChanged)="pageChanged($event)"
             [itemsPerPage]=maxNumberOfGroupsPerPage [(ngModel)]="currentPage"></pagination>
 
 <ng-template #noGroups>

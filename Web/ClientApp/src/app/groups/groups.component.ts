@@ -169,7 +169,6 @@ export class GroupsComponent {
   }
 
   /** FILTER **/
-
   public filter(token: string) {
     token = token.toLowerCase();
     if (!token) {
@@ -243,7 +242,7 @@ export class GroupsComponent {
    * Sorts the groups alphabetically
    */
   initiateArrays() {
-    this._groups.sort((a, b) => a.name > b.name ? 1 : -1);
+    this._groups.sort(/*(a, b) => a.name > b.name ? 1 : -1*/);
     this._filteredGroups = this._groups;
     this._returnedArray = this._filteredGroups.slice(0, this.maxNumberOfGroupsPerPage);
   }
