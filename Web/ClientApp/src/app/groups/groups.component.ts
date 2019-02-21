@@ -128,7 +128,6 @@ export class GroupsComponent {
 
   removeMemberFromAlreadyCreatedGroup(group, memberName) {
     this._groupsDataService.removeMember(group.id, memberName).subscribe(value => {
-      console.log(value);
       const index = group.members.indexOf(memberName, 0);
       if (index > -1) {
         group.members.splice(index, 1);
@@ -184,7 +183,6 @@ export class GroupsComponent {
           for (let i in group.members) {
             let member = group.members[i];
             if (member.toLowerCase().includes(token)) {
-              console.log(member);
               this._filteredGroups.push(group);
               break;
             }
@@ -302,7 +300,6 @@ export class GroupsComponent {
     let memberName = String(this.groupForm.value.groupMember.toString());
     this.groupMembers.push(memberName);
     this.groupForm.controls['groupMember'].setValue(""); //.reset();
-    console.log(this.groupMembers)
   }
 
   /**
@@ -323,9 +320,7 @@ export class GroupsComponent {
       "password": this.groupForm.value.groupPassword,
       "members": this.groupMembers
     };
-    console.log(newGroup.password);
     this._groupsDataService.addNewGroup(this.school.id, newGroup).subscribe(value => {
-      console.log(value);
       this._groups.push(value);
       this.initiateArrays();
       this.groupMembers = [];

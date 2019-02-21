@@ -121,7 +121,6 @@ export class AssignmentsComponent {
         if (i > 0) {
           doc.addPage();
         }
-        console.log(f.question.category);
         doc.text("Stand: " + (i + 1) + " :" + f.question.exhibitor.name, 10, 40);
 
         if (!f.extra) {
@@ -135,7 +134,6 @@ export class AssignmentsComponent {
         if (f.photo != null) {
           this.addImage(f.photo, doc); //Todo: dit werkt na de 2x keer klikken, prolly iets met caching te maken.
           setTimeout(() => {
-            console.log('Test');
             // this.addImage(f.photo, doc);
           }, 100000);
         }
@@ -156,7 +154,6 @@ export class AssignmentsComponent {
         if (f.photo != null) {
           this.addImage(f.photo, doc); //Todo: dit werkt na de 2x keer klikken, prolly iets met caching te maken.
           setTimeout(() => {
-            console.log('Test');
             // this.addImage(f.photo, doc);
           }, 100000);
         }
@@ -196,7 +193,6 @@ export class AssignmentsComponent {
             var data = document.getElementById("imageid");
             html2canvas(data).then(canvas => {
               var imgconverted = canvas.toDataURL("data:image/png;base64");
-              console.log(imgconverted, 'base64');
 
               setTimeout(() => {    //<<<---    using ()=> syntax
               }, 300000);
@@ -219,7 +215,6 @@ export class AssignmentsComponent {
             var data = document.getElementById("imageid");
             html2canvas(data).then(canvas => {
               var imgconverted = canvas.toDataURL("data:image/png;base64");
-              console.log(imgconverted, 'base64');
 
               setTimeout(() => {    //<<<---    using ()=> syntax
               }, 300000);
@@ -246,7 +241,6 @@ export class AssignmentsComponent {
   /** FILTER **/
   public filter(token: string) {
     token = token.toLowerCase();
-    console.log(token);
     if (!token) {
       this._filteredGroups = this._groups;
     } else {
