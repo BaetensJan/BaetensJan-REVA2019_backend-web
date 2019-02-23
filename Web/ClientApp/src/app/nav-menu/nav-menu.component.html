@@ -46,7 +46,6 @@
 
         <ng-container *ngIf='(isAdmin | async)'>
           <div class='clearfix' style="margin-bottom: 2.5em;"></div>
-
           <li [routerLinkActive]='["link-active"]'>
             <a (click)='collapse()' [routerLink]='["categorieen"]'>
               <span class='glyphicon glyphicon-th-list'></span> Categorieën

@@ -4,6 +4,7 @@ import {Observable} from "rxjs";
 import {HttpClient} from "@angular/common/http";
 import {Router} from "@angular/router";
 import {TeacherRequest} from "../models/teacherRequest.model";
+import {Category} from "../models/category.model";
 
 @Injectable({
   providedIn: 'root'
@@ -62,6 +63,12 @@ export class InvitationService {
         return true;
       })
     );
+  }
+
+  updateTeacher(rec: TeacherRequest): Observable<TeacherRequest> {
+    return this.http
+      .put(`${this._url}/teacherRequest/UpdateTeacher/${rec.id}`, rec)
+      .pipe(map(TeacherRequest.fromJSON));
   }
 
   /**

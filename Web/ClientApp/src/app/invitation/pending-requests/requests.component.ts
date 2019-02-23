@@ -2,6 +2,8 @@ import {Component, OnInit, TemplateRef} from '@angular/core';
 import {InvitationService} from "../invitation.service";
 import {BsModalRef, BsModalService} from "ngx-bootstrap";
 import {TeacherRequest} from "../../models/teacherRequest.model";
+import {Router} from "@angular/router";
+import {RequestsShareService} from "./requests-share.service";
 
 @Component({
   selector: 'app-requests',
@@ -22,7 +24,7 @@ export class RequestsComponent implements OnInit {
   modalBody: string;
   accept: boolean;
 
-  constructor(private _invitationService: InvitationService, private modalService: BsModalService) {
+  constructor(private router: Router, private _invitationService: InvitationService, private modalService: BsModalService, private _requestTeacherShareService: RequestsShareService) {
   }
 
   ngOnInit() {
@@ -68,6 +70,17 @@ export class RequestsComponent implements OnInit {
     this.refModal.hide();
   }
 
+  onToevoegenAanvraag() {
+    this._requestTeacherShareService.teacherRequest = null;
+    this.router.navigate(["invite-request"]);
+  }
+
+  onAanpassenRequest(request:TeacherRequest) {
+    console.log(request);
+    this._requestTeacherShareService.teacherRequest = request;
+    this._requestTeacherShareService.aanpassen = true;
+    this.router.navigate(["invite-request"]);
+  }
   /**
    * Removes a request from the requests attribute (NOT DB)
    */

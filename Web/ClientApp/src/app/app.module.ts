@@ -7,6 +7,7 @@ import {NavMenuComponent} from './nav-menu/nav-menu.component';
 import {HomeComponent} from './home/home.component';
 import {UserModule} from "./user/user.module";
 import {InformatieschermComponent} from './informatiescherm/informatiescherm.component';
+import {InviteRequestComponent} from "./invitation/send-request/invite-request.component";
 import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
 import {VerticalTimelineModule} from 'angular-vertical-timeline';
 import {
@@ -39,13 +40,14 @@ import { AskQuestionComponent } from './ask-question/ask-question.component';
 import {AssignmentsComponent} from "./assignment/assignments-overview/assignments.component";
 import {AssignmentDetailComponent} from "./assignment/assignment-detail/assignment-detail.component";
 import {AssignmentDataService} from "./assignment/assignment-data.service";
+import {RequestsShareService} from "./invitation/pending-requests/requests-share.service";
 
 @NgModule({
   declarations: [
     AppComponent,
     PageNotFoundComponent, HomeComponent, AssignmentsComponent, InformatieschermComponent,
     CategoriesComponent, CategoryComponent, ExhibitorComponent, ExhibitorsComponent, AssignmentDetailComponent,
-    QuestionComponent, QuestionsComponent, RouteMapComponent, NavMenuComponent, AskQuestionComponent,/* UploadCsvComponent*/
+    QuestionComponent, QuestionsComponent, RouteMapComponent, NavMenuComponent, AskQuestionComponent, InviteRequestComponent/* UploadCsvComponent*/
   ],
   imports: [
     BrowserModule.withServerTransition({appId: 'ng-cli-universal'}),
@@ -67,6 +69,7 @@ import {AssignmentDataService} from "./assignment/assignment-data.service";
   providers: [
     CategoriesDataService,
     CategoryShareService,
+    RequestsShareService,
     ExhibitorsDataService,
     ExhibitorShareService,
     AssignmentDataService,

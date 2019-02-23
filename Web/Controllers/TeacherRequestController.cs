@@ -73,5 +73,21 @@ namespace Web.Controllers
                 Message = "Request removed."
             });
         }
+        
+        
+        [HttpPut("[Action]/{id}")]
+        public async Task<TeacherRequest> UpdateTeacher([FromRoute] int id, [FromBody] TeacherRequest teacherRequest)
+        {
+            TeacherRequest tr = await _teacherRequestRepository.GetById(teacherRequest.Id);
+            tr.Name = teacherRequest.Name;
+            tr.Note = teacherRequest.Note;
+            tr.Email = teacherRequest.Email;
+            tr.Surname = teacherRequest.Surname;
+            tr.SchoolName = teacherRequest.SchoolName;
+            _teacherRequestRepository.Update(tr);
+
+            await _teacherRequestRepository.SaveChanges();
+            return teacherRequest;
+        }
     }
 }

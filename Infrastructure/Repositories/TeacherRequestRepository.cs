@@ -44,6 +44,11 @@ namespace Infrastructure.Repositories
         {
             return _teacherRequests.AddAsync(teacherRequest);
         }
+        
+        public void Update(TeacherRequest teacherRequest)
+        {
+            _teacherRequests.Update(teacherRequest);
+        }
 
         public void Remove(TeacherRequest teacherRequest)
         {

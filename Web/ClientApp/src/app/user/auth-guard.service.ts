@@ -40,15 +40,18 @@ export class AuthGuardService implements CanActivate {
       return false;
     }
     if (this.isNonLoggedInPage(state.url)) {
-      console.log("not logged in page");
       if (this.authService.isLoggedIn$.getValue()) {
         this.router.navigate(['/home']);
         return false;
       }
       return true;
     } else {
-      this.router.navigate(['/home']); // unauthorized.
-      return false;
+      if(state.url == "/invite-request") {
+        return true;
+      } else {
+        this.router.navigate(['/home']); // unauthorized.
+        return false;
+      }
     }
   }
 
@@ -69,7 +72,7 @@ export class AuthGuardService implements CanActivate {
 
   private isNonLoggedInPage(url): boolean {
     //Pages logged-in-users aren't allowed to access anymore
-    let pages = ['/login', "/invite-request", "/register"];
+    let pages = ['/login', "/register"];
     return pages.includes(url);
 
   }

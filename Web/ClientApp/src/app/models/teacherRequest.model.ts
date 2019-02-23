@@ -34,6 +34,10 @@ export class TeacherRequest {
     return this._id;
   }
 
+  set id(id) {
+    this._id = id;
+  }
+
   private _name: string;
 
   /**

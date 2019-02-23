@@ -11,7 +11,6 @@ import {AuthGuardService} from "./auth-guard.service";
 import {LogoutComponent} from "./logout/logout.component";
 import {InviteRequestComponent} from "../invitation/send-request/invite-request.component";
 import {RequestsComponent} from "../invitation/pending-requests/requests.component";
-import {InvitationService} from "../invitation/invitation.service";
 
 /**
  * Routing for user login and registration
@@ -29,10 +28,9 @@ const routes = [
     ReactiveFormsModule,
     RouterModule.forChild(routes)
   ],
-  declarations: [LoginComponent, LogoutComponent, RegisterComponent, InviteRequestComponent, RequestsComponent/*, ForgotPasswordComponent*/],
+  declarations: [LoginComponent, LogoutComponent, RegisterComponent, RequestsComponent/*, ForgotPasswordComponent*/],
   providers: [
     httpInterceptorProviders,
-    InvitationService,
     AuthenticationService,
     AuthGuardService
   ],
