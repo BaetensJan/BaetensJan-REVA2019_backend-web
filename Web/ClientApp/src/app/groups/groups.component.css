@@ -3,11 +3,7 @@
 }
 
 #header + div {
-  margin-top: 2.5em;
-}
-
-#app-credentials {
-  margin-bottom: 2.5em;
+  margin-top: 1.5em;
 }
 
 #app-credentials input {

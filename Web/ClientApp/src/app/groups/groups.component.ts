@@ -79,6 +79,13 @@ export class GroupsComponent {
     return this._applicationStartDate;
   }
 
+  /**
+   * when the current date is after of equal to the appStartDate -> returns true
+   */
+  get appStartDateExpired(): boolean {
+      return this._applicationStartDate <= new Date();
+  }
+
   private _filterOnGroupName: boolean = true; // current text in filterOption button
 
   get filterOnGroupName(): boolean {
