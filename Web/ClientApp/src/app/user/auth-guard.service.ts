@@ -48,7 +48,7 @@ export class AuthGuardService implements CanActivate {
   }
 
   private isLoggedInPage(url): boolean {
-    let pages = ['/groepen', "/opdrachten", "/logout"];
+    let pages = ['/groepen', "/opdrachten", "/logout", "/wachtwoord-veranderen"];
     return pages.includes(url);
   }
 

@@ -9,6 +9,7 @@ using System.Text.Encodings.Web;
 using System.Threading.Tasks;
 using ApplicationCore.Entities;
 using ApplicationCore.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -409,6 +410,31 @@ namespace Web.Controllers
             }
 
             return Ok();
+        }
+
+        [Authorize]
+        [HttpPost("[action]")]
+        public async Task<IActionResult> ChangePassword([FromBody] ChangePasswordDTO model)
+        {
+            var errors = new List<string>();
+            if (!ModelState.IsValid)
+            {
+                return BadRequest();
+            }
+
+            var user = await _userManager.GetUserAsync(User);
+            var result = await _userManager.ChangePasswordAsync(user, model.CurrentPassword, model.NewPassword);
+            if (result.Succeeded)
+            {
+                return Ok();
+            }
+
+            foreach (var error in result.Errors)
+            {
+                errors.Add(error.Description);
+            }
+
+            return BadRequest(errors);
         }
 
         [HttpPost("[action]")]
