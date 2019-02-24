@@ -24,7 +24,11 @@ export class RequestsComponent implements OnInit {
   modalBody: string;
   accept: boolean;
 
-  constructor(private router: Router, private _invitationService: InvitationService, private modalService: BsModalService, private _requestTeacherShareService: RequestsShareService) {
+  constructor(private router: Router,
+              private _invitationService: InvitationService,
+              private modalService: BsModalService,
+              private _requestTeacherShareService: RequestsShareService
+  ) {
   }
 
   ngOnInit() {
@@ -75,12 +79,13 @@ export class RequestsComponent implements OnInit {
     this.router.navigate(["invite-request"]);
   }
 
-  onAanpassenRequest(request:TeacherRequest) {
+  onAanpassenRequest(request: TeacherRequest) {
     console.log(request);
     this._requestTeacherShareService.teacherRequest = request;
     this._requestTeacherShareService.aanpassen = true;
     this.router.navigate(["invite-request"]);
   }
+
   /**
    * Removes a request from the requests attribute (NOT DB)
    */

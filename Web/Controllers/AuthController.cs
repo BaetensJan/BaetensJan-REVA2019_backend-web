@@ -53,7 +53,7 @@ namespace Web.Controllers
         }
 
         /**
-         * Create an ApplicationUser.
+         * This method is used to manually Create an ApplicationUser (e.g. create admin) via e.g. Postman.
          * Parameter = model: CreateUserViewModel
          */
         [HttpPost("[Action]")]
@@ -63,16 +63,26 @@ namespace Web.Controllers
             {
                 var user = _authenticationManager.CreateApplicationUserObject(model.Email, model.Username,
                     model.Password);
-                user = _userManager.Users.Include(u => u.School).SingleOrDefault(u => u.Id == user.Id);
+                var result = await _userManager.CreateAsync(user, model.Password);
 
-                var claim = await CreateClaims(user);
+                if (result.Succeeded)
+                {
+                    user = _userManager.Users.SingleOrDefault(u => u.Id == user.Id);
 
-                return Ok(
-                    new
-                    {
-                        Username = user.UserName,
-                        Token = GetToken(claim)
-                    });
+//                    TODO: uncomment line beneath if you want to create an admin.
+//                    await _userManager.AddToRoleAsync(user, "Admin");
+
+                    user = _userManager.Users.SingleOrDefault(u => u.Id == user.Id);
+
+                    var claim = await CreateClaims(user);
+
+                    return Ok(
+                        new
+                        {
+                            Username = user.UserName,
+                            Token = GetToken(claim)
+                        });
+                }
             }
 
             return Ok(

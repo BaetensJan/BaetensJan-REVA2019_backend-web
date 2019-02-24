@@ -12,7 +12,7 @@ import {AccordionModule, PaginationModule, TypeaheadModule} from "ngx-bootstrap"
 
 const routes = [
   {path: 'updateGroup', canActivate: [AuthGuardService], component: UpdateGroupComponent},
-  {path: '', canActivate: [AuthGuardService], component: GroupsComponent},
+  {path: 'groups', canActivate: [AuthGuardService], component: GroupsComponent},
   // {
   //   path: ':id',
   //   component: UpdateGroupComponent,

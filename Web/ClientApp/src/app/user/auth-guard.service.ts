@@ -16,7 +16,6 @@ export class AuthGuardService implements CanActivate {
     console.debug(`Logged in: ${this.authService.isLoggedIn$.getValue()}`);
     console.debug(`Is Admin: ${this.authService.isModerator$.getValue()}`);
     if (this.isAdminRequired(state.url)) {
-      console.log("administrator page");
       if (this.authService.isLoggedIn$.getValue()) {
         if (this.authService.isModerator$.getValue()) {
           return true;
@@ -31,7 +30,6 @@ export class AuthGuardService implements CanActivate {
       return false;
     }
     if (this.isLoggedInPage(state.url)) {
-      console.log("logged in page");
       if (this.authService.isLoggedIn$.getValue()) {
         return true
       }
@@ -46,7 +44,7 @@ export class AuthGuardService implements CanActivate {
       }
       return true;
     } else {
-      if(state.url == "/invite-request") {
+      if (state.url == "/invite-request") {
         return true;
       } else {
         this.router.navigate(['/home']); // unauthorized.
@@ -56,17 +54,17 @@ export class AuthGuardService implements CanActivate {
   }
 
   private isLoggedInPage(url): boolean {
-
+    console.log(url);
     // assignmentsdetail has queryParams (groupId), e.g. /assignmentdetail?groupId=3
     let detailString = "/assignmentdetail?groupId=";
-    if (url.startsWith(detailString)){
-      let ret = url.replace(detailString,'');
+    if (url.startsWith(detailString)) {
+      let ret = url.replace(detailString, '');
 
       // check if everything after detailString is a number (groupId)
       if (!isNaN(Number(ret))) return true;
     }
 
-    let pages = ['/groepen', "/opdrachten", "/logout"];
+    let pages = ['/group/groups', "/opdrachten", "/logout", "/group/updateGroup"];
     return pages.includes(url);
   }
 
