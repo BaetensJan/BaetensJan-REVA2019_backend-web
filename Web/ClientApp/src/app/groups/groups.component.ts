@@ -129,7 +129,7 @@ export class GroupsComponent {
 
   updateGroup(group: Group) {
     this._groupsSharedService.updateGroup(this._school.id, group);
-    this.router.navigate(["groepen/updateGroup"]);
+    this.router.navigate(["/group/updateGroup"]);
   }
 
 

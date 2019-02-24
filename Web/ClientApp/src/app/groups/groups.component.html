@@ -2,7 +2,7 @@
   <h1>Groepen</h1>
 </div>
 
-<div class="panel panel-default" *ngIf="!appStartDateExpired">
+<div class="panel panel-default" *ngIf="!appStartDateExpired && applicationStartDate">
   <div class="panel-body">
     <h3>De app zal pas gebruikt kunnen worden door studenten vanaf:
       <strong>{{applicationStartDate.toLocaleDateString()}}</strong></h3>
@@ -127,10 +127,10 @@
                 <div class="col-md-2">
                   leden: <span class="badge">{{group.members.length}}</span>
                 </div>
-                <button *ngIf="school" (click)="updateGroup(group)" style="margin-right: 0.2em;"
-                        class="btn btn-primary">
-                  <span class="glyphicon glyphicon-edit"></span>
-                </button>
+                <!--<button *ngIf="school" (click)="updateGroup(group)" style="margin-right: 0.2em;"-->
+                        <!--class="btn btn-primary">-->
+                  <!--<span class="glyphicon glyphicon-edit"></span>-->
+                <!--</button> TODO implementation of update-group is not finished-->
                 <button (click)="openModal(template, group.id)"
                         class="btn btn-danger">
                   <span class="glyphicon glyphicon-remove"></span>

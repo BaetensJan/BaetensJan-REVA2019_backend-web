@@ -20,7 +20,7 @@ import {AssignmentDetailComponent} from "../assignment/assignment-detail/assignm
 const appRoutes: Routes = [
   {path: 'home', component: HomeComponent},
   {
-    path: 'groepen',
+    path: 'group',
     canActivate: [AuthGuardService],
     loadChildren: 'app/all-modules/group/group.module#GroupModule',
     data: {preload: true}

@@ -24,7 +24,7 @@
           </a>
         </li>
         <li *ngIf='(isLoggedIn | async)' [routerLinkActive]='["link-active"]'>
-          <a (click)='collapse()' [routerLink]='["/groepen"]'>
+          <a (click)='collapse()' [routerLink]='["/group/groups"]'>
             <span class='glyphicon glyphicon-user'></span> Groepen
           </a>
         </li>
