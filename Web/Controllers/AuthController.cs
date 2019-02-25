@@ -56,7 +56,7 @@ namespace Web.Controllers
         }
 
         /**
-         * Create an ApplicationUser.
+         * This method is used to manually Create an ApplicationUser (e.g. create admin) via e.g. Postman.
          * Parameter = model: CreateUserViewModel
          */
         [HttpPost("[Action]")]
@@ -66,16 +66,26 @@ namespace Web.Controllers
             {
                 var user = _authenticationManager.CreateApplicationUserObject(model.Email, model.Username,
                     model.Password);
-                user = _userManager.Users.Include(u => u.School).SingleOrDefault(u => u.Id == user.Id);
+                var result = await _userManager.CreateAsync(user, model.Password);
 
-                var claim = await CreateClaims(user);
+                if (result.Succeeded)
+                {
+                    user = _userManager.Users.SingleOrDefault(u => u.Id == user.Id);
 
-                return Ok(
-                    new
-                    {
-                        Username = user.UserName,
-                        Token = GetToken(claim)
-                    });
+//                    TODO: uncomment line beneath if you want to create an admin.
+//                    await _userManager.AddToRoleAsync(user, "Admin");
+
+                    user = _userManager.Users.SingleOrDefault(u => u.Id == user.Id);
+
+                    var claim = await CreateClaims(user);
+
+                    return Ok(
+                        new
+                        {
+                            Username = user.UserName,
+                            Token = GetToken(claim)
+                        });
+                }
             }
 
             return Ok(
@@ -171,6 +181,7 @@ namespace Web.Controllers
         private async Task<Claim[]> CreateClaims(ApplicationUser user)
         {
             var isAdmin = await _userManager.IsInRoleAsync(user, "Admin");
+
             var claims = new List<Claim>()
             {
                 new Claim(JwtRegisteredClaimNames.Sub,
@@ -180,6 +191,8 @@ namespace Web.Controllers
                 new Claim("username", user.UserName),
                 new Claim("isAdmin", isAdmin.ToString()),
             };
+            if (await _userManager.IsInRoleAsync(user, "Teacher"))
+                claims.Add(new Claim("schoolName", user.School.Name));
             claims.AddRange((await _userManager.GetRolesAsync(user)).Select(role => new Claim(ClaimTypes.Role, role)));
 
             return claims.ToArray();
@@ -296,8 +309,8 @@ namespace Web.Controllers
 
         private async Task<ApplicationUser> GetApplicationUser(string username)
         {
-            return _userManager.Users.Include(u => u.School).ThenInclude(s => s.Groups)
-                .SingleOrDefault(u => u.UserName == username);
+            return await _userManager.Users.Include(u => u.School).ThenInclude(s => s.Groups)
+                .SingleOrDefaultAsync(u => u.UserName == username);
         }
 
         /**
@@ -370,7 +383,7 @@ namespace Web.Controllers
                 issuer: "http://app.reva.be",
                 audience: "http://app.reva.be",
                 claims: claim,
-                expires: DateTime.UtcNow.AddHours(1),
+                expires: DateTime.UtcNow.AddDays(7),
                 signingCredentials: new SigningCredentials(signInKey, SecurityAlgorithms.HmacSha256));
         }
 

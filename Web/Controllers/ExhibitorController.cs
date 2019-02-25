@@ -17,20 +17,19 @@ namespace Web.Controllers
         private readonly IExhibitorRepository _exhibitorRepository;
 
         public ExhibitorController(IExhibitorRepository exhibitorRepository, ICategoryRepository categoryRepository,
-            ICategoryExhibitorRepository categoryExhibitorRepository, IQuestionRepository questionRepository)
+            IQuestionRepository questionRepository)
         {
             _exhibitorRepository = exhibitorRepository;
-            _exhibitorManager = new ExhibitorManager(exhibitorRepository, categoryRepository, questionRepository);
+            _exhibitorManager = new ExhibitorManager(exhibitorRepository);
         }
 
         [HttpGet("[action]")]
-        public Task<IEnumerable<Exhibitor>> Exhibitors()
+        public async Task<IEnumerable<Exhibitor>> Exhibitors()
         {
-            var exhbs = _exhibitorManager.ExhibitorsLight();
-            //.Exhibitors().ToList(); Todo: infinite recursive loop (has catExhibitor with exhibitors that have catExhibs and so on).
-            return exhbs;
+//            var exhbs = _exhibitorManager.ExhibitorsLight();
+            return await _exhibitorRepository.All();
         }
-        
+
         /**
          * returns exhibitor with name equal to parameter exhibitorname.
          */
@@ -45,7 +44,7 @@ namespace Web.Controllers
         {
             return _exhibitorManager.ExhibitorsLight();
         }
-        
+
         [HttpPut("[action]/{id}")]
         public Task<Exhibitor> UpdateExhibitor([FromRoute] int id, [FromBody] ExhibitorDTO exhibitordto)
         {
@@ -58,7 +57,7 @@ namespace Web.Controllers
                 GroupsAtExhibitor = 0,
                 Categories = CreateCategories(exhibitordto.CategoryIds)
             };
-            return _exhibitorManager.UpdateExhibitor(id,exhibitor);
+            return _exhibitorManager.UpdateExhibitor(id, exhibitor);
         }
 
         [HttpDelete("[action]/{id}")]
@@ -66,7 +65,7 @@ namespace Web.Controllers
         {
             return _exhibitorManager.RemoveExhibitor(id);
         }
-        
+
         [HttpDelete("RemoveExhibitors")]
         public async Task<ActionResult> RemoveExhibitors()
         {
@@ -96,14 +95,13 @@ namespace Web.Controllers
             //_exhibitorManager.AddExhibitor(exhibitor);
             await _exhibitorRepository.Add(exhibitor);
             await _exhibitorRepository.SaveChanges();
-            
+
             return exhibitor;
         }
 
         [HttpPost("[action]")]
         public async Task<Exhibitor> UpdateExhibitor([FromBody] ExhibitorDTO exhibitordto)
         {
-            
             Exhibitor e = await _exhibitorRepository.GetById(exhibitordto.Id);
             e.Id = exhibitordto.Id;
             e.Name = exhibitordto.Name;

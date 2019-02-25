@@ -41,10 +41,10 @@ namespace Web.Controllers
         /**
         * Returns group status/info to android (current assignment, number of assignments done by group,
         * if group already has an assignment and the coordinates of the previous exhibitor if existing).
-        * Gets groupId via token -> groepId
+        * Gets groupId via token -> groupId
         */
         [HttpGet("[action]")]
-        public async Task<IActionResult> GroupInfo( /*int groupId*/)
+        public async Task<IActionResult> GroupInfo()
         {
             // get username from jwt token.
             var groupId = User.Claims.ElementAt(5).Value;
@@ -58,7 +58,7 @@ namespace Web.Controllers
 
             if (numberOfAssignments > 1)
             {
-                group.Assignments.Sort((ass1, ass2) => ass1.Id.CompareTo(ass2.Id));
+                group.Assignments.Sort((ass1, ass2) => ass1.CreationDate.CompareTo(ass2.CreationDate));
 
                 previousExhibitorXCoordinate =
                     group.Assignments[numberOfAssignments - 2].Question.CategoryExhibitor.Exhibitor.X;
@@ -67,15 +67,28 @@ namespace Web.Controllers
             }
 
             var currentAssignment = group.Assignments.LastOrDefault();
-            var numberOfSubmittedAssignments = currentAssignment == null ? 0 : 
-                currentAssignment.Submitted ? numberOfAssignments : numberOfAssignments - 1;
+            var isCreatedExhibitor = false;
+            var numberOfSubmittedAssignments = numberOfAssignments;
+
+            if (currentAssignment != null && !currentAssignment.Submitted)
+            {
+                numberOfSubmittedAssignments = numberOfAssignments - 1;
+                isCreatedExhibitor =
+                    currentAssignment.WithCreatedExhibitor(
+                        _configuration.GetValue<int>("CreatedExhibitorQuestionId"));
+            }
+
             var hasNoAssignments = numberOfAssignments == 0;
 
             return Ok(new
             {
-                hasNoAssignments,
+                startDate = _configuration.GetValue<DateTime>("StartDate"), // <= DateTime.Now,
+                hasNoAssignments, // we need this attribute, because numberOfAssignments != numberOfSubmittedAssignments
+                // (and the app only knows the latter) 
                 numberOfSubmittedAssignments,
+                maxNumberOfAssignments = _configuration.GetValue<int>("AmountOfQuestions"),
                 currentAssignment, // last assignment
+                isCreatedExhibitor,
                 previousExhibitorXCoordinate,
                 previousExhibitorYCoordinate
             });
@@ -248,18 +261,18 @@ namespace Web.Controllers
                 new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
                 new Claim(ClaimTypes.NameIdentifier, user.Id),
                 new Claim("username", user.UserName),
-                new Claim("school", user.School.Id.ToString()),
-                new Claim("group", groupId.ToString()),
+                new Claim("isAdmin", false.ToString()),
+                new Claim("group", groupId.ToString())
             };
 
             var signInKey = new SymmetricSecurityKey(
                 Encoding.UTF8.GetBytes(_configuration["AppSettings:Secret"]));
 
             return new JwtSecurityToken(
-                issuer: "http://xyz.com",
-                audience: "http://xyz.com",
+                issuer: "http://app.reva.be",
+                audience: "http://app.reva.be",
                 claims: claims,
-                expires: DateTime.UtcNow.AddHours(1),
+                expires: DateTime.UtcNow.AddDays(7),
                 signingCredentials: new SigningCredentials(signInKey, SecurityAlgorithms.HmacSha256));
         }
 

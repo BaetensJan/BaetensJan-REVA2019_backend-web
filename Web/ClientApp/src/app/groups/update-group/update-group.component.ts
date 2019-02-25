@@ -42,7 +42,7 @@ export class UpdateGroupComponent implements OnInit {
 
   ngOnInit() {
     if (this._groupSharedService.edit == false || !this._groupSharedService.group)
-      this.router.navigate(["groepen"]);
+      this.goToGroupsOverview();
     else {
       this._schoolId = this._groupSharedService.schoolId;
       this._schoolDataService.getSchool(this._schoolId).subscribe(value => {
@@ -57,11 +57,13 @@ export class UpdateGroupComponent implements OnInit {
 
   private prepareForm(group: Group) {
     this._groupForm = this.fb.group({
-      groupName: [group.name, [Validators.required, Validators.minLength(5), Validators.maxLength(35)],
+      groupName: [group.name, [Validators.required, Validators.minLength(5),
+        Validators.maxLength(35)],
         this.GroupNameAlreadyExists()
       ],
       groupMember: [''],
-      groupPassword: ['', [Validators.required, Validators.minLength(6), Validators.maxLength(35)]]
+      groupPassword: ['',
+        [Validators.required, Validators.minLength(6), Validators.maxLength(35)]]
     });
   }
 
@@ -102,8 +104,12 @@ export class UpdateGroupComponent implements OnInit {
     };
 
     this._groupDataService.updateGroup(group).subscribe(value => {
-      this.router.navigate(["groepen/overzicht"]);
+      this.goToGroupsOverview();
     });
+  }
+
+  goToGroupsOverview(){
+    this.router.navigate(["group/groups"]);
   }
 
   openModal(template: TemplateRef<any>, groupId: number, memberName?: string) {
@@ -122,7 +128,7 @@ export class UpdateGroupComponent implements OnInit {
       this.memberToRemove.group = this._group;
       console.log(groupId);
 
-      this.modalMessage = `Ben je zeker dat de groep met groepsnaam ${this._group.name} verwijderd mag worden?`;
+      this.modalMessage = `Ben je zeker dat de groep met groepsnaam ${this._group.name} verwijderd mag worden? De ingediende opdrachten van deze groep worden hierdoor ook verwijderd.`;
 
     }
     this.modalRef = this.modalService.show(template, {class: 'modal-sm'});

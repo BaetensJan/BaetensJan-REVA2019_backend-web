@@ -1,10 +1,7 @@
-import { Component, OnInit } from '@angular/core';
+import {Component, OnInit} from '@angular/core';
 import {ActivatedRoute, Router} from "@angular/router";
-import {Group} from "../models/group.model";
-import {Observable} from "rxjs";
-import {GroupsDataService} from "../groups/groups-data.service";
-import * as jsPDF from "jspdf";
-import * as html2canvas from 'html2canvas';
+import {Group} from "../../models/group.model";
+import {GroupsDataService} from "../../groups/groups-data.service";
 
 @Component({
   selector: 'app-assignment-detail',
@@ -17,8 +14,11 @@ export class AssignmentDetailComponent implements OnInit {
   public group: Group;
   public groupId: number;
 
-  constructor(private router?: Router,private route?: ActivatedRoute, private _groupsDataService?: GroupsDataService
-              /*, private _assignmentDataService: AssignmentDataService*/) { }
+  constructor(private router?: Router,
+              private route?: ActivatedRoute,
+              private _groupsDataService?: GroupsDataService
+  ) {
+  }
 
   ngOnInit() {
     this.sub = this.route
@@ -26,7 +26,10 @@ export class AssignmentDetailComponent implements OnInit {
       .subscribe(params => {
         // Defaults to 0 if no query param provided.
         this.groupId = params['groupId'] || 0;
+        // todo make method that returns boolean if group with groupId exists in database
+        // else, go to home -> this.router.navigate(["/assignmentdetail"], {queryParams: {groupId: group.id}});
         this._groupsDataService.getGroup(this.groupId).subscribe(value => {
+          if (!value) this.router.navigate(["/"]);
           this.group = value;
         });
       });

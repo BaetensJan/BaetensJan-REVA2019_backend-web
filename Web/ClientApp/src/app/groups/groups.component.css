@@ -1,9 +1,9 @@
-#header + div {
-  margin-top: 2.5em;
+#schoolLogin, #schoolPassword{
+  cursor: default !important;
 }
 
-#app-credentials {
-  margin-bottom: 2.5em;
+#header + div {
+  margin-top: 1.5em;
 }
 
 #app-credentials input {

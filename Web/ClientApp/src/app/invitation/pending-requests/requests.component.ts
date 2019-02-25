@@ -1,7 +1,8 @@
 import {Component, OnInit, TemplateRef} from '@angular/core';
 import {InvitationService} from "../invitation.service";
-import {TeacherRequest} from "../../../models/teacherRequest.model";
 import {BsModalRef, BsModalService} from "ngx-bootstrap";
+import {TeacherRequest} from "../../models/teacherRequest.model";
+import {Router} from "@angular/router";
 
 @Component({
   selector: 'app-requests',
@@ -22,7 +23,10 @@ export class RequestsComponent implements OnInit {
   modalBody: string;
   accept: boolean;
 
-  constructor(private _invitationService: InvitationService, private modalService: BsModalService) {
+  constructor(private router: Router,
+              private _invitationService: InvitationService,
+              private modalService: BsModalService,
+  ) {
   }
 
   ngOnInit() {
@@ -33,7 +37,6 @@ export class RequestsComponent implements OnInit {
   /**
    * Click event om categorie te verwijderen. Geeft de categorie door aan de modal voor bevestiging.
    *
-   * @param row: Categorie
    */
   openModal(template: TemplateRef<any>, tr: TeacherRequest, accept: boolean) {
     this.clickedItem = tr;
@@ -68,14 +71,20 @@ export class RequestsComponent implements OnInit {
     this.refModal.hide();
   }
 
+  onToevoegenAanvraag() {
+    this.router.navigate(["invite-request"]);
+  }
+
+  onAanpassenRequest(request: TeacherRequest) {
+      this.router.navigate(["invite-request"], { queryParams: { requestId: request.id } });
+  }
+
   /**
    * Removes a request from the requests attribute (NOT DB)
    */
   private removeRequest(): void {
-    console.log(this.requests);
     let index = this.requests.indexOf(this.requests.find((request: TeacherRequest) => request.id === this.clickedItem.id));
     this.requests.splice(index, 1);
-    console.log(this.requests);
     this.clickedItem = null;
   }
 

@@ -10,26 +10,35 @@ namespace ApplicationCore.Entities
         public Question Question { get; set; }
         public string Answer { get; set; }
         public bool Submitted { get; set; } // if the assignment was submitted or still in progress.
-        public bool Extra { get; set; } // if the assignment was created by the group (extra round).
+        public bool Extra { get; set; } // extra round.
         public DateTime CreationDate { get; set; }
         public DateTime SubmissionDate { get; set; }
 
-        public Assignment()
+        /**
+         * Returns true if the Assignment is about a in the app, by the Group created, Exhibitor. 
+         */
+        public bool WithCreatedExhibitor(int createdExhibitorQuestionId)
         {
-            Notes = "";
-            CreationDate = DateTime.Now;
+            return Extra && Question.Id ==  createdExhibitorQuestionId;
         }
-
-        public Assignment(Question question)
+        
+        public Assignment(Question question, bool isExtraRound)
         {
             Question = question;
             Photo = "";
             Answer = "";
             Submitted = false;
-            Extra = question.Id ==
-                    795; //question is extra round and new exhibitor related => this is an extra round assignment
+            Extra = isExtraRound;
             Notes = "";
             CreationDate = DateTime.Now;
+        }
+
+        /**
+         * Temporary used in AssignmentRepository (for Select Mapping because of recursive CategoryExhibitor mistake) 
+         */
+        public Assignment()
+        {
+            
         }
     }
 }

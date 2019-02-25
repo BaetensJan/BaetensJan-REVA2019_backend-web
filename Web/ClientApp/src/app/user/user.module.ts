@@ -36,7 +36,6 @@ const routes = [
   declarations: [LoginComponent, LogoutComponent, RegisterComponent, InviteRequestComponent, RequestsComponent, ForgotPasswordComponent, ForgotPasswordConfirmationComponent, ResetPasswordComponent, ChangePasswordComponent],
   providers: [
     httpInterceptorProviders,
-    InvitationService,
     AuthenticationService,
     AuthGuardService
   ],

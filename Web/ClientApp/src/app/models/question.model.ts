@@ -54,6 +54,14 @@ export class Question {
   }
 
   /**
+   * Checks if Question belongs to an Assignment of which the group created the Exhibitor in
+   * the app (Extra Round)
+   */
+  isCreatedExhibitor(): boolean {
+    return this._id == 127;
+  }
+
+  /**
    * Getter for Id
    */
   get id(): number {

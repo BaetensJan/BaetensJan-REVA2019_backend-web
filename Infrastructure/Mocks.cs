@@ -47,8 +47,8 @@ namespace Infrastructure
                 categories.Add(Categories[getRandomIntBetween0And15()]);
                 categories.Add(Categories[getRandomIntBetween0And15()]);
                 categories.Add(Categories[getRandomIntBetween0And15()]);
-                exhibitors.Add(new Exhibitor(i + 1, name, categories, new Random().NextDouble(),
-                    new Random().NextDouble(), 0, ""));
+//                exhibitors.Add(new Exhibitor(i + 1, name, categories, new Random().NextDouble(),
+//                    new Random().NextDouble(), 0, "")); //TODO is it necessary to have an extra Constructor for a Mock?
             }
 
             return exhibitors;

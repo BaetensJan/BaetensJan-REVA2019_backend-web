@@ -13,8 +13,7 @@ export class TeacherRequest {
     surname: string,
     email: string,
     schoolName: string,
-    note: string,
-  ) {
+    note: string) {
     this._name = name;
     this._surname = surname;
     this._email = email;
@@ -32,6 +31,10 @@ export class TeacherRequest {
    */
   get id(): number {
     return this._id;
+  }
+
+  set id(id) {
+    this._id = id;
   }
 
   private _name: string;
@@ -99,19 +102,38 @@ export class TeacherRequest {
     this._note = note;
   }
 
+  private _creationDate: Date;
+
+  /**
+   * Getter
+   */
+  get creationDate(): Date {
+    return this._creationDate;
+  }
+
+  set creationDate(creationDate) {
+    this._creationDate = creationDate;
+  }
+
+  get creationDateString(): string {
+    return this._creationDate.toLocaleDateString()
+  }
+
   /**
    * Static JSON to Object parser
    *
    * @param json
    */
   static fromJSON(json: any): TeacherRequest {
+    console.log(json);
     const rec = new TeacherRequest(
       json.name,
       json.surname,
       json.email,
       json.schoolName,
-      json.note
+      json.note,
     );
+    rec.creationDate = new Date(json.creationDate);
     rec._id = json.id;
     return rec;
   }
@@ -127,6 +149,7 @@ export class TeacherRequest {
       email: this._email,
       schoolName: this._schoolName,
       note: this._note,
+      creationDate: this._creationDate
     };
   }
 }

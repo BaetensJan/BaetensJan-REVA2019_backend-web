@@ -23,6 +23,7 @@ namespace Infrastructure.Configurations
             builder.Property(t => t.Y);
             builder.Property(t => t.ExhibitorNumber);
             builder.Property(t => t.GroupsAtExhibitor);
+            builder.Property(t => t.TotalNumberOfVisits);
             builder.Property(t => t.CreationDate);
         }
     }

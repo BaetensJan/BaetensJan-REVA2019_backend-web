@@ -1,3 +1,20 @@
-<p>
-  upload-csv works!
-</p>
+<!-- Uploaden van csv voor het veranderen van alle gegevens -->
+<div #myContainer>
+
+
+  <!-- header -->
+  <div id="header">
+    <h1>Uploaden CSV</h1>
+  </div>
+
+  <h3>Categorieën, exposanten, vragen toevoegen, wijzigen of verwijderen via csv</h3>
+
+  <div id="upload-image" class="row">
+    <div class="form-group col-md-4">
+      <label for="inputFile">Selecteer het bestand voor het wijzigen van de gegevens.</label>
+      <input type="file" (change)="onSelectFile($event)" name="File Upload" id="inputFile">
+      <button (click)="uploadCSV()" *ngIf="fileSelected">Upload File</button>
+    </div>
+  </div>
+
+</div>

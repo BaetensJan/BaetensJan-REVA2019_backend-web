@@ -49,19 +49,14 @@ export class ExhibitorsComponent implements OnInit {
   ngOnInit() {
     this._exhibitorsDataService.exhibitors.subscribe(exhibitors => {
       for(let exhib of exhibitors){
-        console.log(exhib);
         if(exhib.x == 0 && exhib.y == 0) {
           this.teller++;
         }
       }
-      console.log(this.teller);
       this.tellertotaal = exhibitors.length;
       if(this.teller > 0) {
-        this._appShareService.addAlert({
-          type: 'success',
-          msg: `U heeft nog ${this.teller} van de ${this.tellertotaal} exposanten niet aangeduid op de kaart.`,
-          timeout: 5000
-        });
+        this.showMessage = true;
+        this.successMessage = "U heeft nog "+this.teller +" van de "+this.tellertotaal +" exposanten niet aangeduid op de kaart.";
       }
     });
     this.filterValue = "";

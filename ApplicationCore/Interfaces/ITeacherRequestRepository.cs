@@ -11,6 +11,7 @@ namespace ApplicationCore.Interfaces
         Task<TeacherRequest> GetByEmail(string email);
         Task<TeacherRequest> GetBySchool(string school);
         Task Add(TeacherRequest teacherRequest);
+        void Update(TeacherRequest category);
         void Remove(TeacherRequest teacherRequest);
         Task SaveChanges();
     }

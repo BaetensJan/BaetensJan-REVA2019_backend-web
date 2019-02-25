@@ -58,7 +58,45 @@ namespace Web.Controllers
         }
 
         /**
-        * Admin declines Teacher Requast.
+        * Admin updates a Teacher-registration request.
+        */
+        [HttpPut("[Action]/{requestId}")]
+        public async Task<IActionResult> UpdateRequest([FromBody] CreateTeacherDTO model, int requestId)
+        {
+            if (ModelState.IsValid)
+            {
+                var request = await _teacherRequestRepository.GetById(requestId);
+                request.Name = model.Name;
+                request.Surname = model.Surname;
+                request.Note = model.Note;
+                request.Email = model.Email;
+                request.SchoolName = model.SchoolName;
+                await _teacherRequestRepository.SaveChanges();
+
+                return Ok(new
+                {
+                    Message = "Teacher request successfully updated."
+                });
+            }
+
+            return Ok(new
+            {
+                Message = "Please fill in all required fields."
+            });
+        }
+
+        /**
+        * return Request with id equal to parameter requestId.
+        */
+        [HttpGet("[Action]/{requestId}")]
+        public async Task<IActionResult> TeacherRequest(int requestId)
+        {
+            var request = await _teacherRequestRepository.GetById(requestId);
+            return Json(request);
+        }
+
+        /**
+        * Admin declines Teacher Request.
         *
         **/
         [HttpGet("[Action]/{teacherRequestId}")]

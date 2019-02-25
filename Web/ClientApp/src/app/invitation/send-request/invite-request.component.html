@@ -82,7 +82,7 @@
 
   <!--Email-->
   <div class="form-group">
-    <label class="col-sm-2 control-label" for="email">Email:</label>
+    <label class="col-sm-2 control-label" for="email">E-mailadres:</label>
     <div class="col-sm-10 col-md-3">
       <input class="form-control" id="email" formControlName="email" type="email">
     </div>
@@ -117,7 +117,7 @@
   <div class="row form-group" style="margin-top: 1em;">
     <div class="col-sm-offset-2 col-sm-10 col-md-3">
       <button class="btn btn-primary" style="width: 100%;" type='submit' [disabled]='!user.valid'>
-        Aanvraag verzenden
+        {{update ? 'Aanpassingen doorvoeren' : 'Aanvraag verzenden'}}
       </button>
     </div>
   </div>

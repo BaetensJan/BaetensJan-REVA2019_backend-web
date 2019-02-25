@@ -6,6 +6,7 @@ using ApplicationCore.Interfaces;
 using ApplicationCore.Services;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore.Internal;
 using Microsoft.Extensions.Configuration;
 using Web.DTOs;
 
@@ -18,7 +19,6 @@ namespace Web.Controllers
     [ApiController]
     public class AssignmentController : Controller
     {
-        private readonly UserManager<ApplicationUser> _userManager;
         private readonly IAssignmentRepository _assignmentRepository;
         private readonly IExhibitorRepository _exhibitorRepository;
         private readonly IGroupRepository _groupRepository;
@@ -27,9 +27,10 @@ namespace Web.Controllers
         private readonly ExhibitorManager _exhibitorManager;
         private readonly IImageWriter _imageWriter;
         private readonly IConfiguration _configuration;
+        private readonly QuestionManager _questionManager;
+        private readonly AssignmentManager _assignmentManager;
 
-        public AssignmentController(UserManager<ApplicationUser> userManager,
-            IConfiguration configuration,
+        public AssignmentController(IConfiguration configuration,
             IAssignmentRepository assignmentRepository,
             IExhibitorRepository exhibitorRepository,
             IGroupRepository groupRepository,
@@ -39,14 +40,15 @@ namespace Web.Controllers
         {
             _configuration = configuration;
             _groupRepository = groupRepository;
-            _userManager = userManager;
             _assignmentRepository = assignmentRepository;
             _exhibitorRepository = exhibitorRepository;
             _exhibitorManager =
-                new ExhibitorManager(exhibitorRepository, categoryRepository, questionRepository);
+                new ExhibitorManager(exhibitorRepository);
             _questionRepository = questionRepository;
+            _questionManager = new QuestionManager();
             _categoryRepository = categoryRepository;
             _imageWriter = imageWriter;
+            _assignmentManager = new AssignmentManager(assignmentRepository);
         }
 
         [HttpGet("[Action]")]
@@ -64,58 +66,106 @@ namespace Web.Controllers
             });
         }
 
+        public async Task<Group> GetGroup()
+        {
+            return await _groupRepository.GetById(Convert.ToInt32(User.Claims.ElementAt(5).Value));
+        }
+
         /**
         * Gets the closest exhibitor with a certain category, starting from previous exhibitor. (Normal Tour)
         * 
         * parameter1: string previousExhibitorId - the id of the previous exhibitor, from which
-        * the assigment has already been submitted.
+        * the assignment has already been submitted.
         * parameter2: string category - the current, by the students chosen, category
-        * 
+        * parameter3: bool isExtraRound - if the group is doing an Assignment in an Extra Round.
+         * 
         * RETURN an Assignment, containing an Exhibitor object that represent the current, newly assigned Exhibitor.
         */
-        [HttpGet("[Action]/{categoryId}/{previousExhibitorId}")]
-        public async Task<IActionResult> CreateAssignment(int categoryId, int previousExhibitorId)
+        [HttpGet("[Action]/{categoryId}/{previousExhibitorId}/{isExtraRound}")]
+        public async Task<IActionResult> CreateAssignment(int categoryId, int previousExhibitorId, bool isExtraRound)
         {
-            // FindNextExhibitor already checks if the categoryId and ExhibitorId combo has a question in the DB.
-            var exhibitor = await _exhibitorManager.FindNextExhibitor(previousExhibitorId, categoryId);
+            var group = await GetGroup();
+            var questions = await _questionRepository.GetAll();
+            var assignments = group.Assignments;
+
+            //todo make new relation in db where Category knows its Questions.
+            // Only get Exhibitors of which there exists a Question with given categoryId. 
+            if (previousExhibitorId != -1)
+            questions = questions.Where(q => q.CategoryExhibitor.CategoryId == categoryId &&
+                                             q.CategoryExhibitor.Exhibitor.Id != previousExhibitorId).ToList();
+            else  questions = questions.Where(q => q.CategoryExhibitor.CategoryId == categoryId).ToList();
+            
+            // Check if group is doing an Extra Round
+            if (assignments != null && assignments.Count >= _configuration.GetValue<int>("AmountOfQuestions"))
+            {
+                questions = _questionManager.UnansweredQuestionsOfCategory(categoryId, assignments, questions);
+            }
+
+            if (questions.Count < 1)
+                return Ok(new
+                {
+                    Message =
+                        "Alle vragen voor deze Categorie zijn al beantwoord. Deze Categorie mocht niet worden weergegeven" +
+                        " in de CategoryChoiceFragment"
+                });
+
+            var potentialExhibitors = questions
+                .Select(e => e.CategoryExhibitor.Exhibitor)
+                .ToList();
+
+            // FindNextExhibitor 
+            var exhibitor =
+                await _exhibitorManager.FindNextExhibitor(previousExhibitorId, potentialExhibitors);
+
+            exhibitor.GroupsAtExhibitor++;
+
             var question = await _questionRepository.GetQuestion(categoryId, exhibitor.Id);
 
-            var assignment = await CreateAssignment(question);
-            assignment =
+            var newAssignment = await _assignmentManager.CreateAssignment(question, isExtraRound, group);
+            newAssignment =
                 await _assignmentRepository
-                    .GetByIdLight(assignment.Id); //Todo temporary, otherwise we have recursive catExh data
+                    .GetByIdLight(newAssignment.Id); //Todo temporary, otherwise we have recursive catExh data
 
-            return Ok(assignment);
+            return Ok(newAssignment);
         }
 
         /**
         * A group has created a new Exhibitor in the Extra Tour, as they didn't find the Exhibitor in the list.
         */
-        [HttpGet("[Action]/{exhibitorName}/{categoryId}/{boothNumber}")]
-        public async Task<IActionResult> CreateAssignmentNewExhibitor(string exhibitorName, int categoryId,
-            int boothNumber)
+        [HttpGet("[Action]")]
+        public async Task<IActionResult> CreateAssignmentNewExhibitor([FromBody] CreatedExhibitorDTO createdExhibitor)
         {
             //We take a specific question for this assignment, as an assignment needs a question
             //and we dont want to create new (random) question in the database each time a group start an extra tour.
-            var question = await _questionRepository.GetById(79);
+            var question = await _questionRepository.GetById(127);
+
+            // get group object via schoolId and groupName
+            var group = await GetGroup();
+
+            // Create assignment and Add to the groups assignments.
+            var assignment = new Assignment(question, true);
 
             // We add the exhibitor information from the group to the Assignment.
-            var category = await _categoryRepository.GetById(categoryId);
-            question.QuestionText += $"\nExposant: {exhibitorName}";
-            if (categoryId != -1)
+            assignment.Answer += $"Exposant naam: {createdExhibitor.Name}";
+            if (createdExhibitor.categoryId != -1)
             {
-                question.QuestionText += $", Categorie: {category.Name}";
+                var category = await _categoryRepository.GetById(createdExhibitor.categoryId);
+                assignment.Answer += $", met Categorie: {category.Name}";
             }
 
-            if (boothNumber != -1)
+            if (!string.IsNullOrEmpty(createdExhibitor.BoothNumber))
             {
-                question.QuestionText += $", Standnummer: {boothNumber}";
+                assignment.Answer += $" en Standnummer: {createdExhibitor.BoothNumber}";
             }
 
-            var assignment = await CreateAssignment(question);
+            group.AddAssignment(assignment);
+            await _assignmentRepository.SaveChanges();
+
             assignment =
                 await _assignmentRepository
                     .GetByIdLight(assignment.Id); //Todo temporary, otherwise we have recursive catExh data
+
+            assignment.Answer = ""; // empty answer for android (we will re-add the exhibitor information @ submit)
 
             return Ok(assignment);
         }
@@ -136,7 +186,8 @@ namespace Web.Controllers
         {
             var question = await _questionRepository.GetQuestion(categoryId, exhibitorId);
 
-            var assignment = await CreateAssignment(question);
+            var assignment = await _assignmentManager.CreateAssignment(question, true, await GetGroup());
+
             assignment =
                 await _assignmentRepository
                     .GetByIdLight(assignment.Id); //Todo temporary, otherwise we have recursive catExh data
@@ -144,42 +195,28 @@ namespace Web.Controllers
             return Ok(assignment);
         }
 
-        private async Task<Assignment> CreateAssignment(Question question)
-        {
-            question.CategoryExhibitor.Exhibitor.GroupsAtExhibitor++;
-
-            // get group object via schoolId and groupName
-            var group = await _groupRepository.GetById(Convert.ToInt32(User.Claims.ElementAt(5).Value));
-
-            // Create assignment and Add to the groups assignments.
-            var assignment = new Assignment(question);
-            group.AddAssignment(assignment);
-            await _assignmentRepository.SaveChanges();
-
-            return assignment;
-        }
-
         /**
-         * When a group submits an Assignment in the application, this controller method will be called.
-         */
+        * When a group submits an Assignment in the application, this controller method will be called.
+        */
         [HttpPost("SubmitAssignment")]
         public async Task<IActionResult> Submit([FromBody] AssignmentDTO model)
         {
             if (ModelState.IsValid)
             {
                 var assignment = await _assignmentRepository.GetById(model.Id);
-                var answer = model.Answer;
+                var answer = "";
 
-                // assignment of Extra Round
-                if (assignment.Extra)
+                // Group created Exhibitor in Extra Round
+                if (assignment.WithCreatedExhibitor(_configuration.GetValue<int>("CreatedExhibitorQuestionId")))
                 {
-                    answer = $"{model.Answer}. Standnummer van exposant: {model.Question.Exhibitor.ExhibitorNumber}," +
-                             $"Exposantnaam: {model.Question.Exhibitor.Name}";
+                    answer = $"{assignment.Answer}. Antwoord groep: {model.Answer}";
                 }
                 else // assignment of normal tour
                 {
-                    var question = await _questionRepository.GetById(assignment.Question.Id);
-                    var exhibitor = await _exhibitorRepository.GetById(question.CategoryExhibitor.ExhibitorId);
+                    answer = model.Answer;
+
+                    var exhibitor =
+                        await _exhibitorRepository.GetById(assignment.Question.CategoryExhibitor.ExhibitorId);
                     exhibitor.GroupsAtExhibitor--;
                 }
 

@@ -15,6 +15,7 @@ namespace ApplicationCore.Entities
         public double X { get; set; }
         public double Y { get; set; }
         public int GroupsAtExhibitor { get; set; }
+        public int TotalNumberOfVisits { get; set; }
 
         public string ExhibitorNumber { get; set; } // exhibition number - Standnummer
 
@@ -23,23 +24,24 @@ namespace ApplicationCore.Entities
         public Exhibitor()
         {
             GroupsAtExhibitor = 0;
+            TotalNumberOfVisits = 0;
             Name = "";
             Categories = new List<CategoryExhibitor>();
             CreationDate = DateTime.Now;
         }
 
-        public Exhibitor(int id, string name, List<Category> categories, double x, double y, int groupsAtExhibitor,
-            string exhibitorNumber)
-        {
-            Id = id;
-            Name = name;
-            //Categories = categories;
-            X = x;
-            Y = y;
-            GroupsAtExhibitor = groupsAtExhibitor;
-            ExhibitorNumber = exhibitorNumber;
-            CreationDate = DateTime.Now;
-        }
+//        public Exhibitor(int id, string name, List<Category> categories, double x, double y, int groupsAtExhibitor,
+//            string exhibitorNumber)
+//        {
+//            Id = id;
+//            Name = name;
+//            //Categories = categories;
+//            X = x;
+//            Y = y;
+//            GroupsAtExhibitor = groupsAtExhibitor;
+//            ExhibitorNumber = exhibitorNumber;
+//            CreationDate = DateTime.Now;
+//        }
 
         public bool Equals(Exhibitor exhibitor)
         {

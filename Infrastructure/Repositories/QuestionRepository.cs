@@ -63,14 +63,6 @@ namespace Infrastructure.Repositories
 
         private Question MapQuestion(Question question)
         {
-//            var ce = question?.CategoryExhibitor;
-//            if (ce != null)
-//            {
-//                if(ce.Exhibitor != null)
-//                ce.Exhibitor.Categories = null;
-//                if(ce.Category != null)
-//                ce.Category.Exhibitors = null;
-//            }
             var q = new Question
             {
                 Id = question.Id,
@@ -95,7 +87,6 @@ namespace Infrastructure.Repositories
                         Y = question.CategoryExhibitor.Exhibitor.Y,
                         GroupsAtExhibitor = question.CategoryExhibitor.Exhibitor.GroupsAtExhibitor,
                         ExhibitorNumber = question.CategoryExhibitor.Exhibitor.ExhibitorNumber
-                        //Categories = e.CategoryExhibitor.Exhibitor.C,
                     }
                 }
             };

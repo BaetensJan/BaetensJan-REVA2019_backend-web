@@ -49,7 +49,8 @@ namespace Infrastructure.Repositories
 
         public Task<School> GetById(int id)
         {
-            var school = _schools.Include(a => a.Groups).ThenInclude(g => g.Assignments)
+            var school = _schools.Include(s => s.Groups).ThenInclude(g => g.Assignments).ThenInclude(a => a.Question)
+                .ThenInclude(q => q.CategoryExhibitor)
                 .SingleOrDefaultAsync(c => c.Id == id);
             return school;
         }

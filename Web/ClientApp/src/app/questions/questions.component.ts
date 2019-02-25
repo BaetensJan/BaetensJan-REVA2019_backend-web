@@ -8,7 +8,6 @@ import {Category} from "../models/category.model";
 import {Exhibitor} from "../models/exhibitor.model";
 import {CategoriesDataService} from "../categories/categories-data.service";
 import {ExhibitorsDataService} from "../exhibitors/exhibitors-data.service";
-import {forEach} from "@angular/router/src/utils/collection";
 
 @Component({
   selector: 'app-questions',

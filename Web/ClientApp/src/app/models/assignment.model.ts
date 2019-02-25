@@ -1,6 +1,4 @@
 import {Exhibitor} from "./exhibitor.model";
-import {NgModule} from "@angular/core";
-import {AssignmentDataService} from "../assignments/assignment-data.service";
 import {Question} from "./question.model";
 
 export class Assignment {

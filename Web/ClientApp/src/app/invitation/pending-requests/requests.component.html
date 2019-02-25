@@ -8,15 +8,22 @@
     <table class="full-width-table table">
       <thead>
       <tr>
+        <th style="font-size: 1.2em; padding-bottom: 1.4em;">Aanvraagdatum</th>
         <th style="font-size: 1.2em; padding-bottom: 1.4em;">Naam</th>
         <th style="font-size: 1.2em; padding-bottom: 1.4em;">Familienaam</th>
-        <th style="font-size: 1.2em; padding-bottom: 1.4em;">Email</th>
+        <th style="font-size: 1.2em; padding-bottom: 1.4em;">E-mailadres</th>
         <th style="font-size: 1.2em; padding-bottom: 1.4em;">School</th>
         <th style="font-size: 1.2em; padding-bottom: 1.4em;">Opmerking</th>
+        <th style="padding-bottom: 1.4em;">
+          <button (click)="onToevoegenAanvraag()" class="btn btn-success">
+            <span class=" glyphicon glyphicon-plus"></span> Aanvraag toevoegen
+          </button>
+        </th>
       </tr>
       </thead>
       <tbody>
       <tr *ngFor="let request of requests">
+        <td style="text-transform:capitalize;">{{request.creationDateString}}</td>
         <td style="text-transform:capitalize;">{{request.name}}</td>
         <td style="text-transform:capitalize;">{{request.surname}}</td>
         <td>{{request.email}}</td>
@@ -25,6 +32,8 @@
         <td>
           <span class="btn glyphicon glyphicon-ok" aria-hidden="true"
                 (click)="openModal(template, request, true)"></span>
+          <span class="btn glyphicon glyphicon-edit" aria-hidden="true"
+                (click)="onAanpassenRequest(request)"></span>
           <span class="btn glyphicon glyphicon-trash" aria-hidden="true"
                 (click)="openModal(template, request, false)"></span>
         </td>

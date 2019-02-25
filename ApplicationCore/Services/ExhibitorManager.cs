@@ -10,18 +10,13 @@ namespace ApplicationCore.Services
     public class ExhibitorManager
     {
         private readonly IExhibitorRepository _exhibitorRepository;
-        private readonly ICategoryRepository _categoryRepository;
-        private readonly IQuestionRepository _questionRepository;
 
-        public ExhibitorManager(IExhibitorRepository exhibitorRepository, ICategoryRepository categoryRepository,
-            IQuestionRepository questionRepository)
+        public ExhibitorManager(IExhibitorRepository exhibitorRepository)
         {
             _exhibitorRepository = exhibitorRepository;
-            _categoryRepository = categoryRepository;
-            _questionRepository = questionRepository;
         }
 
-        public Task<List<Exhibitor>> Exhibitors()
+        public Task<IEnumerable<Exhibitor>> Exhibitors()
         {
             return _exhibitorRepository.All();
         }
@@ -33,13 +28,15 @@ namespace ApplicationCore.Services
 
         /**
          * Finds the "fittest" Exhibitor, holding in account how occupied with visitors and far the exhibitors are.
+         *
+         * Always check that potentialExhibitors doesn't contain Exhibitor with id equal to startExhibitorId
          */
-        public async Task<Exhibitor> FindNextExhibitor(int exhibitorIdStart, int categoryId)
+        public async Task<Exhibitor> FindNextExhibitor(int startExhibitorId, List<Exhibitor> potentialExhibitors)
         {
             Exhibitor start = null;
             // The first time the tour starts, the exhibitorId will be -1
-            if (exhibitorIdStart != -1)
-                start = await _exhibitorRepository.GetById(exhibitorIdStart);
+            if (startExhibitorId != -1)
+                start = await _exhibitorRepository.GetById(startExhibitorId);
 
             double startX;
             double startY;
@@ -55,12 +52,7 @@ namespace ApplicationCore.Services
                 startY = start.Y;
             }
 
-            /*Todo enkel categoryExhibitor objecten nemen waaraan een question verbonden is. en een methode in de repo daarvoor voorzien.*/
-            var questions = await _questionRepository.GetAll();
-            var potentialExhibitors =
-                questions.Where(q => q.CategoryExhibitor.CategoryId == categoryId)
-                    .Select(e => e.CategoryExhibitor.Exhibitor)
-                    .ToList();
+
             var nextExhibitor = potentialExhibitors[0];
             potentialExhibitors.RemoveAt(0);
             var lowestWeight = GetWeight(nextExhibitor, startX, startY);
@@ -111,8 +103,8 @@ namespace ApplicationCore.Services
             _exhibitorRepository.Update(exhibitor);
             await _exhibitorRepository.SaveChanges();
             return exhibitor;
-        } 
-        
+        }
+
         public async Task<Exhibitor> RemoveExhibitor(int id)
         {
             Exhibitor exhibitor = await _exhibitorRepository.GetById(id);

@@ -43,11 +43,7 @@ export class Group {
    */
   static
 
-  fromJSON(json
-             :
-             any
-  ):
-    Group {
+  fromJSON(json:any): Group {
     const rec = new Group(json.name, json.assignments, json.members);
 
     rec._id = json.id;

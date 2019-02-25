@@ -71,7 +71,7 @@ export class LoginComponent implements OnInit {
               this.router.navigate(['/']);
             }
           } else {
-            this.errorMsg = `Could not login`;
+            this.errorMsg = `De gebruikersnaam of het paswoord is verkeerd`;
           }
         },
         (err: HttpErrorResponse) => {
@@ -80,9 +80,15 @@ export class LoginComponent implements OnInit {
               this.user.value.username
               }: ${err.error.message}`;
           } else {
-            this.errorMsg = `Error ${err.status} while trying to login user ${
-              this.user.value.username
-              }`;//: ${err.error}`;
+            if(err.status == 0) {
+              this.errorMsg = `Er is een probleem met de server. Gelieve later opnieuw te proberen`;
+            } else if(err.status == 404){
+              this.errorMsg = `Er is een probleem opgetreden`;
+            } else {
+              this.errorMsg = `Error ${err.status} voor het inloggen met user ${
+                this.user.value.username
+                }`;//: ${err.error}`;
+            }
           }
         }
       );

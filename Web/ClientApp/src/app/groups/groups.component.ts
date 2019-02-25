@@ -4,7 +4,6 @@ import {Group} from "../models/group.model";
 import {Observable} from "rxjs/Rx";
 import {PageChangedEvent} from 'ngx-bootstrap/pagination';
 import {AbstractControl, FormBuilder, FormGroup, Validators} from "@angular/forms";
-import {TypeaheadMatch} from 'ngx-bootstrap/typeahead/typeahead-match.class';
 import {BsModalRef, BsModalService} from "ngx-bootstrap";
 import {AppShareService} from "../AppShareService";
 import {School} from "../models/school.model";
@@ -12,21 +11,8 @@ import {SchoolDataService} from "../schools/school-data.service";
 import {GroupSharedService} from "./group-shared.service";
 import {Router} from "@angular/router";
 import {map} from "rxjs/operators";
-import {AssignmentDataService} from "../assignments/assignment-data.service";
-
-
-function parseJwt(token) {
-  if (!token) {
-    return null;
-  }
-  try {
-    const base64Url = token.split('.')[1];
-    const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
-    return JSON.parse(window.atob(base64));
-  } catch (err) {
-    return null;
-  }
-}
+import {AuthenticationService} from "../user/authentication.service";
+import {AssignmentDataService} from "../assignment/assignment-data.service";
 
 @Component({
   selector: 'groups',
@@ -39,18 +25,29 @@ export class GroupsComponent {
   modalRef: BsModalRef; // modal that appears asking for confirmation to remove a member from a group.
   modalMessage: string;
 
-  filterOption = "name"; // current filter option: 'groupName' = name or 'groupMembers' = members.
-  filterText = "Groepsnaam"; // current text in filterOption button
-  filterOnGroupName = true; // if current filter option is filtering on 'groupName' or on 'groupMembers'
-  contentArray: Group[]; // array containing the groups that fits the filter.
-  returnedArray: Group[]; // array containing the groups (maxNumberOfGroupsPerPage) that are showed on the current page.
+  currentPage; // the current page in the pagination (e.g. page 1, 2 ...)
+  private _groups: Group[]; // array containing the groups that fits the filter.
+  private _returnedArray: Group[]; // array containing the groups (maxNumberOfGroupsPerPage) that are shown on the current page.
+  /**
+   * Getter for groups
+   */
+  get returnedArray(): Group[] {
+    return this._returnedArray;
+  }
+
+  private _filteredGroups: Group[]; // array containing all groups that meet the filter
+  /**
+   * Getter for groups
+   */
+  get filteredGroups(): Group[] {
+    return this._filteredGroups;
+  }
+
   maxNumberOfGroupsPerPage = 5; // amount of groups that will be showed on the current page, to keep the page neat.
   newMemberName: string = ""; // value of input-field in an already existing group. Will be used to add a new member to an existing group.
   createGroupClicked: boolean = false; // if the + button (for creating a group) was clicked.
   groupMembers: string[]; // members that were added to the newly created group.
-  filteredGroups: Group[];
   groupForm: FormGroup;
-  private _applicationStartDate: Date;
   filterValue: string = "";
 
   /**
@@ -61,16 +58,42 @@ export class GroupsComponent {
    * @param _assignmentDataService
    * @param _schoolDataService
    * @param fb
-   * @param modalService
-   * @param appShareService
+   * @param _modalService
+   * @param _appShareService
+   * @param _authService
    */
   constructor(private router: Router,
               private _groupsDataService: GroupsDataService,
               private _groupsSharedService: GroupSharedService,
               private _schoolDataService: SchoolDataService,
               private _assignmentDataService: AssignmentDataService,
-              private fb: FormBuilder, private modalService: BsModalService,
-              private appShareService: AppShareService) {
+              private fb: FormBuilder,
+              private _modalService: BsModalService,
+              private _appShareService: AppShareService,
+              private _authService: AuthenticationService) {
+  }
+
+  private _applicationStartDate: Date;
+
+  get applicationStartDate(): Date {
+    return this._applicationStartDate;
+  }
+
+  /**
+   * when the current date is after of equal to the appStartDate -> returns true
+   */
+  get appStartDateExpired(): boolean {
+      return this._applicationStartDate <= new Date();
+  }
+
+  private _filterOnGroupName: boolean = true; // current text in filterOption button
+
+  get filterOnGroupName(): boolean {
+    return this._filterOnGroupName;
+  }
+
+  set filterOnGroupName(value) {
+    this._filterOnGroupName = value;
   }
 
   private _school: School;
@@ -82,25 +105,14 @@ export class GroupsComponent {
     return this._school;
   }
 
-  _groups: Group[]; // array containing ALL the groups.
-
-  /**
-   * Getter for groups
-   */
-  get groups(): Group[] {
-    return this._groups;
-  }
-
   ngOnInit(): void {
-    let currentUser = parseJwt(localStorage.getItem("currentUser"));
+    let currentUser = AuthenticationService.parseJwt(localStorage.getItem("currentUser"));
     let schoolId = currentUser.school;
     let isAdmin = currentUser.isAdmin;
     if (isAdmin == "True") {
       this._groupsDataService.allGroups.subscribe(value => {
         this._groups = value;
-        this.contentArray = this._groups;
-        this.filteredGroups = this._groups;
-        this.initiateReturnedArray();
+        this.initiateArrays();
       });
     } else {
       this._schoolDataService.getSchool(schoolId).subscribe(value => {
@@ -108,9 +120,7 @@ export class GroupsComponent {
         this._school = value;
         this.prepareFormGroup();
         this._groups = this._school.groups;
-        this.contentArray = this._groups;
-        this.initiateReturnedArray();
-        this.filteredGroups = this._groups
+        this.initiateArrays();
       });
     }
     this.groupMembers = [];
@@ -119,9 +129,80 @@ export class GroupsComponent {
 
   updateGroup(group: Group) {
     this._groupsSharedService.updateGroup(this._school.id, group);
-    this.router.navigate(["groepen/updateGroup"]);
+    this.router.navigate(["/group/updateGroup"]);
   }
 
+
+  removeMemberFromAlreadyCreatedGroup(group, memberName) {
+    this._groupsDataService.removeMember(group.id, memberName).subscribe(value => {
+      const index = group.members.indexOf(memberName, 0);
+      if (index > -1) {
+        group.members.splice(index, 1);
+      }
+    });
+  }
+
+  removeGroup(group) {
+    this._groupsDataService.removeGroup(group).subscribe(value => {
+      let index = this._groups.indexOf(group, 0);
+      if (index > -1) {
+        this._groups.splice(index, 1);
+      }
+      index = this._returnedArray.indexOf(group, 0);
+      if (index > -1) {
+        this._returnedArray.splice(index, 1);
+      }
+    });
+  }
+
+  decline(): void {
+    this.memberToRemove.name = "";
+    this.memberToRemove.group = null;
+    this.modalRef.hide();
+  }
+
+  /**
+   * Shows a message when a group was successfully created.
+   * @param groupName
+   */
+  public add(groupName: string): void {
+    this._appShareService.addAlert(
+      {
+        type: 'success',
+        msg: `De nieuwe groep met groepsnaam ${groupName} werd succesvol toegevoegd.}`,
+        timeout: 5000
+      });
+  }
+
+  /** FILTER **/
+  public filter(token: string) {
+    token = token.toLowerCase();
+    if (!token) {
+      this._filteredGroups = this._groups;
+    } else {
+      if (this._filterOnGroupName) {
+        this._filteredGroups = this._groups.filter((group: Group) => {
+          return group.name.toLowerCase().includes(token);
+        });
+      } else {
+        this._filteredGroups = [];
+        this._groups.forEach((group: Group) => {
+          for (let i in group.members) {
+            let member = group.members[i];
+            if (member.toLowerCase().includes(token)) {
+              this._filteredGroups.push(group);
+              break;
+            }
+          }
+          // return group.members.toString().includes(token);
+        });
+      }
+    }
+    this._returnedArray = this._filteredGroups.slice(0, this.maxNumberOfGroupsPerPage);
+    this.currentPage = 1; // switches current page in pagination back to page 1
+  }
+
+  /** MODAL / POPUP **/
   openModal(template: TemplateRef<any>, groupId: number, memberName?: string) {
     if (memberName) {
       if (groupId != -1) {
@@ -135,14 +216,15 @@ export class GroupsComponent {
     } else { // deleting of a group.
       let group = this.findGroupWithId(groupId);
       this.memberToRemove.group = group;
-      console.log(groupId);
-
-      this.modalMessage = `Ben je zeker dat de groep met groepsnaam ${group.name} verwijderd mag worden?`;
-
+      this.modalMessage = `Ben je zeker dat de groep met groepsnaam ${group.name} verwijderd mag worden? 
+      De ingediende opdrachten van deze groep worden hierdoor ook verwijderd.`;
     }
-    this.modalRef = this.modalService.show(template, {class: 'modal-sm'});
+    this.modalRef = this._modalService.show(template, {class: 'modal-sm'});
   }
 
+  /**
+   * When Teacher confirms to remove a group / member of group in the Modal (popup).
+   */
   confirm(): void {
     if (this.memberToRemove.name != "") {
       if (this.memberToRemove.group != null) {
@@ -161,64 +243,13 @@ export class GroupsComponent {
     this.modalRef.hide();
   }
 
-  removeMemberFromAlreadyCreatedGroup(group, memberName) {
-    this._groupsDataService.removeMember(group.id, memberName).subscribe(value => {
-      console.log(value);
-      const index = group.members.indexOf(memberName, 0);
-      if (index > -1) {
-        group.members.splice(index, 1);
-      }
-    });
-  }
-
-  removeGroup(group) {
-    this._groupsDataService.removeGroup(group).subscribe(value => {
-      let index = this._groups.indexOf(group, 0);
-      if (index > -1) {
-        this._groups.splice(index, 1);
-      }
-      index = this.returnedArray.indexOf(group, 0);
-      if (index > -1) {
-        this.returnedArray.splice(index, 1);
-      }
-    });
-  }
-
-  decline(): void {
-    this.memberToRemove.name = "";
-    this.memberToRemove.group = null;
-    this.modalRef.hide();
-  }
-
   /**
-   * Shows a message when a group was successfully created.
-   * @param groupName
+   * Sorts the groups alphabetically
    */
-  public add(groupName: string): void {
-    this.appShareService.addAlert(
-      {
-        type: 'success',
-        msg: `De nieuwe groep met groepsnaam ${groupName} werd succesvol toegevoegd op ${new Date().toLocaleTimeString()}`,
-        timeout: 5000
-      });
-  }
-
-  changeFilter() {
-    this.filterOnGroupName = !this.filterOnGroupName;
-    if (this.filterOnGroupName) {
-      this.filterOption = "name";
-      this.filterText = "Groepsnaam";
-    } else {
-      this.filterOption = "members";
-      this.filterText = "Groepslid";
-    }
-  }
-
-  /**
-   * initiates the returnedArray with the groups that should be presented on the current page.
-   */
-  initiateReturnedArray() {
-    this.returnedArray = this.contentArray.sort((a, b) => a.name > b.name ? 1 : -1).slice(0, this.maxNumberOfGroupsPerPage);
+  initiateArrays() {
+    this._groups.sort(/*(a, b) => a.name > b.name ? 1 : -1*/);
+    this._filteredGroups = this._groups;
+    this._returnedArray = this._filteredGroups.slice(0, this.maxNumberOfGroupsPerPage);
   }
 
   prepareFormGroup() {
@@ -247,14 +278,14 @@ export class GroupsComponent {
   }
 
   /**
-   * When a used clicks on the next page pagination button,
+   * When a user clicks on the next page pagination button,
    * it will show the next groups.
    * @param event
    */
   pageChanged(event: PageChangedEvent): void {
     const startItem = (event.page - 1) * event.itemsPerPage;
     const endItem = event.page * event.itemsPerPage;
-    this.returnedArray = this.contentArray.slice(startItem, endItem);
+    this._returnedArray = this._filteredGroups.slice(startItem, endItem);
   }
 
   /**
@@ -276,7 +307,6 @@ export class GroupsComponent {
     let memberName = String(this.groupForm.value.groupMember.toString());
     this.groupMembers.push(memberName);
     this.groupForm.controls['groupMember'].setValue(""); //.reset();
-    console.log(this.groupMembers)
   }
 
   /**
@@ -297,11 +327,9 @@ export class GroupsComponent {
       "password": this.groupForm.value.groupPassword,
       "members": this.groupMembers
     };
-    console.log(newGroup.password);
     this._groupsDataService.addNewGroup(this.school.id, newGroup).subscribe(value => {
-      console.log(value);
       this._groups.push(value);
-      this.executeFilterQuery();
+      this.initiateArrays();
       this.groupMembers = [];
       this.groupForm.controls['groupName'].setValue("");
       this.groupForm.controls['groupPassword'].setValue("");
@@ -310,68 +338,8 @@ export class GroupsComponent {
     });
   }
 
-  public filter(token: string) {
-    console.log(token);
-    console.log(this._groups);
-    console.log(this.filteredGroups);
-    this.filteredGroups = this._groups.filter((group: Group) => {
-      return group.name.toLowerCase().startsWith(token.toLowerCase());
-
-      //return question.categoryExhibitor.exhibitor.name.toLowerCase().startsWith(token.toLowerCase()) ||
-      //  question.categoryExhibitor.category.name.toLowerCase().startsWith(token.toLowerCase());
-    });
-  }
-
-  /**
-   * Edits the contentArray (array that represents all the groups that should be presented) to
-   * the current filter value (text that user typed in the filter field).
-   */
-  executeFilterQuery(filter?: string) {
-    this.contentArray = [];
-    if (filter) {
-      this._groups.forEach(group => {
-        let sub = group.name.toLowerCase().substr(0, filter.length);
-        if (sub == filter.toLocaleLowerCase() /*|| group.members.includes(filter)*/) { //TODO eens members geimplementeerd is in backend, uit commentaar halen.
-          this.contentArray.push(group);
-        }
-      });
-    } else {
-      this.contentArray = this._groups;
-    }
-    this.initiateReturnedArray();
-  }
-
-  /**
-   * On enter of click on typeAHeadMatch, the chosen group will be displayed.
-   * @param event
-   */
-  onSelect(event: TypeaheadMatch): void {
-    let group = event.item;
-    this.contentArray = [];
-    this.contentArray.push(group);
-    this.initiateReturnedArray()
-  }
-
-  /**
-   * No result matching the searchterm in the filter.
-   * @param event
-   */
-  typeaheadNoResults(event: boolean): void {
-    console.log("no result" + event);
-    this.executeFilterQuery();
-  }
-
   private findGroupWithId(groupId: number) {
     let group = this._groups.find(g => g.id == groupId);
     return group;
-  }
-
-
-  get applicationStartDate(): Date {
-    return this._applicationStartDate;
-  }
-
-  set applicationStartDate(value: Date) {
-    this._applicationStartDate = value;
   }
 }

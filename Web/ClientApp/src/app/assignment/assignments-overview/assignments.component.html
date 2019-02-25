@@ -1,0 +1,55 @@
+<div id="header">
+  <h1>Ingediende opdrachten</h1>
+</div>
+
+<div>
+  <div class="col-md-8">
+    <div class="input-group">
+      <span class="input-group-addon">Zoekfilter
+       </span>
+      <input class="form-control" type="text" placeholder="filter" (ngModelChange)="filter($event)"
+             [(ngModel)]="filterValue">
+    </div>
+  </div>
+
+  <button style="margin-bottom: 4em;" class="btn btn-primary" (click)="downloadAllPDF()">Download alle Opdrachten als
+    PDF
+  </button>
+</div>
+
+<table class="table" *ngIf="returnedArray; else noGroups">
+  <thead>
+  <tr>
+    <th scope="col">#</th>
+    <th scope="col">Groepsnaam</th>
+    <th scope="col">Download PDF</th>
+    <th scope="col">Aantal Ingediende Opdrachten</th>
+    <th scope="col">Detailscherm</th>
+  </tr>
+  </thead>
+  <tbody>
+  <tr *ngFor="let group of returnedArray; let i = index">
+    <th scope="row">{{i + 1}}</th>
+    <td>{{group.name}}</td>
+    <td>
+
+      <button class="" (click)="pdfDownload(group)"><img id="imageid" src="../../assets/logopdf.png" alt="logo pdf"
+                                                         width="50" height="50">
+      </button>
+    </td>
+    <td>
+      <p>{{group.assignments.length}}</p>
+    </td>
+    <td>
+      <button (click)="detailAssignment(group)" class="btn btn-primary">Detailscherm van opdracht</button>
+    </td>
+  </tr>
+  </tbody>
+</table>
+<pagination *ngIf="filteredGroups" [totalItems]="filteredGroups.length" (pageChanged)="pageChanged($event)"
+            [itemsPerPage]=maxNumberOfGroupsPerPage [(ngModel)]="currentPage"></pagination>
+
+<ng-template #noGroups>
+  <h3>Er zijn nog geen door groepen ingediende opdrachten.</h3>
+</ng-template>
+

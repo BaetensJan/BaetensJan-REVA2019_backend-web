@@ -1,4 +1,4 @@
-import {Component, OnInit, ElementRef, ViewChild} from '@angular/core';
+import {Component, ElementRef, OnInit, ViewChild} from '@angular/core';
 import * as jsPDF from 'jspdf';
 import * as html2canvas from 'html2canvas';
 
@@ -48,16 +48,15 @@ export class InformatieschermComponent implements OnInit {
     var data = document.getElementById('contentToConvert');
     html2canvas(data).then(canvas => {
       // Few necessary setting options
-      var imgWidth = 208;
-      var pageHeight = 295;
-      var imgHeight = canvas.height * imgWidth / canvas.width;
-      var heightLeft = imgHeight;
-
-      const contentDataURL = canvas.toDataURL('image/png');
-      console.log(contentDataURL);
-      let pdf = new jsPDF('p', 'mm', 'a4'); // A4 size page of PDF
-      var position = 0;
-      pdf.addImage(contentDataURL, 'PNG', 0, position, imgWidth, imgHeight);
+      let pdf = new jsPDF('p', 'pt', 'a4'); // A4 size page of PDF
+      let wid: number;
+      let hgt: number;
+      let img = canvas.toDataURL("image/png", wid = canvas.width, hgt = canvas.height);
+      let ratio = hgt / wid;
+      let width = pdf.internal.pageSize.width - 20;
+      let height = width * ratio - 20;
+      pdf.addImage(img, 'JPEG', 20, 20, width, height);
+      pdf.addImage(img, 'JPEG', 20, 20, width, height);
       pdf.save('informatie_applicatie.pdf'); // Generated PDF
     });
   }

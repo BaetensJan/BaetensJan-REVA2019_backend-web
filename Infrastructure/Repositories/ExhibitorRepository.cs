@@ -55,15 +55,19 @@ namespace Infrastructure.Repositories
         public async Task<IEnumerable<Exhibitor>> AllLight()
         {
             // Abstractie: zorgt ervoor dat enkel de nodige data opgehaald wordt (geen recursieve loop).
-            var exhibitors = (await _exhibitors.Include(c=>c.Categories).ThenInclude(ce=>ce.Category).ToListAsync()).Select(MapExhibitor);
+            var exhibitors = (await _exhibitors.Include(c=>c.Categories).ThenInclude(ce=>ce.Category)
+                .ToListAsync()).Select(MapExhibitor);
             return exhibitors;
         }
 
-        public Task<List<Exhibitor>> All()
+        public async Task<IEnumerable<Exhibitor>> All()
         {
-            var exhibitors = _exhibitors.Include(e => e.Categories).ThenInclude(c => c.Category).ToListAsync();
-//            .Select(MapExhibitor);
-            return exhibitors;
+//            var exhibitors = _exhibitors.Include(e => e.Categories).ThenInclude(c => c.Category)
+//                .ToListAsync();
+//            return await exhibitors;
+//todo until fixed we use select.
+//todo was there a reason why this used to return a list rather than a IEnumerable?
+            return await AllLight();
         }
 
         public Task<Exhibitor> GetById(int id)
