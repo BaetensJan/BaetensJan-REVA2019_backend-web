@@ -71,7 +71,7 @@ export class AuthGuardService implements CanActivate {
 
   private isNonLoggedInPage(url): boolean {
     //Pages logged in users aren't allowed to access anymore
-    let pages = ['/login', "/invite-request", "/register", "wachtwoord-vergeten", "/wachtwoord-vergeten-confirmation", "/reset-wachtwoord"];
+    let pages = ['/login', "/invite-request", "/register", "/wachtwoord-vergeten", "/wachtwoord-vergeten-confirmation", "/reset-wachtwoord"];
     return pages.includes(url);
 
   }

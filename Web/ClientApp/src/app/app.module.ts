@@ -7,15 +7,15 @@ import {NavMenuComponent} from './nav-menu/nav-menu.component';
 import {HomeComponent} from './home/home.component';
 import {UserModule} from "./user/user.module";
 import {InformatieschermComponent} from './informatiescherm/informatiescherm.component';
-import {InviteRequestComponent} from "./invitation/send-request/invite-request.component";
 import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
 import {VerticalTimelineModule} from 'angular-vertical-timeline';
 import {
+  AlertModule,
+  BsDropdownModule,
+  ButtonsModule,
   ModalModule,
   PaginationModule,
-  TypeaheadModule,
-  ButtonsModule,
-  AlertModule, BsDropdownModule
+  TypeaheadModule
 } from "ngx-bootstrap";
 import {ExhibitorComponent} from './exhibitor/exhibitor.component';
 import {ExhibitorsComponent} from './exhibitors/exhibitors.component';
@@ -26,17 +26,17 @@ import {CategoryShareService} from "./category/category-share.service";
 import {CategoriesComponent} from "./categories/categories.component";
 import {CategoryComponent} from "./category/category.component";
 import {AppShareService} from "./AppShareService";
-import { QuestionsComponent } from './questions/questions.component';
-import { QuestionComponent } from './questions/question/question.component';
+import {QuestionsComponent} from './questions/questions.component';
+import {QuestionComponent} from './questions/question/question.component';
 import {QuestionSharedService} from "./questions/question-shared.service";
 import {QuestionDataService} from "./questions/question-data.service";
 import {FileUploadModule} from "ng2-file-upload";
-import { RouteMapComponent } from './route-map/route-map.component';
+import {RouteMapComponent} from './route-map/route-map.component';
 import {SchoolDataService} from "./schools/school-data.service";
 import {ImageDataService} from "./image-data-service/image-data.service";
-import { PageNotFoundComponent } from './page-not-found/page-not-found.component';
+import {PageNotFoundComponent} from './page-not-found/page-not-found.component';
 import {AppRoutingModule} from "./app-routing/app-routing.module";
-import { AskQuestionComponent } from './ask-question/ask-question.component';
+import {AskQuestionComponent} from './ask-question/ask-question.component';
 import {AssignmentsComponent} from "./assignment/assignments-overview/assignments.component";
 import {AssignmentDetailComponent} from "./assignment/assignment-detail/assignment-detail.component";
 import {AssignmentDataService} from "./assignment/assignment-data.service";
@@ -48,7 +48,7 @@ import {UploadCsvComponent} from "./upload-csv/upload-csv.component";
     PageNotFoundComponent, HomeComponent, AssignmentsComponent, InformatieschermComponent,
     CategoriesComponent, CategoryComponent, ExhibitorComponent, ExhibitorsComponent, AssignmentDetailComponent,
     QuestionComponent, QuestionsComponent, RouteMapComponent, NavMenuComponent, AskQuestionComponent,
-    InviteRequestComponent, UploadCsvComponent
+    UploadCsvComponent
   ],
   imports: [
     BrowserModule.withServerTransition({appId: 'ng-cli-universal'}),
