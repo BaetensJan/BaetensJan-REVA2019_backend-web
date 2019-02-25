@@ -71,12 +71,12 @@ namespace Web.Controllers
             var numberOfSubmittedAssignments = numberOfAssignments;
 
             if (currentAssignment != null && !currentAssignment.Submitted)
-                {
-                    numberOfSubmittedAssignments = numberOfAssignments - 1;
-                    isCreatedExhibitor =
-                        currentAssignment.WithCreatedExhibitor(
-                            _configuration.GetValue<int>("CreatedExhibitorQuestionId"));
-                }
+            {
+                numberOfSubmittedAssignments = numberOfAssignments - 1;
+                isCreatedExhibitor =
+                    currentAssignment.WithCreatedExhibitor(
+                        _configuration.GetValue<int>("CreatedExhibitorQuestionId"));
+            }
 
             var hasNoAssignments = numberOfAssignments == 0;
 
@@ -261,18 +261,18 @@ namespace Web.Controllers
                 new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
                 new Claim(ClaimTypes.NameIdentifier, user.Id),
                 new Claim("username", user.UserName),
-                new Claim("school", user.School.Id.ToString()),
-                new Claim("group", groupId.ToString()),
+                new Claim("isAdmin", false.ToString()),
+                new Claim("group", groupId.ToString())
             };
 
             var signInKey = new SymmetricSecurityKey(
                 Encoding.UTF8.GetBytes(_configuration["AppSettings:Secret"]));
 
             return new JwtSecurityToken(
-                issuer: "http://xyz.com",
-                audience: "http://xyz.com",
+                issuer: "http://app.reva.be",
+                audience: "http://app.reva.be",
                 claims: claims,
-                expires: DateTime.UtcNow.AddHours(1),
+                expires: DateTime.UtcNow.AddDays(7),
                 signingCredentials: new SigningCredentials(signInKey, SecurityAlgorithms.HmacSha256));
         }
 

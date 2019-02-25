@@ -74,13 +74,16 @@ export class InvitationService {
    * @param id
    */
   getTeacherRequest(id: number): Observable<TeacherRequest> {
-    // this.http.get(`${this._url}/teacherRequest/teacherRequest/${id}`)
-    //   .subscribe(res => {
-    //       console.log(res);
-    //     });
+    console.log("in request method");
+    let obs = this.http.get<TeacherRequest>(`${this._url}/teacherRequest/teacherRequest/${id}`);
+      obs.subscribe((res: any) => {
+        console.log(res);
+      });
 
-    return this.http.get(`${this._url}/teacherRequest/teacherRequest/${id}`)
-      .pipe(map(TeacherRequest.fromJSON));
+    return obs;
+
+     // return this.http.get(`${this._url}/teacherRequest/teacherRequest/${id}`)
+     //   .pipe(map(TeacherRequest.fromJSON));
   }
 
   /**

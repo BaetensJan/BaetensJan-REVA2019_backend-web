@@ -64,14 +64,13 @@ export class InviteRequestComponent implements OnInit {
       name: [
         '',
         [Validators.required,
-          Validators.minLength(1)],
-        this.serverSideValidateUsername()
+          Validators.minLength(1)]
+        // this.serverSideValidateUsername()
       ],
       surname: [
         '',
         [Validators.required,
-          Validators.minLength(1)],
-        this.serverSideValidateUsername()
+          Validators.minLength(1)]
       ],
       schoolName: [
         '',
@@ -134,23 +133,23 @@ export class InviteRequestComponent implements OnInit {
     };
   }
 
-  /**
-   * Checks Username for availability
-   */
-  serverSideValidateUsername(): (control: AbstractControl) => Observable<{ [p: string]: any }> {
-    return (control: AbstractControl): Observable<{ [key: string]: any }> => {
-      return this._authenticationService
-        .checkUserNameAvailability(control.value)
-        .pipe(
-          map(available => {
-            if (available) {
-              return null;
-            }
-            return {userAlreadyExists: true};
-          })
-        );
-    };
-  }
+  // /**
+  //  * Checks Username for availability
+  //  */
+  // serverSideValidateUsername(): (control: AbstractControl) => Observable<{ [p: string]: any }> {
+  //   return (control: AbstractControl): Observable<{ [key: string]: any }> => {
+  //     return this._authenticationService
+  //       .checkUserNameAvailability(control.value)
+  //       .pipe(
+  //         map(available => {
+  //           if (available) {
+  //             return null;
+  //           }
+  //           return {userAlreadyExists: true};
+  //         })
+  //       );
+  //   };
+  // }
 
   /**
    * Checks if schoolName already exists in database

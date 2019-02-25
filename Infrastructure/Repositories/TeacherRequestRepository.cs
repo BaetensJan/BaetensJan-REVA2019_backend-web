@@ -3,6 +3,7 @@ using System.Threading.Tasks;
 using ApplicationCore.Entities;
 using ApplicationCore.Interfaces;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.ChangeTracking;
 
 namespace Infrastructure.Repositories
 {
@@ -17,26 +18,26 @@ namespace Infrastructure.Repositories
             _teacherRequests = dbContext.TeacherRequests;
         }
 
-        public Task<List<TeacherRequest>> All()
+        public async Task<List<TeacherRequest>> All()
         {
-            return _teacherRequests.ToListAsync();
+            return await _teacherRequests.ToListAsync();
         }
 
-        public Task<TeacherRequest> GetById(int id)
+        public async Task<TeacherRequest> GetById(int id)
         {
-            var teacherRequest = _teacherRequests.SingleOrDefaultAsync(c => c.Id == id);
+            var teacherRequest = await _teacherRequests.SingleOrDefaultAsync(c => c.Id == id);
             return teacherRequest;
         }
 
-        public Task<TeacherRequest> GetByEmail(string email)
+        public async Task<TeacherRequest> GetByEmail(string email)
         {
-            var teacherRequest = _teacherRequests.SingleOrDefaultAsync(c => c.Email == email);
+            var teacherRequest = await _teacherRequests.SingleOrDefaultAsync(c => c.Email == email);
             return teacherRequest;
         }
 
-        public Task<TeacherRequest> GetBySchool(string school)
+        public async Task<TeacherRequest> GetBySchool(string school)
         {
-            var teacherRequest = _teacherRequests.SingleOrDefaultAsync(c => c.SchoolName == school);
+            var teacherRequest = await _teacherRequests.SingleOrDefaultAsync(c => c.SchoolName == school);
             return teacherRequest;
         }
 
