@@ -37,7 +37,6 @@ export class RequestsComponent implements OnInit {
   /**
    * Click event om categorie te verwijderen. Geeft de categorie door aan de modal voor bevestiging.
    *
-   * @param row: Categorie
    */
   openModal(template: TemplateRef<any>, tr: TeacherRequest, accept: boolean) {
     this.clickedItem = tr;
@@ -84,10 +83,8 @@ export class RequestsComponent implements OnInit {
    * Removes a request from the requests attribute (NOT DB)
    */
   private removeRequest(): void {
-    console.log(this.requests);
     let index = this.requests.indexOf(this.requests.find((request: TeacherRequest) => request.id === this.clickedItem.id));
     this.requests.splice(index, 1);
-    console.log(this.requests);
     this.clickedItem = null;
   }
 

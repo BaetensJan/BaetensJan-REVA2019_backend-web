@@ -4,8 +4,6 @@ import {Observable} from "rxjs";
 import {HttpClient} from "@angular/common/http";
 import {Router} from "@angular/router";
 import {TeacherRequest} from "../models/teacherRequest.model";
-import {Category} from "../models/category.model";
-import {Group} from "../models/group.model";
 
 @Injectable({
   providedIn: 'root'
@@ -76,6 +74,11 @@ export class InvitationService {
    * @param id
    */
   getTeacherRequest(id: number): Observable<TeacherRequest> {
+    // this.http.get(`${this._url}/teacherRequest/teacherRequest/${id}`)
+    //   .subscribe(res => {
+    //       console.log(res);
+    //     });
+
     return this.http.get(`${this._url}/teacherRequest/teacherRequest/${id}`)
       .pipe(map(TeacherRequest.fromJSON));
   }

@@ -49,12 +49,10 @@ export class ExhibitorsComponent implements OnInit {
   ngOnInit() {
     this._exhibitorsDataService.exhibitors.subscribe(exhibitors => {
       for(let exhib of exhibitors){
-        console.log(exhib);
         if(exhib.x == 0 && exhib.y == 0) {
           this.teller++;
         }
       }
-      console.log(this.teller);
       this.tellertotaal = exhibitors.length;
       if(this.teller > 0) {
         this.showMessage = true;

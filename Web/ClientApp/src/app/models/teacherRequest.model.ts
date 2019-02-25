@@ -7,7 +7,6 @@ export class TeacherRequest {
    * @param email
    * @param schoolName
    * @param note
-   * @param creationDate
    */
   constructor(
     name: string,

@@ -89,13 +89,14 @@ namespace Web.Controllers
         * return Request with id equal to parameter requestId.
         */
         [HttpGet("[Action]/{requestId}")]
-        public async Task<TeacherRequest> TeacherRequest(int requestId)
+        public async Task<IActionResult> TeacherRequest(int requestId)
         {
-            return await _teacherRequestRepository.GetById(requestId);
+            var request = await _teacherRequestRepository.GetById(requestId);
+            return Json(request);
         }
 
         /**
-        * Admin declines Teacher Requast.
+        * Admin declines Teacher Request.
         *
         **/
         [HttpGet("[Action]/{teacherRequestId}")]

@@ -102,7 +102,6 @@ export class InviteRequestComponent implements OnInit {
 
               this._email = value.email;
               this._schoolName = value.schoolName;
-
               this.user.patchValue({
                 name: value.name,
                 surname: value.surname,
@@ -158,9 +157,11 @@ export class InviteRequestComponent implements OnInit {
    */
   serverSideValidateSchoolName(): (control: AbstractControl) => Observable<{ [p: string]: any }> {
     return (control: AbstractControl): Observable<{ [key: string]: any }> => {
+
       if (this.update && control.value == this._schoolName) {
         return observableOf(null);
       }
+
       return this._schoolDataService
         .checkSchoolNameAvailability(control.value)
         .pipe(
