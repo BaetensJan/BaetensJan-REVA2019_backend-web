@@ -80,6 +80,11 @@
               <span class='glyphicon glyphicon-plus'></span> Aanvragen
             </a>
           </li>
+          <li [routerLinkActive]='["link-active"]'>
+            <a (click)='collapse()' [routerLink]='["wachtwoord-veranderen"]'>
+              <span class='glyphicon glyphicon-user'></span> Wachtwoord Veranderen
+            </a>
+          </li>
         </ng-container>
 
         <div class='clearfix' style="margin-bottom: 1.5em;"></div>
@@ -105,7 +110,7 @@
       <footer *ngIf="!(isAdmin | async)">
         <small>Werk gemaakt in het kader van de opleiding toegepaste informatica aan Hogeschool Gent
           door Jan Baetens, Dennis Deroose en Gilles Willemot. U kan contact met ons opnemen via
-          <a id="email" href="mailto:reva.app.team@gmail.com?subject=Reva app contact">
+          <a href="mailto:reva.app.team@gmail.com?subject=Reva app contact" id="email">
             reva.app.team@gmail.com
           </a>
         </small>

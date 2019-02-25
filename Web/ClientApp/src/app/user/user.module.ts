@@ -9,8 +9,13 @@ import {RegisterComponent} from './register/register.component';
 import {httpInterceptorProviders} from '../http-interceptors';
 import {AuthGuardService} from "./auth-guard.service";
 import {LogoutComponent} from "./logout/logout.component";
-import {InviteRequestComponent} from "../invitation/send-request/invite-request.component";
-import {RequestsComponent} from "../invitation/pending-requests/requests.component";
+import {InvitationService} from "./invitation/invitation.service";
+import {RequestsComponent} from "./invitation/pending-requests/requests.component";
+import {InviteRequestComponent} from "./invitation/send-request/invite-request.component";
+import {ForgotPasswordComponent} from './forgot-password/forgot-password.component';
+import {ForgotPasswordConfirmationComponent} from './forgot-password-confirmation/forgot-password-confirmation.component';
+import {ResetPasswordComponent} from './reset-password/reset-password.component';
+import { ChangePasswordComponent } from './change-password/change-password.component';
 
 /**
  * Routing for user login and registration
@@ -28,7 +33,7 @@ const routes = [
     ReactiveFormsModule,
     RouterModule.forChild(routes)
   ],
-  declarations: [LoginComponent, LogoutComponent, RegisterComponent, RequestsComponent/*, ForgotPasswordComponent*/],
+  declarations: [LoginComponent, LogoutComponent, RegisterComponent, InviteRequestComponent, RequestsComponent, ForgotPasswordComponent, ForgotPasswordConfirmationComponent, ResetPasswordComponent, ChangePasswordComponent],
   providers: [
     httpInterceptorProviders,
     AuthenticationService,

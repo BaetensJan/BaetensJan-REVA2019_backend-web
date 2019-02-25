@@ -19,9 +19,9 @@ export class UploadCsvComponent implements OnInit {
               private _questionDataService: QuestionDataService, private router: Router,
               private modalService: BsModalService) { }
 
+
   ngOnInit() {
   }
-
 
   onSelectFile(event) { // called each time file input changes
     var files = event.target.files; // FileList object
@@ -198,5 +198,4 @@ export class UploadCsvComponent implements OnInit {
   public uploadCSV() {
     this.extractData(this._csv);
   }
-
 }

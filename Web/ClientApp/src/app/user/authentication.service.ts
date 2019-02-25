@@ -144,6 +144,22 @@ export class AuthenticationService {
     }
   }
 
+  forgotPassword(email: string): Observable<boolean> {
+    return this.http.post(`${this._url}/ForgotPassword`, {email}).pipe(
+      map((res: any) => {
+        return true;
+      })
+    );
+  }
+
+  resetPassword(email: string, code: string, password: string) {
+    return this.http.post(`${this._url}/ResetPassword`, {code, email, password}).pipe(
+      map((res: any) => {
+        return true;
+      })
+    );
+  }
+
   /**
    * Checks username availability using backend
    *
@@ -187,6 +203,13 @@ export class AuthenticationService {
     return !(parsedToken && parsedToken.group);
   }
 
+
+  changePassword(password: string): Observable<boolean> {
+    return this.http.post(`${this._url}/ChangePassword`, {password}).pipe(
+      map((res: any) => {
+        return true;
+      })
+    );
   /**
    * Parser for jwt token when authenticating user
    *
@@ -203,5 +226,6 @@ export class AuthenticationService {
     } catch (err) {
       return null;
     }
+
   }
 }
