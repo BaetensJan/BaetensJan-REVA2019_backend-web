@@ -20,6 +20,7 @@ import {UploadCsvComponent} from "../upload-csv/upload-csv.component";
 import {ForgotPasswordConfirmationComponent} from "../user/forgot-password-confirmation/forgot-password-confirmation.component";
 import {ForgotPasswordComponent} from "../user/forgot-password/forgot-password.component";
 import {ResetPasswordComponent} from "../user/reset-password/reset-password.component";
+import {ChangePasswordComponent} from "../user/change-password/change-password.component";
 
 const appRoutes: Routes = [
   {path: 'home', component: HomeComponent},
@@ -44,6 +45,7 @@ const appRoutes: Routes = [
   {path: 'aanvragen', canActivate: [AuthGuardService], component: RequestsComponent},
   {path: 'ask-question', component: AskQuestionComponent},
   {path: 'wachtwoord-vergeten', canActivate: [AuthGuardService], component: ForgotPasswordComponent},
+  {path: 'wachtwoord-veranderen', canActivate: [AuthGuardService], component: ChangePasswordComponent},
   {
     path: 'wachtwoord-vergeten-confirmation',
     canActivate: [AuthGuardService],

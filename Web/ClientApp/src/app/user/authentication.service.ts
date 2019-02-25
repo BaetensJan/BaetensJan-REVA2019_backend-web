@@ -211,4 +211,12 @@ export class AuthenticationService {
     // check if user is a group. Groups have no access to web.
     return !(parsedToken && parsedToken.group);
   }
+
+  changePassword(password: string): Observable<boolean> {
+    return this.http.post(`${this._url}/ChangePassword`, {password}).pipe(
+      map((res: any) => {
+        return true;
+      })
+    );
+  }
 }

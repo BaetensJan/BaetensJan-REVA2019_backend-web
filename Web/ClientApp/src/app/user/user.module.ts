@@ -15,6 +15,7 @@ import {InviteRequestComponent} from "./invitation/send-request/invite-request.c
 import {ForgotPasswordComponent} from './forgot-password/forgot-password.component';
 import {ForgotPasswordConfirmationComponent} from './forgot-password-confirmation/forgot-password-confirmation.component';
 import {ResetPasswordComponent} from './reset-password/reset-password.component';
+import { ChangePasswordComponent } from './change-password/change-password.component';
 
 /**
  * Routing for user login and registration
@@ -32,7 +33,7 @@ const routes = [
     ReactiveFormsModule,
     RouterModule.forChild(routes)
   ],
-  declarations: [LoginComponent, LogoutComponent, RegisterComponent, InviteRequestComponent, RequestsComponent, ForgotPasswordComponent, ForgotPasswordConfirmationComponent, ResetPasswordComponent],
+  declarations: [LoginComponent, LogoutComponent, RegisterComponent, InviteRequestComponent, RequestsComponent, ForgotPasswordComponent, ForgotPasswordConfirmationComponent, ResetPasswordComponent, ChangePasswordComponent],
   providers: [
     httpInterceptorProviders,
     InvitationService,
