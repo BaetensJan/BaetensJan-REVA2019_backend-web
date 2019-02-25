@@ -25,7 +25,7 @@ export class InviteRequestComponent implements OnInit {
    */
   public errorMsg: string;
 
-  private update: boolean = false;
+  public update: boolean = false;
 
   private requestId: number;
 

@@ -305,8 +305,8 @@ namespace Web.Controllers
 
         private async Task<ApplicationUser> GetApplicationUser(string username)
         {
-            return _userManager.Users.Include(u => u.School).ThenInclude(s => s.Groups)
-                .SingleOrDefault(u => u.UserName == username);
+            return await _userManager.Users.Include(u => u.School).ThenInclude(s => s.Groups)
+                .SingleOrDefaultAsync(u => u.UserName == username);
         }
 
         /**
