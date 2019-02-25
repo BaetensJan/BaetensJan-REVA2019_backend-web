@@ -1,23 +1,20 @@
 import {Observable} from 'rxjs/Observable';
-import {AfterViewInit, ChangeDetectorRef, Component, OnInit} from '@angular/core';
-import {Router} from '@angular/router';
+import {Component, OnInit} from '@angular/core';
+import {ActivatedRoute, Router} from '@angular/router';
 import {AbstractControl, FormBuilder, FormGroup, ValidatorFn, Validators} from '@angular/forms';
 import {HttpErrorResponse} from '@angular/common/http';
 import {map} from 'rxjs/operators';
 import {InvitationService} from "../invitation.service";
 import {SchoolDataService} from "../../schools/school-data.service";
 import {AuthenticationService} from "../../user/authentication.service";
-import {TeacherRequest} from "../../models/teacherRequest.model";
-import {CategoryShareService} from "../../category/category-share.service";
-import {CategoriesDataService} from "../../categories/categories-data.service";
-import {RequestsShareService} from "../pending-requests/requests-share.service";
+import { of as observableOf} from 'rxjs';
 
 @Component({
   selector: 'app-invite-request',
   templateUrl: './invite-request.component.html',
   styleUrls: ['./invite-request.component.css']
 })
-export class InviteRequestComponent implements AfterViewInit, OnInit {
+export class InviteRequestComponent implements OnInit {
 
   /**
    * @ignore
@@ -27,37 +24,35 @@ export class InviteRequestComponent implements AfterViewInit, OnInit {
    * @ignore
    */
   public errorMsg: string;
-  /**
-   * @ignore
-   */
-  public selectedTeacherRequest: TeacherRequest;
-  /**
-   * @ignore
-   */
-  public heeftWaarde = false;
-  /**
-   * @ignore
-   */
-  public aanpassen: boolean;
+
+  private update: boolean = false;
+
+  private requestId: number;
+
+  // we need to cache this email when update a request in order for the emailvalidator,
+  // otherwise it will tell us that this email was already taken (in database).
+  private _email: string;
+  // we need to cache this schoolName when update a request in order for the schoolNameValidator,
+  // otherwise it will tell us that this email was already taken (in database).
+  private _schoolName: string;
+
   /**
    * Constructor
    *
    * @param _invitationService
    * @param _schoolDataService
    * @param _authenticationService
-   * @param _requestTeacherShareService
-   * @param cdRef
    * @param router
+   * @param route
    * @param fb
    */
   constructor(
     private _invitationService: InvitationService,
     private _schoolDataService: SchoolDataService,
     private _authenticationService: AuthenticationService,
-    private _requestTeacherShareService: RequestsShareService,
-    private cdRef: ChangeDetectorRef,
     private router: Router,
-    private fb: FormBuilder
+    private fb: FormBuilder,
+    private route?: ActivatedRoute
   ) {
   }
 
@@ -94,26 +89,32 @@ export class InviteRequestComponent implements AfterViewInit, OnInit {
       ],
       note: ''
     });
-    this.selectedTeacherRequest = this._requestTeacherShareService.teacherRequest;
-    console.log(this.selectedTeacherRequest);
-    this.aanpassen = this._requestTeacherShareService.aanpassen;
-    if (this.selectedTeacherRequest == undefined) {
-      this.selectedTeacherRequest = new TeacherRequest("","","","","");
-      this.selectedTeacherRequest.name = "";
-      this.selectedTeacherRequest.surname = "";
-      this.selectedTeacherRequest.email = "";
-      this.selectedTeacherRequest.schoolName = "";
-      this.selectedTeacherRequest.note = "";
+
+    if(this._authenticationService.isModerator$.getValue()) {
+      this.route.queryParams.subscribe(params => {
+        // Defaults to 0 if no query param provided.
+        this.requestId = params['requestId'] || -1;
+        if (this.requestId != -1) {
+          this._invitationService.getTeacherRequest(this.requestId).subscribe(value => {
+            if (!value) this.router.navigate(["/"]);
+            else {
+              this.update = true;
+
+              this._email = value.email;
+              this._schoolName = value.schoolName;
+
+              this.user.patchValue({
+                name: value.name,
+                surname: value.surname,
+                schoolName: value.schoolName,
+                note: value.note,
+                email: value.email
+              });
+            }
+          });
+        }
+      });
     }
-    this.heeftWaarde = true;
-    this.cdRef.detectChanges();
-  }
-
-  /**
-   * Loads category or creates empty category based on editing or creating
-   */
-  ngAfterViewInit() {
-
   }
 
   emailPatternValidator(): ValidatorFn {
@@ -157,6 +158,9 @@ export class InviteRequestComponent implements AfterViewInit, OnInit {
    */
   serverSideValidateSchoolName(): (control: AbstractControl) => Observable<{ [p: string]: any }> {
     return (control: AbstractControl): Observable<{ [key: string]: any }> => {
+      if (this.update && control.value == this._schoolName) {
+        return observableOf(null);
+      }
       return this._schoolDataService
         .checkSchoolNameAvailability(control.value)
         .pipe(
@@ -172,6 +176,9 @@ export class InviteRequestComponent implements AfterViewInit, OnInit {
 
   serverSideValidateEmail(): (control: AbstractControl) => Observable<{ [p: string]: any }> {
     return (control: AbstractControl): Observable<{ [key: string]: any }> => {
+
+      if (this.update && control.value == this._email) return observableOf(null);
+
       return this._authenticationService
         .checkEmailAvailability(control.value)
         .pipe(
@@ -189,13 +196,14 @@ export class InviteRequestComponent implements AfterViewInit, OnInit {
    * Click event to submit user information to the backend for registration
    */
   onSubmit() {
-    if(this.selectedTeacherRequest.id == undefined){
+    // admin updates a request.
+    if (this.update) {
       this._invitationService
-        .inviteRequest(this.user.value.email, this.user.value.name, this.user.value.surname, this.user.value.schoolName, this.user.value.note)
+        .updateRequest(this.requestId, this.user.value.email, this.user.value.name, this.user.value.surname, this.user.value.schoolName, this.user.value.note)
         .subscribe(
           val => {
             if (val) {
-              this.router.navigate(['/']);
+              this.router.navigate(['requests']);
             }
           },
           (error: HttpErrorResponse) => {
@@ -203,18 +211,18 @@ export class InviteRequestComponent implements AfterViewInit, OnInit {
           }
         );
     } else {
-      var updateTeacher = new TeacherRequest(this.user.value.name, this.user.value.surname,this.user.value.email,this.user.value.schoolName, this.user.value.note);
-      updateTeacher.id = this.selectedTeacherRequest.id;
-      this._invitationService.updateTeacher(updateTeacher).subscribe(
-        val => {
-          if (val) {
-            this.router.navigate(['aanvragen']);
+      this._invitationService
+        .inviteRequest(this.user.value.email, this.user.value.name, this.user.value.surname, this.user.value.schoolName, this.user.value.note)
+        .subscribe(
+          val => {
+            if (val) {
+              this.router.navigate(['requests']);
+            }
+          },
+          (error: HttpErrorResponse) => {
+            this.errorMsg = `Er is iets fout gegaan bij de verwerking van uw aanvraag. Gelieve het later opnieuw te proberen.`;
           }
-        },
-        (error: HttpErrorResponse) => {
-          this.errorMsg = `Er is iets fout gegaan bij de verwerking van uw aanvraag. Gelieve het later opnieuw te proberen.`;
-        }
-      );
+        );
     }
   }
 }

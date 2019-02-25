@@ -7,7 +7,7 @@
     "compodoc-serve": "./node_modules/.bin/compodoc -s",
     "ng": "ng",
     "startdev": "ng serve --proxy-config proxy.conf.json",
-    "start": "ng serve",
+    "start": "ng serve --proxy-config proxy.conf.json",
     "build": "ng build --extract-css",
     "build:ssr": "npm run build -- --app=ssr --output-hashing=media",
     "test": "ng test",

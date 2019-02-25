@@ -7,7 +7,7 @@
   <div class="form-group">
     <label class="col-sm-2 control-label" for="name">Voornaam:</label>
     <div class="col-sm-10 col-md-3">
-      <input class="form-control" [(ngModel)]="selectedTeacherRequest.name" type="text" id="name" formControlName='name'>
+      <input class="form-control" type="text" id="name" formControlName='name'>
     </div>
   </div>
   <div class="row">
@@ -21,7 +21,7 @@
   <div class="form-group">
     <label class="col-sm-2 control-label" for="surname">Familienaam:</label>
     <div class="col-sm-10 col-md-3">
-      <input class="form-control" [(ngModel)]="selectedTeacherRequest.surname" type="text" id="surname" formControlName='surname'>
+      <input class="form-control" type="text" id="surname" formControlName='surname'>
     </div>
   </div>
   <div class="row">
@@ -35,7 +35,7 @@
   <div class="form-group">
     <label class="col-sm-2 control-label" for="schoolName">Schoolnaam:</label>
     <div class="col-sm-10 col-md-3">
-      <input class="form-control" [(ngModel)]="selectedTeacherRequest.schoolName" type="text" id="schoolName" formControlName='schoolName'>
+      <input class="form-control" type="text" id="schoolName" formControlName='schoolName'>
     </div>
   </div>
   <div class="row">
@@ -84,7 +84,7 @@
   <div class="form-group">
     <label class="col-sm-2 control-label" for="email">E-mailadres:</label>
     <div class="col-sm-10 col-md-3">
-      <input class="form-control" [(ngModel)]="selectedTeacherRequest.email" id="email" formControlName="email" type="email">
+      <input class="form-control" id="email" formControlName="email" type="email">
     </div>
   </div>
   <div class="row">
@@ -110,14 +110,14 @@
   <div class="form-group">
     <label class="col-sm-2 control-label" for="note">Opmerking:</label>
     <div class="col-sm-10 col-md-3">
-      <textarea class="form-control" [(ngModel)]="selectedTeacherRequest.note" id="note" formControlName="note" type="note"></textarea>
+      <textarea class="form-control" id="note" formControlName="note" type="note"></textarea>
     </div>
   </div>
 
   <div class="row form-group" style="margin-top: 1em;">
     <div class="col-sm-offset-2 col-sm-10 col-md-3">
       <button class="btn btn-primary" style="width: 100%;" type='submit' [disabled]='!user.valid'>
-        Aanvraag verzenden
+        {{update ? 'Aanpassingen doorvoeren' : 'Aanvraag verzenden'}}
       </button>
     </div>
   </div>

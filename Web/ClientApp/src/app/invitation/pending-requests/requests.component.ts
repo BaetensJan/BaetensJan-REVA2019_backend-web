@@ -3,7 +3,6 @@ import {InvitationService} from "../invitation.service";
 import {BsModalRef, BsModalService} from "ngx-bootstrap";
 import {TeacherRequest} from "../../models/teacherRequest.model";
 import {Router} from "@angular/router";
-import {RequestsShareService} from "./requests-share.service";
 
 @Component({
   selector: 'app-requests',
@@ -27,7 +26,6 @@ export class RequestsComponent implements OnInit {
   constructor(private router: Router,
               private _invitationService: InvitationService,
               private modalService: BsModalService,
-              private _requestTeacherShareService: RequestsShareService
   ) {
   }
 
@@ -75,15 +73,11 @@ export class RequestsComponent implements OnInit {
   }
 
   onToevoegenAanvraag() {
-    this._requestTeacherShareService.teacherRequest = null;
     this.router.navigate(["invite-request"]);
   }
 
   onAanpassenRequest(request: TeacherRequest) {
-    console.log(request);
-    this._requestTeacherShareService.teacherRequest = request;
-    this._requestTeacherShareService.aanpassen = true;
-    this.router.navigate(["invite-request"]);
+      this.router.navigate(["invite-request"], { queryParams: { requestId: request.id } });
   }
 
   /**

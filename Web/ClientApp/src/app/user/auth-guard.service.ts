@@ -15,6 +15,12 @@ export class AuthGuardService implements CanActivate {
     console.debug(`NonLogin Required: ${this.isNonLoggedInPage(state.url)}`);
     console.debug(`Logged in: ${this.authService.isLoggedIn$.getValue()}`);
     console.debug(`Is Admin: ${this.authService.isModerator$.getValue()}`);
+
+    //todo beter om eerst rol te bekijken van user (admin, loggedin, notlogged in en vervolgens pas url te checken)
+    if (state.url == "/invite-request") {
+      return !(this.authService.isLoggedIn$.getValue()
+        && this.authService.isModerator$.getValue() == false);
+    }
     if (this.isAdminRequired(state.url)) {
       if (this.authService.isLoggedIn$.getValue()) {
         if (this.authService.isModerator$.getValue()) {
@@ -43,18 +49,13 @@ export class AuthGuardService implements CanActivate {
         return false;
       }
       return true;
-    } else {
-      if (state.url == "/invite-request") {
-        return true;
-      } else {
-        this.router.navigate(['/home']); // unauthorized.
-        return false;
-      }
-    }
+    } else
+      this.router.navigate(['/home']); // unauthorized.
+    return false;
   }
 
+
   private isLoggedInPage(url): boolean {
-    console.log(url);
     // assignmentsdetail has queryParams (groupId), e.g. /assignmentdetail?groupId=3
     let detailString = "/assignmentdetail?groupId=";
     if (url.startsWith(detailString)) {
@@ -70,15 +71,22 @@ export class AuthGuardService implements CanActivate {
 
   private isNonLoggedInPage(url): boolean {
     //Pages logged-in-users aren't allowed to access anymore
-    let pages = ['/login', "/register"];
+    let pages = ['/login'];
     return pages.includes(url);
 
   }
 
   private isAdminRequired(url): boolean {
-    let adminPages = ["/categorieen", "/categorie", "/exposanten", "/exposant",
-      "/beursplan", "/aanvragen", "/vragen", "/vraag", "/upload-csv"];
-    return adminPages.includes(url);
+    let detailString = "/invite-request?requestId=";
+    if (url.startsWith(detailString)) {
+      let ret = url.replace(detailString, '');
 
+      // check if everything after detailString is a number (requestId)
+      if (!isNaN(Number(ret))) return true;
+    }
+
+    let adminPages = ["/categorieen", "/categorie", "/exposanten", "/exposant",
+      "/beursplan", "/requests", "/vragen", "/vraag", "/upload-csv"];
+    return adminPages.includes(url);
   }
 }

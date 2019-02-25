@@ -16,6 +16,7 @@ import {InviteRequestComponent} from "../invitation/send-request/invite-request.
 import {RequestsComponent} from "../invitation/pending-requests/requests.component";
 import {AssignmentsComponent} from "../assignment/assignments-overview/assignments.component";
 import {AssignmentDetailComponent} from "../assignment/assignment-detail/assignment-detail.component";
+import {UploadCsvComponent} from "../upload-csv/upload-csv.component";
 
 const appRoutes: Routes = [
   {path: 'home', component: HomeComponent},
@@ -32,12 +33,12 @@ const appRoutes: Routes = [
   {path: 'categorie', canActivate: [AuthGuardService], component: CategoryComponent},
   {path: 'exposanten', canActivate: [AuthGuardService], component: ExhibitorsComponent},
   {path: 'exposant', canActivate: [AuthGuardService], component: ExhibitorComponent},
-  // {path: 'upload-csv', canActivate: [AuthGuardService], component: UploadCsvComponent},
+  {path: 'upload-csv', canActivate: [AuthGuardService], component: UploadCsvComponent},
   {path: 'vragen', canActivate: [AuthGuardService], component: QuestionsComponent},
   {path: 'vraag', canActivate: [AuthGuardService], component: QuestionComponent},
   {path: 'beursplan', canActivate: [AuthGuardService], component: RouteMapComponent},
   {path: 'invite-request', canActivate: [AuthGuardService], component: InviteRequestComponent},
-  {path: 'aanvragen', canActivate: [AuthGuardService], component: RequestsComponent},
+  {path: 'requests', canActivate: [AuthGuardService], component: RequestsComponent},
   {path: 'ask-question', component: AskQuestionComponent},
   {path: '', redirectTo: 'home', pathMatch: 'full'},
   {path: '**', component: PageNotFoundComponent}

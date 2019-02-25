@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import {Component, OnInit} from '@angular/core';
 import {ActivatedRoute, Router} from "@angular/router";
 import {Group} from "../../models/group.model";
 import {GroupsDataService} from "../../groups/groups-data.service";
@@ -14,8 +14,11 @@ export class AssignmentDetailComponent implements OnInit {
   public group: Group;
   public groupId: number;
 
-  constructor(private router?: Router,private route?: ActivatedRoute, private _groupsDataService?: GroupsDataService
-              /*, private _assignmentDataService: AssignmentDataService*/) { }
+  constructor(private router?: Router,
+              private route?: ActivatedRoute,
+              private _groupsDataService?: GroupsDataService
+  ) {
+  }
 
   ngOnInit() {
     this.sub = this.route

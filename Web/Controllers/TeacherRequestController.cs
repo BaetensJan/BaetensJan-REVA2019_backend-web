@@ -58,6 +58,43 @@ namespace Web.Controllers
         }
 
         /**
+        * Admin updates a Teacher-registration request.
+        */
+        [HttpPut("[Action]/{requestId}")]
+        public async Task<IActionResult> UpdateRequest([FromBody] CreateTeacherDTO model, int requestId)
+        {
+            if (ModelState.IsValid)
+            {
+                var request = await _teacherRequestRepository.GetById(requestId);
+                request.Name = model.Name;
+                request.Surname = model.Surname;
+                request.Note = model.Note;
+                request.Email = model.Email;
+                request.SchoolName = model.SchoolName;
+                await _teacherRequestRepository.SaveChanges();
+
+                return Ok(new
+                {
+                    Message = "Teacher request successfully updated."
+                });
+            }
+
+            return Ok(new
+            {
+                Message = "Please fill in all required fields."
+            });
+        }
+
+        /**
+        * return Request with id equal to parameter requestId.
+        */
+        [HttpGet("[Action]/{requestId}")]
+        public async Task<TeacherRequest> TeacherRequest(int requestId)
+        {
+            return await _teacherRequestRepository.GetById(requestId);
+        }
+
+        /**
         * Admin declines Teacher Requast.
         *
         **/
@@ -72,22 +109,6 @@ namespace Web.Controllers
             {
                 Message = "Request removed."
             });
-        }
-        
-        
-        [HttpPut("[Action]/{id}")]
-        public async Task<TeacherRequest> UpdateTeacher([FromRoute] int id, [FromBody] TeacherRequest teacherRequest)
-        {
-            TeacherRequest tr = await _teacherRequestRepository.GetById(teacherRequest.Id);
-            tr.Name = teacherRequest.Name;
-            tr.Note = teacherRequest.Note;
-            tr.Email = teacherRequest.Email;
-            tr.Surname = teacherRequest.Surname;
-            tr.SchoolName = teacherRequest.SchoolName;
-            _teacherRequestRepository.Update(tr);
-
-            await _teacherRequestRepository.SaveChanges();
-            return teacherRequest;
         }
     }
 }

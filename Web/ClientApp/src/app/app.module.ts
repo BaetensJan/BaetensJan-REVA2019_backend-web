@@ -40,14 +40,15 @@ import { AskQuestionComponent } from './ask-question/ask-question.component';
 import {AssignmentsComponent} from "./assignment/assignments-overview/assignments.component";
 import {AssignmentDetailComponent} from "./assignment/assignment-detail/assignment-detail.component";
 import {AssignmentDataService} from "./assignment/assignment-data.service";
-import {RequestsShareService} from "./invitation/pending-requests/requests-share.service";
+import {UploadCsvComponent} from "./upload-csv/upload-csv.component";
 
 @NgModule({
   declarations: [
     AppComponent,
     PageNotFoundComponent, HomeComponent, AssignmentsComponent, InformatieschermComponent,
     CategoriesComponent, CategoryComponent, ExhibitorComponent, ExhibitorsComponent, AssignmentDetailComponent,
-    QuestionComponent, QuestionsComponent, RouteMapComponent, NavMenuComponent, AskQuestionComponent, InviteRequestComponent/* UploadCsvComponent*/
+    QuestionComponent, QuestionsComponent, RouteMapComponent, NavMenuComponent, AskQuestionComponent,
+    InviteRequestComponent, UploadCsvComponent
   ],
   imports: [
     BrowserModule.withServerTransition({appId: 'ng-cli-universal'}),
@@ -69,7 +70,6 @@ import {RequestsShareService} from "./invitation/pending-requests/requests-share
   providers: [
     CategoriesDataService,
     CategoryShareService,
-    RequestsShareService,
     ExhibitorsDataService,
     ExhibitorShareService,
     AssignmentDataService,
