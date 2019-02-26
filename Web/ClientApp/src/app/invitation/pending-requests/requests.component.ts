@@ -31,7 +31,8 @@ export class RequestsComponent implements OnInit {
 
   ngOnInit() {
     this._invitationService.teacherRequests.subscribe(value =>
-      this._requests = value);
+      this._requests = value.sort((a, b) => new Date(a.creationDate).getTime() - new Date(b.creationDate).getTime())
+    );
   }
 
   /**

@@ -16,6 +16,20 @@
       Gelieve uw voornaam in te vullen.
     </div>
   </div>
+  <div class="row">
+    <div class="col-sm-offset-2 col-sm-10 col-md-3 alert alert-danger"
+         *ngIf='user.get("name").errors?.minlength && user.get("name").touched'>
+      De naam moet ten minste {{user.get("name").errors?.minlength.requiredLength }} letters bevatten.
+      U heeft momenteel {{user.get("name").errors?.minlength.actualLength}} lettertekens gebruikt.
+    </div>
+  </div>
+  <div class="row">
+    <div class="col-sm-offset-2 col-sm-10 col-md-3 alert alert-danger"
+         *ngIf='user.get("name").errors?.maxlength && user.get("name").touched'>
+      Dit veld mag maximum {{user.get("name").errors?.maxlength.requiredLength }} letters bevatten.
+      U heeft momenteel {{user.get("name").errors?.maxlength.actualLength}} lettertekens gebruikt.
+    </div>
+  </div>
 
   <!--Surname-->
   <div class="form-group">
@@ -28,6 +42,13 @@
     <div class="col-sm-offset-2 col-sm-10 col-md-3 alert alert-danger"
          *ngIf='user.get("surname").errors?.required && user.get("surname").touched'>
       Gelieve uw familienaam in te vullen.
+    </div>
+  </div>
+  <div class="row">
+    <div class="col-sm-offset-2 col-sm-10 col-md-3 alert alert-danger"
+         *ngIf='user.get("surname").errors?.maxlength && user.get("surname").touched'>
+      Dit veld mag maximum {{user.get("surname").errors?.maxlength.requiredLength }} letters bevatten.
+      U heeft momenteel {{user.get("surname").errors?.maxlength.actualLength}} lettertekens gebruikt.
     </div>
   </div>
 
@@ -79,6 +100,14 @@
       De schoolnaam mag geen <strong>punt</strong> (<b style="font-weight: bold; font-size: 1.8em;">.</b>) bevatten.
     </div>
   </div>
+  <div class="row">
+    <div class="col-sm-offset-2 col-sm-10 col-md-3 alert alert-danger"
+         *ngIf='user.get("schoolName").errors?.maxlength && user.get("schoolName").touched'>
+      Dit veld mag maximum {{user.get("schoolName").errors?.maxlength.requiredLength }} letters bevatten.
+      U heeft momenteel {{user.get("schoolName").errors?.maxlength.actualLength}} lettertekens gebruikt.
+    </div>
+  </div>
+
 
   <!--Email-->
   <div class="form-group">
@@ -103,6 +132,13 @@
            *ngIf='user.get("email").errors?.wrongInput && user.get("email").touched'>
         Gelieve een geldig emailadres in te vullen.
       </div>
+    </div>
+  </div>
+  <div class="row">
+    <div class="col-sm-offset-2 col-sm-10 col-md-3 alert alert-danger"
+         *ngIf='user.get("email").errors?.maxlength && user.get("email").touched'>
+      Dit veld mag maximum {{user.get("email").errors?.maxlength.requiredLength }} letters bevatten.
+      U heeft momenteel {{user.get("email").errors?.maxlength.actualLength}} lettertekens gebruikt.
     </div>
   </div>
 

@@ -7,7 +7,7 @@ import {map} from 'rxjs/operators';
 import {InvitationService} from "../invitation.service";
 import {SchoolDataService} from "../../schools/school-data.service";
 import {AuthenticationService} from "../../user/authentication.service";
-import { of as observableOf} from 'rxjs';
+import {of as observableOf} from 'rxjs';
 
 @Component({
   selector: 'app-invite-request',
@@ -64,32 +64,32 @@ export class InviteRequestComponent implements OnInit {
       name: [
         '',
         [Validators.required,
-          Validators.minLength(1)]
+          Validators.minLength(1), Validators.maxLength(30)]
         // this.serverSideValidateUsername()
       ],
       surname: [
         '',
         [Validators.required,
-          Validators.minLength(1)]
+          Validators.minLength(1), Validators.maxLength(30)]
       ],
       schoolName: [
         '',
         [Validators.required,
-          Validators.minLength(1),
+          Validators.minLength(1), Validators.maxLength(30),
           this.schoolNamePatternValidator()],
         this.serverSideValidateSchoolName()
       ],
       email: [
         '',
         Validators.compose([
-          Validators.required,
+          Validators.required, Validators.minLength(1), Validators.maxLength(60),
           this.emailPatternValidator()]),
         this.serverSideValidateEmail()
       ],
       note: ''
     });
 
-    if(this._authenticationService.isModerator$.getValue()) {
+    if (this._authenticationService.isModerator$.getValue()) {
       this.route.queryParams.subscribe(params => {
         // Defaults to 0 if no query param provided.
         this.requestId = params['requestId'] || -1;
@@ -216,7 +216,7 @@ export class InviteRequestComponent implements OnInit {
         .subscribe(
           val => {
             if (val) {
-              this.router.navigate(['requests']);
+              this.router.navigate([this._authenticationService.isModerator$.getValue() ? 'requests' : '/']);
             }
           },
           (error: HttpErrorResponse) => {
