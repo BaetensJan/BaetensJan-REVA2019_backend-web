@@ -45,7 +45,7 @@ const appRoutes: Routes = [
   {path: 'requests', canActivate: [AuthGuardService], component: RequestsComponent},
   {path: 'ask-question', component: AskQuestionComponent},
   {path: 'forgot-password', canActivate: [AuthGuardService], component: ForgotPasswordComponent},
-  {path: 'change-password', canActivate: [AuthGuardService], component: ChangePasswordComponent},
+  {path: 'wachtwoord-veranderen', canActivate: [AuthGuardService], component: ChangePasswordComponent},
   {
     path: 'wachtwoord-vergeten-confirmation', canActivate: [AuthGuardService],
     component: ForgotPasswordConfirmationComponent

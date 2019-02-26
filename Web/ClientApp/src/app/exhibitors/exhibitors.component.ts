@@ -4,8 +4,7 @@ import {Router} from "@angular/router";
 import {ExhibitorsDataService} from "./exhibitors-data.service";
 import {ExhibitorShareService} from "../exhibitor/exhibitor-share.service";
 import {Exhibitor} from "../models/exhibitor.model";
-import {Group} from "../models/group.model";
-import {AppShareService} from "../AppShareService";
+import {AppShareService} from "../app-share.service";
 
 @Component({
   selector: 'app-exhibitors',

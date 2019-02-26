@@ -1,4 +1,4 @@
-import {AfterViewInit, ChangeDetectorRef, Component, ElementRef, OnInit, ViewChild} from '@angular/core';
+import {AfterViewInit, ChangeDetectorRef, Component, ElementRef, ViewChild} from '@angular/core';
 import {Router} from "@angular/router";
 import {Exhibitor} from "../models/exhibitor.model";
 import {ExhibitorShareService} from "./exhibitor-share.service";
@@ -6,7 +6,7 @@ import {ExhibitorsDataService} from "../exhibitors/exhibitors-data.service";
 import {CategoriesDataService} from "../categories/categories-data.service";
 import {Category} from "../models/category.model";
 import {AuthenticationService} from "../user/authentication.service";
-import {AppShareService} from "../AppShareService";
+import {AppShareService} from "../app-share.service";
 
 
 @Component({

@@ -16,7 +16,7 @@ export class AuthGuardService implements CanActivate {
 
     // user is logged in.
     if (this._authService.isLoggedIn$.getValue()) {
-      let pages = ['/group/groups', "/opdrachten", "/logout", "/group/updateGroup", "/change-password"];
+      let pages = ['/group/groups', "/opdrachten", "/logout", "/group/updateGroup", "/wachtwoord-veranderen"];
 
       if (pages.includes(state.url) || this.isAssignmentDetail(state.url))
         return this.youShallXXXPass(true, state.url);

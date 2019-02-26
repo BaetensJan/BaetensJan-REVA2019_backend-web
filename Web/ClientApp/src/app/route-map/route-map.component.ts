@@ -1,9 +1,10 @@
-import {AfterViewInit, Component, ElementRef, ViewChild, OnInit} from '@angular/core';
+import {AfterViewInit, Component, ElementRef, OnInit, ViewChild} from '@angular/core';
 import {ImageDataService} from "../image-data-service/image-data.service";
-import { Subscription } from 'rxjs/Subscription';
-import { Observable } from 'rxjs/Observable';
+import {Subscription} from 'rxjs/Subscription';
+import {Observable} from 'rxjs/Observable';
 import 'rxjs/add/observable/timer';
-import {AppShareService} from "../AppShareService";
+import {AppShareService} from "../app-share.service";
+
 
 @Component({
   selector: 'app-route-map',

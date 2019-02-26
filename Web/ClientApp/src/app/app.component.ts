@@ -1,6 +1,6 @@
 import {Component} from '@angular/core';
 import {AlertComponent} from "ngx-bootstrap";
-import {AppShareService} from "./AppShareService";
+import {AppShareService} from "./app-share.service";
 
 @Component({
   selector: 'app-root',
@@ -13,9 +13,9 @@ export class AppComponent {
    */
   title = 'app';
 
-   alerts: any[]; // alerts that appear above the page (e.g. when a new group is successfully created).
+  alerts: any[]; // alerts that appear above the page (e.g. when a new group is successfully created).
 
-  constructor(private appShareService: AppShareService){
+  constructor(private appShareService: AppShareService) {
     this.alerts = this.appShareService.alerts;
   }
 

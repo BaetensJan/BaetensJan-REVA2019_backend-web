@@ -5,7 +5,7 @@ import {Observable} from "rxjs/Rx";
 import {PageChangedEvent} from 'ngx-bootstrap/pagination';
 import {AbstractControl, FormBuilder, FormGroup, Validators} from "@angular/forms";
 import {BsModalRef, BsModalService} from "ngx-bootstrap";
-import {AppShareService} from "../AppShareService";
+import {AppShareService} from "../app-share.service";
 import {School} from "../models/school.model";
 import {SchoolDataService} from "../schools/school-data.service";
 import {GroupSharedService} from "./group-shared.service";
@@ -83,7 +83,7 @@ export class GroupsComponent {
    * when the current date is after of equal to the appStartDate -> returns true
    */
   get appStartDateExpired(): boolean {
-      return this._applicationStartDate <= new Date();
+    return this._applicationStartDate <= new Date();
   }
 
   private _filterOnGroupName: boolean = true; // current text in filterOption button

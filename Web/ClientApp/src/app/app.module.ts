@@ -25,7 +25,6 @@ import {CategoriesDataService} from "./categories/categories-data.service";
 import {CategoryShareService} from "./category/category-share.service";
 import {CategoriesComponent} from "./categories/categories.component";
 import {CategoryComponent} from "./category/category.component";
-import {AppShareService} from "./AppShareService";
 import {QuestionsComponent} from './questions/questions.component';
 import {QuestionComponent} from './questions/question/question.component';
 import {QuestionSharedService} from "./questions/question-shared.service";
@@ -41,6 +40,7 @@ import {AssignmentsComponent} from "./assignment/assignments-overview/assignment
 import {AssignmentDetailComponent} from "./assignment/assignment-detail/assignment-detail.component";
 import {AssignmentDataService} from "./assignment/assignment-data.service";
 import {UploadCsvComponent} from "./upload-csv/upload-csv.component";
+import {AppShareService} from "./app-share.service";
 
 @NgModule({
   declarations: [
