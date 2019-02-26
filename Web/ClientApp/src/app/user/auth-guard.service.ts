@@ -5,57 +5,52 @@ import {ActivatedRouteSnapshot, CanActivate, Router, RouterStateSnapshot} from '
 @Injectable()
 export class AuthGuardService implements CanActivate {
 
-  constructor(private authService: AuthenticationService, private router: Router) {
+  constructor(private _authService: AuthenticationService, private router: Router) {
   }
 
   canActivate(route: ActivatedRouteSnapshot, state: RouterStateSnapshot): boolean {
     console.debug(state.url);
-    console.debug(`Admin Required: ${this.isAdminRequired(state.url)}`);
-    console.debug(`Login Required: ${this.isLoggedInPage(state.url)}`);
-    console.debug(`NonLogin Required: ${this.isNonLoggedInPage(state.url)}`);
-    console.debug(`Logged in: ${this.authService.isLoggedIn$.getValue()}`);
-    console.debug(`Is Admin: ${this.authService.isModerator$.getValue()}`);
+    console.debug(`Logged in: ${this._authService.isLoggedIn$.getValue()}`);
+    console.debug(`Is Admin: ${this._authService.isModerator$.getValue()}`);
 
-    //todo beter om eerst rol te bekijken van user (admin, loggedin, notlogged in en vervolgens pas url te checken)
-    if (state.url == "/invite-request") {
-      return !(this.authService.isLoggedIn$.getValue()
-        && this.authService.isModerator$.getValue() == false);
-    }
-    if (this.isAdminRequired(state.url)) {
-      if (this.authService.isLoggedIn$.getValue()) {
-        if (this.authService.isModerator$.getValue()) {
-          return true;
-        } else {
-          //unauthorized => redirect to unauthorized
-          this.router.navigate(['/login']);
-          return false;
+
+    // user is logged in.
+    if (this._authService.isLoggedIn$.getValue()) {
+      let pages = ['/group/groups', "/opdrachten", "/logout", "/group/updateGroup", "/change-password"];
+
+      if (pages.includes(state.url) || this.isAssignmentDetail(state.url))
+        return this.youShallXXXPass(true, state.url);
+      else {
+        // check if user is admin.
+        if (this._authService.isModerator$.getValue()) {
+
+          let adminPages = ["/categorieen", "/categorie", "/exposanten", "/exposant",
+            "/beursplan", "/requests", "/vragen", "/vraag", "/upload-csv"];
+          if (adminPages.includes(state.url) || this.isAssignmentDetail(state.url) || this.isInviteRequest(state.url))
+            return this.youShallXXXPass(true, state.url);
         }
+        return this.youShallXXXPass(false, "/");
       }
-      this.authService.redirectUrl = state.url;
-      this.router.navigate(['/login']);
-      return false;
     }
-    if (this.isLoggedInPage(state.url)) {
-      if (this.authService.isLoggedIn$.getValue()) {
-        return true
-      }
-      this.authService.redirectUrl = state.url;
-      this.router.navigate(['/login']);
-      return false;
+    // user is not logged in.
+    else {
+      let pages = ['/login', "/invite-request", "/register", "/forgot-password", "/wachtwoord-vergeten-confirmation",
+        "/reset-wachtwoord"];
+      if (pages.includes(state.url)) return this.youShallXXXPass(true, state.url);
+      else return this.youShallXXXPass(false, "login");
     }
-    if (this.isNonLoggedInPage(state.url)) {
-      if (this.authService.isLoggedIn$.getValue()) {
-        this.router.navigate(['/home']);
-        return false;
-      }
+  }
+
+  private youShallXXXPass(pass: boolean, url) {
+    if (pass) {
+      this._authService.redirectUrl = url;
       return true;
-    } else
-      this.router.navigate(['/home']); // unauthorized.
+    }
+    this.router.navigate([url]);
     return false;
   }
 
-
-  private isLoggedInPage(url): boolean {
+  private isAssignmentDetail(url): boolean {
     // assignmentsdetail has queryParams (groupId), e.g. /assignmentdetail?groupId=3
     let detailString = "/assignmentdetail?groupId=";
     if (url.startsWith(detailString)) {
@@ -64,19 +59,9 @@ export class AuthGuardService implements CanActivate {
       // check if everything after detailString is a number (groupId)
       if (!isNaN(Number(ret))) return true;
     }
-
-    let pages = ['/group/groups', "/opdrachten", "/logout", "/group/updateGroup", "/wachtwoord-veranderen"];
-    return pages.includes(url);
   }
 
-  private isNonLoggedInPage(url): boolean {
-    //Pages logged in users aren't allowed to access anymore
-    let pages = ['/login', "/invite-request", "/register", "/wachtwoord-vergeten", "/wachtwoord-vergeten-confirmation", "/reset-wachtwoord"];
-    return pages.includes(url);
-
-  }
-
-  private isAdminRequired(url): boolean {
+  private isInviteRequest(url): boolean {
     let detailString = "/invite-request?requestId=";
     if (url.startsWith(detailString)) {
       let ret = url.replace(detailString, '');
@@ -84,9 +69,5 @@ export class AuthGuardService implements CanActivate {
       // check if everything after detailString is a number (requestId)
       if (!isNaN(Number(ret))) return true;
     }
-
-    let adminPages = ["/categorieen", "/categorie", "/exposanten", "/exposant",
-      "/beursplan", "/requests", "/vragen", "/vraag", "/upload-csv"];
-    return adminPages.includes(url);
   }
 }

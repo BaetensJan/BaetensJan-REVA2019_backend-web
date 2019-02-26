@@ -80,32 +80,65 @@
               <span class='glyphicon glyphicon-plus'></span> Aanvragen
             </a>
           </li>
-          <li [routerLinkActive]='["link-active"]'>
-            <a (click)='collapse()' [routerLink]='["wachtwoord-veranderen"]'>
-              <span class='glyphicon glyphicon-user'></span> Wachtwoord Veranderen
-            </a>
-          </li>
         </ng-container>
 
         <div class='clearfix' style="margin-bottom: 1.5em;"></div>
 
-        <li *ngIf='(isLoggedIn | async); else loginlink' [routerLinkActive]='["link-active"]'>
-          <a (click)='collapse()' [routerLink]='["logout"]'>
-            <span class="glyphicon glyphicon-user"></span> Logout
-          </a>
+        <li>
+          <div dropdown>
+            <span id="dropdown-span">
+              <i class="glyphicon glyphicon-user"></i>
+              <a *ngIf='!(isLoggedIn | async)' (click)='collapse()' [routerLinkActive]='["link-active"]'
+                 [routerLink]='["login"]'>
+                login
+              </a>
+            </span>
+            <a dropdownToggle class="dropdown-toggle" aria-controls="dropdown-basic">
+              <span class="caret"></span>
+            </a>
+
+            <ul id="dropdown-basic" *dropdownMenu class="dropdown-menu"
+                role="menu" aria-labelledby="button-basic">
+
+              <!-- start login / logout -->
+              <ng-container *ngIf='(isLoggedIn | async); else notLoggedIn'>
+                <li role="menuitem">
+                  <a class="dropdown-item" (click)='collapse()' [routerLink]='["logout"]'>
+                    Logout
+                  </a>
+                </li>
+                <li role="menuitem">
+                  <a class="dropdown-item" (click)='collapse()' [routerLink]='["change-password"]'>
+                    Wachtwoord wijzigen
+                  </a>
+                </li>
+              </ng-container>
+
+              <ng-template #notLoggedIn>
+                <li role="menuitem">
+                  <a class="dropdown-item" (click)='collapse()' [routerLink]='["forgot-password"]'>
+                    Wachtwoord vergeten
+                  </a>
+                </li>
+                <li role="menuitem">
+                  <a class="dropdown-item" (click)='collapse()' [routerLink]='["login"]'>
+                    Login
+                  </a>
+                </li>
+              </ng-template>
+              <!-- end login / logout -->
+
+            </ul>
+          </div>
         </li>
+
+
         <li *ngIf='(!(isAdmin | async) && (isLoggedIn | async))'>
           <p (click)='collapse()'>
             <span class="glyphicon glyphicon-none"></span>{{user | async}} - {{school | async}}
           </p>
         </li>
-        <ng-template #loginlink>
-          <li [routerLinkActive]='["link-active"]'>
-            <a (click)='collapse()' [routerLink]='["login"]'>
-              <span class="glyphicon glyphicon-user"></span> Login
-            </a>
-          </li>
-        </ng-template>
+
       </ul>
       <footer *ngIf="!(isAdmin | async)">
         <small>Werk gemaakt in het kader van de opleiding toegepaste informatica aan Hogeschool Gent
