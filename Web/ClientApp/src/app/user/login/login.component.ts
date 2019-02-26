@@ -64,12 +64,12 @@ export class LoginComponent implements OnInit {
       .subscribe(
         val => {
           if (val) {
-            if (this.authService.redirectUrl) {
+            /*if (this.authService.redirectUrl) {
               this.router.navigateByUrl(this.authService.redirectUrl);
               this.authService.redirectUrl = undefined;
-            } else {
-              this.router.navigate(['/']);
-            }
+            } else {*/
+              this.router.navigate(['/home']);
+            //}
           } else {
             this.errorMsg = `De gebruikersnaam of het paswoord is verkeerd`;
           }

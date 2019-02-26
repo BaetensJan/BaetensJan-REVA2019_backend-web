@@ -86,14 +86,15 @@
 
         <li>
           <div dropdown>
-            <span id="dropdown-span">
-              <i class="glyphicon glyphicon-user"></i>
-              <a *ngIf='!(isLoggedIn | async)' (click)='collapse()' [routerLinkActive]='["link-active"]'
-                 [routerLink]='["login"]'>
-                login
-              </a>
-            </span>
+            <!--<span id="dropdown-span">-->
+              <!--<i class="glyphicon glyphicon-user"></i>-->
+              <!--<a *ngIf='!(isLoggedIn | async)' (click)='collapse()' [routerLinkActive]='["link-active"]'-->
+                 <!--[routerLink]='["login"]'>-->
+                <!--login-->
+              <!--</a>-->
+            <!--</span>-->
             <a dropdownToggle class="dropdown-toggle" aria-controls="dropdown-basic">
+              <i class="glyphicon glyphicon-user"></i>
               <span class="caret"></span>
             </a>
 
@@ -132,7 +133,6 @@
           </div>
         </li>
 
-
         <li *ngIf='(!(isAdmin | async) && (isLoggedIn | async))'>
           <p (click)='collapse()'>
             <span class="glyphicon glyphicon-none"></span>{{user | async}} - {{school | async}}
@@ -140,6 +140,8 @@
         </li>
 
       </ul>
+      <div class='clearfix' style="margin-bottom: 1.5em;"></div>
+
       <footer *ngIf="!(isAdmin | async)">
         <small>Werk gemaakt in het kader van de opleiding toegepaste informatica aan Hogeschool Gent
           door Jan Baetens, Dennis Deroose en Gilles Willemot. U kan contact met ons opnemen via

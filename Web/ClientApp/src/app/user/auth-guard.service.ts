@@ -35,9 +35,9 @@ export class AuthGuardService implements CanActivate {
     // user is not logged in.
     else {
       let pages = ['/login', "/invite-request", "/register", "/forgot-password", "/wachtwoord-vergeten-confirmation",
-        "/reset-wachtwoord"];
+        "/reset-wachtwoord", '/home', '/'];
       if (pages.includes(state.url)) return this.youShallXXXPass(true, state.url);
-      else return this.youShallXXXPass(false, "login");
+      else return this.youShallXXXPass(false, "/login");
     }
   }
 

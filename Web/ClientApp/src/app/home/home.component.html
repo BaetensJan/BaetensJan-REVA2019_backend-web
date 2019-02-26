@@ -32,7 +32,7 @@
 
 <div class="panel panel-default" style="margin-top: 2em;">
   <div class=" panel-body" style="font-size: 1.2em">
-    <p>Wil je als school ook gebruik maken van de app? Gelieve een aanvraag in te dienen via
+    <p *ngIf='!(isLoggedIn | async)'>Wil je als school ook gebruik maken van de app? Gelieve een aanvraag in te dienen via
       <strong>
         <a [routerLink]='["/invite-request"]'>deze link</a>
       </strong>
