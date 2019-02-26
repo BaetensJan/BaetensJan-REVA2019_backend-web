@@ -1,9 +1,6 @@
 import {Component} from '@angular/core';
-import {Observable, Subscription} from "rxjs";
-import {ExhibitorsDataService} from "../exhibitors/exhibitors-data.service";
-import {ExhibitorShareService} from "../exhibitor/exhibitor-share.service";
-import {Exhibitor} from "../models/exhibitor.model";
-import {forEach} from "@angular/router/src/utils/collection";
+import {Observable} from "rxjs";
+import {AuthenticationService} from "../user/authentication.service";
 
 /**
  * @ignore
@@ -15,4 +12,10 @@ import {forEach} from "@angular/router/src/utils/collection";
 })
 export class HomeComponent {
 
+  constructor(private _authService: AuthenticationService) {
+  }
+
+  get isLoggedIn(): Observable<boolean> {
+    return this._authService.isLoggedIn$;
+  }
 }

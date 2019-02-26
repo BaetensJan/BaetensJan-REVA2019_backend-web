@@ -32,15 +32,25 @@
 
 <div class="panel panel-default" style="margin-top: 2em;">
   <div class=" panel-body" style="font-size: 1.2em">
-    <p *ngIf='!(isLoggedIn | async)'>Wil je als school ook gebruik maken van de app? Gelieve een aanvraag in te dienen via
+    <div *ngIf='!(isLoggedIn | async)'>
+    <p>Wil je als school ook gebruik maken van de app? Gelieve een aanvraag in te dienen via
       <strong>
         <a [routerLink]='["/invite-request"]'>deze link</a>
       </strong>
     </p>
-    <p>Eventuele vragen kan je stellen via
+      <p>
+      Heb je al een account? Dan kan je
+        <strong>
+          <a [routerLink]='["/login"]'>inloggen</a>
+        </strong>
+      </p>
+    </div>
+    <br>
+    <p>Eventuele vragen kan je
       <strong>
-        <a [routerLink]='["/ask-question"]'>deze link</a> <!-- link aan te passen na aanmaak component -->
+        <a [routerLink]='["/ask-question"]'>hier</a> <!-- link aan te passen na aanmaak component -->
       </strong>
+      stellen.
     </p>
   </div>
 </div>
