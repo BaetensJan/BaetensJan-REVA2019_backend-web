@@ -69,21 +69,13 @@ export class InvitationService {
   }
 
   /**
-   * Makes call to the backend and returns a group
+   * Makes call to the backend and returns a TeacherRequest
    *
    * @param id
    */
-  getTeacherRequest(id: number): Observable<any> {
-    console.log("in request method");
-    let obs = this.http.get(`${this._url}/teacherRequest/teacherRequest/${id}`);
-    obs.subscribe((res: any) => {
-      console.log(res);
-    });
-
-    return obs;
-
-    // return this.http.get(`${this._url}/teacherRequest/teacherRequest/${id}`)
-    //   .pipe(map(TeacherRequest.fromJSON));
+  getTeacherRequest(id: number): Observable<TeacherRequest> {
+    return this.http.get(`${this._url}/teacherRequest/teacherRequest/${id}`)
+      .pipe(map(TeacherRequest.fromJSON));
   }
 
   /**

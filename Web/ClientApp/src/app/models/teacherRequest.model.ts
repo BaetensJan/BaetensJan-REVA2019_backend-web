@@ -125,7 +125,6 @@ export class TeacherRequest {
    * @param json
    */
   static fromJSON(json: any): TeacherRequest {
-    console.log(json);
     const rec = new TeacherRequest(
       json.name,
       json.surname,
