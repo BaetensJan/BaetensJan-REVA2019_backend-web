@@ -14,6 +14,11 @@ import {of as observableOf} from 'rxjs';
   templateUrl: './invite-request.component.html',
   styleUrls: ['./invite-request.component.css']
 })
+
+/**
+ * This component is used by a User to send a TeacherRequest to join the platform,
+ * or by an admin in order to edit an existing TeacherRequest.
+ */
 export class InviteRequestComponent implements OnInit {
 
   /**

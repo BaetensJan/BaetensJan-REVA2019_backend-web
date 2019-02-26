@@ -59,7 +59,8 @@ export class ChangePasswordComponent implements OnInit {
   ngOnInit() {
     this.passwordControl = this.fb.group(
       {
-        currentPassword: ['', [Validators.required, passwordValidator(8)]],
+        currentPassword: ['', [Validators.required, passwordValidator(6)]], // keep length at 6 (backend
+        // creates a password of length equal to 6).
         password: ['', [Validators.required, passwordValidator(8)]],
         confirmPassword: ['', Validators.required]
       },

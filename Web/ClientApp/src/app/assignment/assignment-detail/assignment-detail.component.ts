@@ -30,7 +30,7 @@ export class AssignmentDetailComponent implements OnInit {
         // else, go to home -> this.router.navigate(["/assignmentdetail"], {queryParams: {groupId: group.id}});
         this._groupsDataService.getGroup(this.groupId).subscribe(value => {
           if (!value) this.router.navigate(["/"]);
-          this.group = value;
+          else this.group = value;
         });
       });
   }
