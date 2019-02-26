@@ -5,14 +5,17 @@ using System.IO;
 using System.Linq;
 using System.Security.Claims;
 using System.Text;
+using System.Text.Encodings.Web;
 using System.Threading.Tasks;
 using ApplicationCore.Entities;
 using ApplicationCore.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
+using Newtonsoft.Json;
 using Web.DTOs;
 
 namespace Web.Controllers
@@ -181,7 +184,8 @@ namespace Web.Controllers
 
             var claims = new List<Claim>()
             {
-                new Claim(JwtRegisteredClaimNames.Sub, user.Email),
+                new Claim(JwtRegisteredClaimNames.Sub,
+                    user.Id), //Todo: In case something doesn't work anymore with User, this has been changed from user.Email
                 new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
                 new Claim(ClaimTypes.NameIdentifier, user.Id),
                 new Claim("username", user.UserName),
@@ -397,6 +401,110 @@ namespace Web.Controllers
                             {model.Message}
                         </p>", new[] {model.Email});
             return Ok(true);
+        }
+
+        [HttpPost("[action]")]
+        public async Task<IActionResult> ForgotPassword([FromBody] ResetPasswordDTO model)
+        {
+            var user = await _userManager.FindByEmailAsync(model.Email);
+            if (user != null)
+            {
+                var code = await _userManager.GeneratePasswordResetTokenAsync(user);
+                await _emailSender.SendMailAsync(_configuration["Email:Smtp:From"],
+                    $"Reva App Wachtwoord Reset",
+                    $@"
+                            <p>Beste,<p>
+                            <p>Er werd zojuist een aanvraag gedaan om je wachtwoord te veranderen.</p>
+                            <p>Als je deze aanvraag gemaakt hebt, <a href='http://app.reva.be/reset-wachtwoord?code={HtmlEncoder.Default.Encode(code)}&email={model.Email}'>Klik hier om je wachtwoord te veranderen</a></p>
+                            
+                            <p>Als je deze aanvraag niet gemaakt hebt, kan je deze email negeren.</p>
+                    ", new[] {model.Email});
+                Console.Error.WriteLine(code);
+            }
+
+            return Ok();
+        }
+
+        [Authorize]
+        [HttpPost("[action]")]
+        public async Task<IActionResult> ChangePassword([FromBody] ChangePasswordDTO model)
+        {
+            var errors = new List<string>();
+            if (!ModelState.IsValid)
+            {
+                return BadRequest();
+            }
+
+            var user = await _userManager.GetUserAsync(User);
+            var result = await _userManager.ChangePasswordAsync(user, model.CurrentPassword, model.NewPassword);
+            if (result.Succeeded)
+            {
+                return Ok();
+            }
+
+            foreach (var error in result.Errors)
+            {
+                errors.Add(error.Description);
+            }
+
+            return BadRequest(errors);
+        }
+
+        [HttpPost("[action]")]
+        public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordDTO model)
+        {
+            var errors = new List<string>();
+            if (!ModelState.IsValid)
+            {
+                return BadRequest();
+            }
+
+            var user = await _userManager.FindByEmailAsync(model.Email);
+            if (user == null)
+            {
+                // Don't reveal that the user does not exist
+                return Ok();
+            }
+
+            Console.Error.WriteLine(model.Code);
+
+            var result = await _userManager.ResetPasswordAsync(user, model.Code, model.Password);
+            if (result.Succeeded)
+            {
+                return Ok();
+            }
+
+            foreach (var error in result.Errors)
+            {
+                errors.Add(error.Description);
+            }
+
+            return BadRequest(errors);
+        }
+
+        [HttpPost("[action]")]
+        public async Task<IActionResult> DownloadPersonalData()
+        {
+            var user = await _userManager.GetUserAsync(HttpContext.User);
+            if (user == null)
+            {
+                return NotFound($"Unable to load user with ID '{_userManager.GetUserId(User)}'.");
+            }
+
+            //_logger.LogInformation("User with ID '{UserId}' asked for their personal data.", _userManager.GetUserId(User));
+
+            // Only include personal data for download
+            var personalData = new Dictionary<string, string>();
+            var personalDataProps = typeof(ApplicationUser).GetProperties().Where(
+                prop => Attribute.IsDefined(prop, typeof(PersonalDataAttribute)));
+            foreach (var p in personalDataProps)
+            {
+                personalData.Add(p.Name, p.GetValue(user)?.ToString() ?? "null");
+            }
+
+            Response.Headers.Add("Content-Disposition", "attachment; filename=PersonalData.json");
+            return new FileContentResult(Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(personalData)),
+                "text/json");
         }
     }
 }

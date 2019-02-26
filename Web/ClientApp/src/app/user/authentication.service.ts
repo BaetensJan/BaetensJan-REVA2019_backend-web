@@ -8,6 +8,12 @@ import {Router} from '@angular/router';
 @Injectable()
 export class AuthenticationService {
   /**
+   * Parser for jwt token when authenticating user
+   *
+   * @param token
+   */
+  public static function
+  /**
    * @ignore
    */
   public redirectUrl: string;
@@ -56,7 +62,6 @@ export class AuthenticationService {
    * @ignore
    */
   private _user$: BehaviorSubject<string>;
-  private _school$: BehaviorSubject<string>;
 
   /**
    * Getter for user
@@ -64,6 +69,8 @@ export class AuthenticationService {
   get user$(): BehaviorSubject<string> {
     return this._user$;
   }
+
+  private _school$: BehaviorSubject<string>;
 
   get school$(): BehaviorSubject<string> {
     return this._school$;
@@ -77,13 +84,25 @@ export class AuthenticationService {
     return new BehaviorSubject<boolean>(this._user$.getValue() != null);
   }
 
-
   /**
    * Getter for token
    */
   get token(): string {
     const localToken = localStorage.getItem(this._tokenKey);
     return !!localToken ? localToken : '';
+  }
+
+  static parseJwt(token) {
+    if (!token) {
+      return null;
+    }
+    try {
+      const base64Url = token.split('.')[1];
+      const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+      return JSON.parse(window.atob(base64));
+    } catch (err) {
+      return null;
+    }
   }
 
   /**
@@ -144,6 +163,22 @@ export class AuthenticationService {
     }
   }
 
+  forgotPassword(email: string): Observable<boolean> {
+    return this.http.post(`${this._url}/ForgotPassword`, {email}).pipe(
+      map((res: any) => {
+        return true;
+      })
+    );
+  }
+
+  resetPassword(email: string, code: string, password: string) {
+    return this.http.post(`${this._url}/ResetPassword`, {code, email, password}).pipe(
+      map((res: any) => {
+        return true;
+      })
+    );
+  }
+
   /**
    * Checks username availability using backend
    *
@@ -173,6 +208,14 @@ export class AuthenticationService {
     );
   }
 
+  changePassword(password: string): Observable<boolean> {
+    return this.http.post(`${this._url}/ChangePassword`, {password}).pipe(
+      map((res: any) => {
+        return true;
+      })
+    );
+  }
+
   private setTokenAndInitiateAttributes(token, username: string, schoolName: string) {
     localStorage.setItem(this._tokenKey, token);
     this._user$.next(username);
@@ -185,23 +228,5 @@ export class AuthenticationService {
 
     // check if user is a group. Groups have no access to web.
     return !(parsedToken && parsedToken.group);
-  }
-
-  /**
-   * Parser for jwt token when authenticating user
-   *
-   * @param token
-   */
-  static parseJwt(token) {
-    if (!token) {
-      return null;
-    }
-    try {
-      const base64Url = token.split('.')[1];
-      const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
-      return JSON.parse(window.atob(base64));
-    } catch (err) {
-      return null;
-    }
   }
 }
