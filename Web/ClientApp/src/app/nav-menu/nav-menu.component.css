@@ -18,21 +18,9 @@
   background-color: #fb8700 !important;
 }
 
-/*#dropdown-span {*/
-  /*margin-left: 1em;*/
-  /*font-size: 1.1em;*/
-  /*color: white;*/
-/*}*/
-
-/*#dropdown-span.link-active a,*/
-/*#dropdown-span a:hover*/
-/*{*/
-  /*color: #fb8700 !important;*/
-/*}*/
-
-/*#dropdown-span a {*/
-  /*text-decoration: none !important;*/
-/*}*/
+.dropdown-toggle {
+  text-decoration: none !important;
+}
 
 
 footer {

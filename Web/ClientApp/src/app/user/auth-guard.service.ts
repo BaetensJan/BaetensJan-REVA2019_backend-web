@@ -25,7 +25,7 @@ export class AuthGuardService implements CanActivate {
         if (this._authService.isModerator$.getValue()) {
 
           let adminPages = ["/categorieen", "/categorie", "/exposanten", "/exposant",
-            "/beursplan", "/requests", "/vragen", "/vraag", "/upload-csv"];
+            "/beursplan", "/requests", "/vragen", "/vraag", "/upload-csv", "/invite-request"];
           if (adminPages.includes(state.url) || this.isAssignmentDetail(state.url) || this.isInviteRequest(state.url))
             return this.youShallXXXPass(true, state.url);
         }
