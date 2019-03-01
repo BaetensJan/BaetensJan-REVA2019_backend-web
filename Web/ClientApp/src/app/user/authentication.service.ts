@@ -208,8 +208,8 @@ export class AuthenticationService {
     );
   }
 
-  changePassword(password: string): Observable<boolean> {
-    return this.http.post(`${this._url}/ChangePassword`, {password}).pipe(
+  changePassword(password: string, newPassword: string): Observable<boolean> {
+    return this.http.post(`${this._url}/ChangePassword`, {CurrentPassword: password, NewPassword: newPassword}).pipe(
       map((res: any) => {
         return true;
       })
