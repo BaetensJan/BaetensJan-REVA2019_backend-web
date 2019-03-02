@@ -5,8 +5,9 @@
   <div class="panel-body" style="font-size: 1.2em;">
     <p>Dit is het web platform die aan leerkrachten secundair onderwijs ondersteuning biedt voor de <b>android app</b>.
     </p>
-    <p><b>De android app</b> (die te vinden is in de playstore onder de naam '<b>reva-app-2019</b>') zorgt voor
-      een degelijke begeleiding van groepjes op de Reva expositie. <br>
+    <p><b>De android app</b>, die te vinden is in de playstore onder de naam
+      <b><a href="https://play.google.com/store/apps/details?id=be.reva.app" target="_blank">reva app 2019</a></b>,
+      zorgt voor een degelijke begeleiding van groepjes op de Reva expositie. <br>
       Een groepje krijgt door middel van een rondleiding de mogelijkheid om categorieën af te gaan,
       waarvoor vervolgens een exposant wordt toegewezen met telkens hieraan verbonden een opdracht.
     <p>Klik voor meer info omtrent de app op
@@ -33,13 +34,13 @@
 <div class="panel panel-default" style="margin-top: 2em;">
   <div class=" panel-body" style="font-size: 1.2em">
     <div *ngIf='!(isLoggedIn | async)'>
-    <p>Wil je als school ook gebruik maken van de app? Gelieve een aanvraag in te dienen via
-      <strong>
-        <a [routerLink]='["/invite-request"]'>deze link</a>
-      </strong>
-    </p>
+      <p>Wil je als school ook gebruik maken van de app? Gelieve een aanvraag in te dienen via
+        <strong>
+          <a [routerLink]='["/invite-request"]'>deze link</a>
+        </strong>
+      </p>
       <p>
-      Heb je al een account? Dan kan je
+        Heb je al een account? Dan kan je
         <strong>
           <a [routerLink]='["/login"]'>inloggen</a>
         </strong>

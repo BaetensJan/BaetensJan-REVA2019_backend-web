@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -52,35 +53,62 @@ namespace ApplicationCore.Services
                 startY = start.Y;
             }
 
+            var maxDistance = 0.0;
+            // contains the distances per Exhibitor to the current Exhibitor.
+            var distances = new List<double>();
+            var maxVisitorsAtExhibitor = 0;
+            var maxTotalVisitors = 0;
 
-            var nextExhibitor = potentialExhibitors[0];
-            potentialExhibitors.RemoveAt(0);
-            var lowestWeight = GetWeight(nextExhibitor, startX, startY);
-
-            potentialExhibitors.ForEach(e =>
+            potentialExhibitors.ForEach(exh =>
             {
-                var weight = GetWeight(e, startX, startY);
+                // Distance compared to current exhibitors' position.
+                var distance = Math.Abs(startX - exh.X) + Math.Abs(startY - exh.Y);
 
-                if (weight < lowestWeight)
-                {
-                    lowestWeight = weight;
-                    nextExhibitor = e;
-                }
+                distances.Add(distance);
+
+                if (distance > maxDistance) maxDistance = distance;
+
+                if (exh.GroupsAtExhibitor > maxVisitorsAtExhibitor) maxVisitorsAtExhibitor = exh.GroupsAtExhibitor;
+
+                if (exh.TotalNumberOfVisits > maxTotalVisitors) maxTotalVisitors = exh.TotalNumberOfVisits;
             });
+           
+            var nextExhibitor = potentialExhibitors[0];
+            var highestWeight = GetWeight(nextExhibitor,distances[0], maxDistance, maxVisitorsAtExhibitor, maxTotalVisitors);
+
+            for (var i = 1; i < potentialExhibitors.Count; i++)
+            {
+                var exhibitor = potentialExhibitors[i];
+                var weight = GetWeight(exhibitor, distances[i], maxDistance, maxVisitorsAtExhibitor, maxTotalVisitors);
+
+                if (weight < highestWeight)
+                {
+                    nextExhibitor = exhibitor;
+                    highestWeight = weight;
+                }
+            }
+
             return nextExhibitor;
         }
+
 
         /**
          * value that reflects the weight, holding in account the distance and number of groups standing
          * at the exhibitor, as measure of potential.
          */
-        private double GetWeight(Exhibitor exhibitor, double startX, double startY)
+        private double GetWeight(Exhibitor exhibitor, double distance, double maxDistance, int maxVisitorsAtExhibitor,
+            int maxTotalVisitors)
         {
-            // Distance compared to current exhibitors' position.
-            var distance = Math.Abs(startX - exhibitor.X) + Math.Abs(startY - exhibitor.Y);
-            // value that reflects the weight, holding in account the distance and number of groups standing
-            // at the exhibitor, as measure of potential.
-            var weight = (int) (distance + Math.Pow(distance, exhibitor.GroupsAtExhibitor));
+            // every weight is a number between 0 and 1.
+            var distanceWeight = distance / maxDistance;
+            var visitorsAtExhibitorWeight = exhibitor.GroupsAtExhibitor / maxVisitorsAtExhibitor;
+            var totalVisitorsWeight = exhibitor.TotalNumberOfVisits / maxTotalVisitors;
+
+            // We multiply each weight-attribute with a vector that represents its procentual (total is 100) rate of
+            // importance.
+            var weight = distanceWeight * 0.25 + visitorsAtExhibitorWeight * 0.5 + totalVisitorsWeight * 0.25;
+            
+            // the weight of the Exhibitor is a number between 0 and 1.
             return weight;
         }
 
