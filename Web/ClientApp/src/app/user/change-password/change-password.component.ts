@@ -69,7 +69,7 @@ export class ChangePasswordComponent implements OnInit {
   }
 
   onSubmit() {
-    this._authenticationService.changePassword(this.passwordControl.value.password).subscribe();
+    this._authenticationService.changePassword(this.passwordControl.value.currentPassword, this.passwordControl.value.password).subscribe();
     this.router.navigate(['/wachtwoord-vergeten-confirmation']);
   }
 
