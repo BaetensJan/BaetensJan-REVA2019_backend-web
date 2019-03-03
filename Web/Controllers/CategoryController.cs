@@ -53,15 +53,15 @@ namespace Web.Controllers
          * 
          */
         [HttpGet("[action]/{exhibitorId}")]
-        public async Task<IEnumerable<Category>> GetUnpickedCategories(int exhibitorId)
+        public async Task<IActionResult> GetUnpickedCategories(int exhibitorId)
         {
             var group = await _groupRepository.GetById(Convert.ToInt32(User.Claims.ElementAt(5).Value));
             var assignments = group.Assignments;
             
             // Group is doing an extra round if they have submitted more than the amount of questions to be answered
             // in a normal tour.
-            var extraRound = assignments.Count > _configuration.GetValue<int>("AmountOfQuestions");
-            return await _categoryManager.GetUnpickedCategories(exhibitorId, assignments, extraRound);
+            var extraRound = assignments.Count >= _configuration.GetValue<int>("AmountOfQuestions");
+            return Json(await _categoryManager.GetUnpickedCategories(exhibitorId, assignments, extraRound));
         }
 
         /**

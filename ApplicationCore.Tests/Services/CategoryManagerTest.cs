@@ -206,8 +206,7 @@ namespace ApplicationCore.Tests.Services
         [Fact]
         public void GetUnpickedCategoriesNormalTourTest()
         {
-            var categories = new CategoryManager(_categoryRepo.Object, _exhibitorRepo.Object, _questionRepo.Object)
-                .GetUnpickedCategoriesNormalTour(_assignments, _categories);
+            var categories = CategoryManager.GetUnpickedCategoriesNormalTour(_assignments, _categories);
 
             var id = 8;
             // _assignments contains question with id 1 -> 7
@@ -232,8 +231,7 @@ namespace ApplicationCore.Tests.Services
                 }
             });
 
-            var categories = new CategoryManager(_categoryRepo.Object, _exhibitorRepo.Object, _questionRepo.Object)
-                .GetUnpickedCategoriesExtraRound(_assignments, _categories, _questions).ToList();
+            var categories = CategoryManager.GetUnpickedCategoriesExtraRound(_assignments, _categories, _questions).ToList();
 
             // Category with id 2 has 2 questions: one that is already answered/picked (question2) by the Group
             // and one unanswered/unpicked (question10, with Category 2)

@@ -46,8 +46,8 @@ namespace Infrastructure.Repositories
         {
             // Abstractie: zorgt ervoor dat enkel de nodige data opgehaald wordt (geen recursieve loop).
             var categories =
-                (await _categories.Include(c => c.Exhibitors).ThenInclude(ce => ce.Exhibitor).ToListAsync()).Select(
-                    MapCategory);
+                (await _categories.Include(c => c.Exhibitors).ThenInclude(ce => ce.Exhibitor)
+                    .ToListAsync()).Select(c => c.MapCategory());
             return categories;
         }
 
@@ -68,38 +68,7 @@ namespace Infrastructure.Repositories
             var cat = _categories.SingleOrDefaultAsync(c => c.Name == categoryName);
             return cat;
         }
-
-        private Category MapCategory(Category category)
-        {
-//            var categoryExhibitors = category.Exhibitors;
-//            categoryExhibitors?.ForEach(ce =>
-//            {
-//                ce.Exhibitor.Categories = null;
-//                ce.Category.Exhibitors = null;
-//            });
-            var cat = new Category
-            {
-                Id = category.Id,
-                Name = category.Name,
-                Exhibitors = category.Exhibitors.Select(ce => new CategoryExhibitor
-                {
-                    ExhibitorId = ce.ExhibitorId,
-                    Exhibitor = new Exhibitor
-                    {
-                        Id = ce.Exhibitor.Id,
-                        Name = ce.Exhibitor.Name,
-                        X = ce.Exhibitor.X,
-                        Y = ce.Exhibitor.Y,
-                        GroupsAtExhibitor = ce.Exhibitor.GroupsAtExhibitor,
-                        ExhibitorNumber = ce.Exhibitor.ExhibitorNumber
-                    }
-                }).ToList(),
-                Photo = category.Photo,
-                Description = category.Description
-            };
-            return cat;
-        }
-
+       
         public Task Add(Category category)
         {
             return _categories.AddAsync(category);

@@ -30,7 +30,6 @@ namespace ApplicationCore.Services
                 return GetUnpickedCategoriesNormalTour(assignments, await _categoryRepo.All());
             }
 
-
             // Group is doing an Extra Round
             IEnumerable<Category> categories;
             var questions = await _questionRepo.GetAll();
@@ -44,7 +43,10 @@ namespace ApplicationCore.Services
             {
                 var exhibitor = await _exhibitorRepo.GetById(exhibitorId);
                 if (exhibitor == null) return null;
-                categories = exhibitor.Categories.Select(categoryExhibitor => categoryExhibitor.Category);
+                
+                // todo, MapCategory() can be removed if recursive problem is fixed.
+                categories = exhibitor.Categories.Select(categoryExhibitor => categoryExhibitor.Category.MapCategory());
+                    
                 // todo, category should know its related questions in db (to not get all questions every time).
                 questions = questions.Where(q => q.CategoryExhibitor.ExhibitorId == exhibitorId).ToList();
             }
@@ -55,7 +57,7 @@ namespace ApplicationCore.Services
         /**
          * Returns a list of categories that were not yet picked by the Group (check via assignments).
          */
-        public IEnumerable<Category> GetUnpickedCategoriesNormalTour(IEnumerable<Assignment> assignments,
+        public static IEnumerable<Category> GetUnpickedCategoriesNormalTour(IEnumerable<Assignment> assignments,
             IEnumerable<Category> categories)
         {
             var cats = new List<Category>(categories);
@@ -76,7 +78,7 @@ namespace ApplicationCore.Services
          * Returns a list of categories of which not all questions related to that Category are answered by a
          * Group (check via assignments) yet.
          */
-        public IEnumerable<Category> GetUnpickedCategoriesExtraRound(IEnumerable<Assignment> assignments,
+        public static IEnumerable<Category> GetUnpickedCategoriesExtraRound(IEnumerable<Assignment> assignments,
             IEnumerable<Category> categories, IEnumerable<Question> questions)
         {
             var unpickedCategories = new List<Category>();
