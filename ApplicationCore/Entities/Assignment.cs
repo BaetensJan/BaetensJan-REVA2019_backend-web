@@ -15,7 +15,7 @@ namespace ApplicationCore.Entities
         public DateTime SubmissionDate { get; set; }
 
         /**
-         * Returns true if the Assignment is about a in the app, by the Group created, Exhibitor. 
+         * Returns true if the Assignment is about a, by the Group in the app created, Exhibitor. 
          */
         public bool WithCreatedExhibitor(int createdExhibitorQuestionId)
         {

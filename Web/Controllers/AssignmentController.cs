@@ -211,7 +211,10 @@ namespace Web.Controllers
                 var answer = "";
 
                 // Group created Exhibitor in Extra Round
-                if (assignment.WithCreatedExhibitor(_configuration.GetValue<int>("CreatedExhibitorQuestionId")))
+                var createdExhibitor =
+                    assignment.WithCreatedExhibitor(_configuration.GetValue<int>("CreatedExhibitorQuestionId"));
+                
+                if (createdExhibitor)
                 {
                     answer = $"{assignment.Answer}. Antwoord groep: {model.Answer}";
                 }
@@ -234,7 +237,8 @@ namespace Web.Controllers
                 
                 // make backup of assignment
                 var group = await GetGroup();
-                await _assignmentBackupRepository.Add(assignment, User.ToString(), group.Name);
+                await _assignmentBackupRepository.Add(assignment, User.ToString(), group.Name,
+                    createdExhibitor);
                 
 //                if (result.Succeeded)
                 //TODO: temporary, recursive loop anders:
