@@ -7,9 +7,9 @@ using System.Text;
 using System.Threading.Tasks;
 using ApplicationCore.Entities;
 using ApplicationCore.Interfaces;
+using ApplicationCore.Services;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 using Web.DTOs;
@@ -24,6 +24,7 @@ namespace Web.Controllers
         private readonly ISchoolRepository _schoolRepository;
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly IAuthenticationManager _authenticationManager;
+        private readonly GroupManager _groupManager;
         private readonly IConfiguration _configuration;
 
         public GroupController(IGroupRepository repository, UserManager<ApplicationUser> userManager,
@@ -31,6 +32,7 @@ namespace Web.Controllers
             IConfiguration configuration)
         {
             _userManager = userManager;
+            _groupManager = new GroupManager(configuration);
             _groupRepository = repository;
             _authenticationManager = authenticationManager;
             _schoolRepository = schoolRepository;
@@ -50,48 +52,8 @@ namespace Web.Controllers
             var groupId = User.Claims.ElementAt(5).Value;
             var group = await _groupRepository.GetById(Convert.ToInt32(groupId));
             if (group == null) return Ok(new {Message = "Group not found or groupId not in token."});
-            if (group.Assignments == null) group.Assignments = new List<Assignment>();
-
-            var previousExhibitorXCoordinate = 0.0;
-            var previousExhibitorYCoordinate = 0.0;
-            var numberOfAssignments = group.Assignments.Count;
-
-            if (numberOfAssignments > 1)
-            {
-                group.Assignments.Sort((ass1, ass2) => ass1.CreationDate.CompareTo(ass2.CreationDate));
-
-                previousExhibitorXCoordinate =
-                    group.Assignments[numberOfAssignments - 2].Question.CategoryExhibitor.Exhibitor.X;
-                previousExhibitorYCoordinate =
-                    group.Assignments[numberOfAssignments - 2].Question.CategoryExhibitor.Exhibitor.Y;
-            }
-
-            var currentAssignment = group.Assignments.LastOrDefault();
-            var isCreatedExhibitor = false;
-            var numberOfSubmittedAssignments = numberOfAssignments;
-
-            if (currentAssignment != null && !currentAssignment.Submitted)
-            {
-                numberOfSubmittedAssignments = numberOfAssignments - 1;
-                isCreatedExhibitor =
-                    currentAssignment.WithCreatedExhibitor(
-                        _configuration.GetValue<int>("CreatedExhibitorQuestionId"));
-            }
-
-            var hasNoAssignments = numberOfAssignments == 0;
-
-            return Ok(new
-            {
-                startDate = _configuration.GetValue<DateTime>("StartDate"), // <= DateTime.Now,
-                hasNoAssignments, // we need this attribute, because numberOfAssignments != numberOfSubmittedAssignments
-                // (and the app only knows the latter) 
-                numberOfSubmittedAssignments,
-                maxNumberOfAssignments = _configuration.GetValue<int>("AmountOfQuestions"),
-                currentAssignment, // last assignment
-                isCreatedExhibitor,
-                previousExhibitorXCoordinate,
-                previousExhibitorYCoordinate
-            });
+            var groupInfo = _groupManager.GetGroupInfo(group);
+            return groupInfo;
         }
 
         /**

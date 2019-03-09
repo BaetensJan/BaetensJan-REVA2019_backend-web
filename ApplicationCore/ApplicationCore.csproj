@@ -14,6 +14,9 @@
     </ItemGroup>
 
     <ItemGroup>
+        <Reference Include="Microsoft.AspNetCore.Mvc.Formatters.Json, Version=2.2.0.0, Culture=neutral, PublicKeyToken=adb9793829ddae60">
+          <HintPath>..\..\..\.nuget\packages\microsoft.aspnetcore.mvc.formatters.json\2.2.0\lib\netstandard2.0\Microsoft.AspNetCore.Mvc.Formatters.Json.dll</HintPath>
+        </Reference>
         <Reference Include="Microsoft.IdentityModel.Tokens, Version=5.2.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35">
             <HintPath>..\..\..\..\.nuget\packages\microsoft.identitymodel.tokens\5.2.0\lib\netstandard1.4\Microsoft.IdentityModel.Tokens.dll</HintPath>
         </Reference>

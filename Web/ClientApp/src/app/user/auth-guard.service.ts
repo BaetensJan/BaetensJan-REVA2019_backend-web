@@ -16,26 +16,52 @@ export class AuthGuardService implements CanActivate {
 
     // user is logged in.
     if (this._authService.isLoggedIn$.getValue()) {
-      let pages = ['/group/groups', "/opdrachten", "/logout", "/group/updateGroup", "/wachtwoord-veranderen"];
 
-      if (pages.includes(state.url) || this.isAssignmentDetail(state.url))
+      let pages =
+        [
+          '/group/groups', "/group/updateGroup",
+          "/wachtwoord-veranderen", "/opdrachten",
+          "/logout"
+        ];
+
+      if (pages.includes(state.url)
+        || AuthGuardService.isAssignmentDetail(state.url)) {
         return this.youShallXXXPass(true, state.url);
-      else {
+      } else {
+
         // check if user is admin.
         if (this._authService.isModerator$.getValue()) {
 
-          let adminPages = ["/categorieen", "/categorie", "/exposanten", "/exposant",
-            "/beursplan", "/requests", "/vragen", "/vraag", "/upload-csv", "/invite-request"];
-          if (adminPages.includes(state.url) || this.isAssignmentDetail(state.url) || this.isInviteRequest(state.url))
+          let adminPages =
+            [
+              "/categorieen", "/categorie",
+              "/exposanten", "/exposant",
+              "/beursplan", "/vragen", "/vraag", "/upload-csv",
+              "/requests", "/invite-request", "/accept-request"
+            ];
+
+          if (adminPages.includes(state.url)
+            || AuthGuardService.isAssignmentDetail(state.url)
+            || AuthGuardService.isInviteRequest(state.url)
+            || AuthGuardService.isAcceptRequest(state.url)) {
             return this.youShallXXXPass(true, state.url);
+          }
         }
+
         return this.youShallXXXPass(false, "/");
       }
     }
+
     // user is not logged in.
     else {
-      let pages = ['/login', "/invite-request", "/register", "/forgot-password", "/wachtwoord-vergeten-confirmation",
-        "/reset-wachtwoord", '/home', '/'];
+
+      let pages =
+        ['/login',
+          "/forgot-password", "/wachtwoord-vergeten-confirmation", "/reset-wachtwoord",
+          "/invite-request",
+          '/home', '/'
+        ];
+
       if (pages.includes(state.url)) return this.youShallXXXPass(true, state.url);
       else return this.youShallXXXPass(false, "/login");
     }
@@ -50,8 +76,13 @@ export class AuthGuardService implements CanActivate {
     return false;
   }
 
-  private isAssignmentDetail(url): boolean {
-    // assignmentsdetail has queryParams (groupId), e.g. /assignmentdetail?groupId=3
+  /**
+   * Method used to check if going to assignmentdetail AND has queryParams (groupId),
+   * e.g. /assignmentdetail?groupId=3
+   *
+   * @param url
+   */
+  private static isAssignmentDetail(url): boolean {
     let detailString = "/assignmentdetail?groupId=";
     if (url.startsWith(detailString)) {
       let ret = url.replace(detailString, '');
@@ -61,7 +92,17 @@ export class AuthGuardService implements CanActivate {
     }
   }
 
-  private isInviteRequest(url): boolean {
+  private static isAcceptRequest(url): boolean {
+    let detailString = "/accept-request?requestId=";
+    if (url.startsWith(detailString)) {
+      let ret = url.replace(detailString, '');
+
+      // check if everything after detailString is a number (requestId)
+      if (!isNaN(Number(ret))) return true;
+    }
+  }
+
+  private static isInviteRequest(url): boolean {
     let detailString = "/invite-request?requestId=";
     if (url.startsWith(detailString)) {
       let ret = url.replace(detailString, '');

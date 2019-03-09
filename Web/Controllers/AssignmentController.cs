@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using ApplicationCore.Entities;
 using ApplicationCore.Interfaces;
 using ApplicationCore.Services;
+using Infrastructure.Repositories;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore.Internal;
@@ -20,6 +21,7 @@ namespace Web.Controllers
     public class AssignmentController : Controller
     {
         private readonly IAssignmentRepository _assignmentRepository;
+        private readonly IAssignmentBackupRepository _assignmentBackupRepository;
         private readonly IExhibitorRepository _exhibitorRepository;
         private readonly IGroupRepository _groupRepository;
         private readonly IQuestionRepository _questionRepository;
@@ -32,6 +34,7 @@ namespace Web.Controllers
 
         public AssignmentController(IConfiguration configuration,
             IAssignmentRepository assignmentRepository,
+            IAssignmentBackupRepository assignmentBackupRepository,
             IExhibitorRepository exhibitorRepository,
             IGroupRepository groupRepository,
             ICategoryRepository categoryRepository,
@@ -41,6 +44,7 @@ namespace Web.Controllers
             _configuration = configuration;
             _groupRepository = groupRepository;
             _assignmentRepository = assignmentRepository;
+            _assignmentBackupRepository = assignmentBackupRepository;
             _exhibitorRepository = exhibitorRepository;
             _exhibitorManager =
                 new ExhibitorManager(exhibitorRepository);
@@ -227,7 +231,11 @@ namespace Web.Controllers
                 assignment.SubmissionDate = DateTime.Now;
 
                 await _assignmentRepository.SaveChanges();
-
+                
+                // make backup of assignment
+                var group = await GetGroup();
+                await _assignmentBackupRepository.Add(assignment, User.ToString(), group.Name);
+                
 //                if (result.Succeeded)
                 //TODO: temporary, recursive loop anders:
                 assignment = await _assignmentRepository.GetByIdLight(assignment.Id);

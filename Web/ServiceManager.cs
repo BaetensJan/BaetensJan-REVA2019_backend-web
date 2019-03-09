@@ -101,6 +101,7 @@ namespace Web
             _services.AddScoped<IGroupRepository, GroupRepository>();
             _services.AddScoped<IExhibitorRepository, ExhibitorRepository>();
             _services.AddScoped<IAssignmentRepository, AssignmentRepository>();
+            _services.AddScoped<IAssignmentBackupRepository, AssignmentBackupRepository>();
             _services.AddScoped<IGroupRepository, GroupRepository>();
             _services.AddScoped<ICategoryExhibitorRepository, CategoryExhibitorRepository>();
             _services.AddScoped<IImageWriter, ImageWriter>();

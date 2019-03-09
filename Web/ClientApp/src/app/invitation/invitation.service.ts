@@ -78,6 +78,14 @@ export class InvitationService {
       .pipe(map(TeacherRequest.fromJSON));
   }
 
+  teacherRequestExist(id: number): Observable<boolean> {
+    return this.http.get(`${this._url}/teacherRequest/teacherRequestExists/${id}`).pipe(
+      map((res: any) => {
+        return res;
+      })
+    );
+  }
+
   /**
    * Create Teacher and send email to Teacher
    *
@@ -86,7 +94,7 @@ export class InvitationService {
   createTeacher(teacherRequestId: number): Observable<boolean> {
     return this.http.get(`${this._url}/Auth/CreateTeacher/${teacherRequestId}`).pipe(
       map((res: any) => {
-        return true;
+        return res;
       })
     );
   }

@@ -1,3 +1,4 @@
+using System;
 using ApplicationCore.Entities;
 using Infrastructure.Configurations;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
@@ -10,6 +11,7 @@ namespace Infrastructure
         public DbSet<Group> Groups { get; set; }
         public DbSet<Exhibitor> Exhibitors { get; set; }
         public DbSet<Assignment> Assignments { get; set; }
+        public DbSet<Assignment> BackupAssignments { get; set; }
         public DbSet<Category> Categories { get; set; }
         public DbSet<CategoryExhibitor> CategoryExhibitors { get; set; }
         public DbSet<Question> Questions { get; set; }

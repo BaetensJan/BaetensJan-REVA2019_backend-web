@@ -105,11 +105,11 @@ namespace Web.Controllers
         {
             var model = await _teacherRequestRepository.GetById(teacherRequestId);
             // creating the school
-            var school = new School(model.SchoolName, GetRandomString(6));
+            var school = new School(model.SchoolName, GetRandomString(8));
             await _schoolRepository.Add(school);
             await _schoolRepository.SaveChanges();
 
-            var password = GetRandomString(6);
+            var password = GetRandomString(8);
 
             // creating teacher consisting of his school
             var user = _authenticationManager.CreateApplicationUserObject(model.Email, model.Email,
@@ -142,6 +142,8 @@ namespace Web.Controllers
                         Wachtwoord: {password}
                         </p>
                         <br>
+                        <p>U kan met deze gegevens inloggen via volgende link: <strong>http://app.reva.be/login</strong></p>
+                        <br>
                         <b>
                         Verander uw wachtwoord na inloggen!
                         </b>
@@ -159,11 +161,8 @@ namespace Web.Controllers
                 return Ok(
                     new
                     {
-                        Message = "Teacher successfully created."
-//                            Username = user.UserName,
-//                            Token = GetToken(claim)
-//                            token = new JwtSecurityTokenHandler().WriteToken(token),
-//                            expiration = token.ValidTo
+                        login = user.UserName,
+                        password
                     });
             }
 

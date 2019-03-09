@@ -12,7 +12,6 @@ import {QuestionsComponent} from "../questions/questions.component";
 import {QuestionComponent} from "../questions/question/question.component";
 import {RouteMapComponent} from "../route-map/route-map.component";
 import {AskQuestionComponent} from "../ask-question/ask-question.component";
-import {InviteRequestComponent} from "../invitation/send-request/invite-request.component";
 import {RequestsComponent} from "../invitation/pending-requests/requests.component";
 import {AssignmentsComponent} from "../assignment/assignments-overview/assignments.component";
 import {AssignmentDetailComponent} from "../assignment/assignment-detail/assignment-detail.component";
@@ -21,9 +20,15 @@ import {ForgotPasswordConfirmationComponent} from "../user/forgot-password-confi
 import {ForgotPasswordComponent} from "../user/forgot-password/forgot-password.component";
 import {ResetPasswordComponent} from "../user/reset-password/reset-password.component";
 import {ChangePasswordComponent} from "../user/change-password/change-password.component";
+import {InviteRequestComponent} from "../invitation/send-or-update-request/invite-request.component";
+import {AcceptRequestComponent} from "../invitation/accept-request/accept-request.component";
 
 const appRoutes: Routes = [
   {path: 'home', component: HomeComponent},
+
+  /**
+   * Teacher pages
+   */
   {
     path: 'group',
     canActivate: [AuthGuardService],
@@ -33,17 +38,35 @@ const appRoutes: Routes = [
   {path: 'opdrachten', canActivate: [AuthGuardService], component: AssignmentsComponent},
   {path: 'assignmentdetail', canActivate: [AuthGuardService], component: AssignmentDetailComponent},
   {path: 'informatiescherm', component: InformatieschermComponent},
+
+  /**
+   * Admin pages
+   */
   {path: 'categorieen', canActivate: [AuthGuardService], component: CategoriesComponent},
   {path: 'categorie', canActivate: [AuthGuardService], component: CategoryComponent},
   {path: 'exposanten', canActivate: [AuthGuardService], component: ExhibitorsComponent},
   {path: 'exposant', canActivate: [AuthGuardService], component: ExhibitorComponent},
   {path: 'upload-csv', canActivate: [AuthGuardService], component: UploadCsvComponent},
   {path: 'vragen', canActivate: [AuthGuardService], component: QuestionsComponent},
+  // detail page of a specific Assignment Question
   {path: 'vraag', canActivate: [AuthGuardService], component: QuestionComponent},
   {path: 'beursplan', canActivate: [AuthGuardService], component: RouteMapComponent},
+
+  /**
+   * Request pages
+   */
   {path: 'invite-request', canActivate: [AuthGuardService], component: InviteRequestComponent},
+  {path: 'accept-request', canActivate: [AuthGuardService], component: AcceptRequestComponent},
   {path: 'requests', canActivate: [AuthGuardService], component: RequestsComponent},
+
+  /**
+   * Common pages
+   */
   {path: 'ask-question', component: AskQuestionComponent},
+
+  /**
+   * Password pages
+   */
   {path: 'forgot-password', canActivate: [AuthGuardService], component: ForgotPasswordComponent},
   {path: 'wachtwoord-veranderen', canActivate: [AuthGuardService], component: ChangePasswordComponent},
   {
@@ -51,6 +74,10 @@ const appRoutes: Routes = [
     component: ForgotPasswordConfirmationComponent
   },
   {path: 'reset-wachtwoord', canActivate: [AuthGuardService], component: ResetPasswordComponent},
+
+  /**
+   * Fallback
+   */
   {path: '', redirectTo: 'home', pathMatch: 'full'},
   {path: '**', component: PageNotFoundComponent}
 ];

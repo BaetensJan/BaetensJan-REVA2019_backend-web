@@ -61,9 +61,7 @@ export class RequestsComponent implements OnInit {
    */
   modalAccepted() {
     if (this.accept) {
-      this._invitationService.createTeacher(this.clickedItem.id).subscribe(request => {
-        this.removeRequest();
-      });
+      this.router.navigate(["accept-request"], { queryParams: { requestId: this.clickedItem.id } });
     } else {
       this._invitationService.deleteTeacher(this.clickedItem.id).subscribe(request => {
         this.removeRequest();

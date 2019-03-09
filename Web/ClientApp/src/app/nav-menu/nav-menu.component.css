@@ -1,13 +1,17 @@
-@media (max-height: 400px) {
+@media (max-height: 600px) {
   footer {
     display: none;
   }
 }
 
-@media (max-width: 800px) {
+@media (max-width: 920px) {
   footer {
     display: none;
   }
+}
+
+.navbar {
+  overflow-y: auto;
 }
 
 #dropdown-basic a {
@@ -44,7 +48,7 @@ footer {
 
 #email {
   color: white;
-  font-size: 15px;
+  font-size: 1em;
 }
 
 li .glyphicon {
@@ -78,7 +82,7 @@ li.link-active a:focus {
 .navbar-nav li a,
 .navbar-nav li p {
   color: white !important;
-  font-size: 1.4em;
+  font-size: 1.2em;
 }
 
 .navbar-nav li p {

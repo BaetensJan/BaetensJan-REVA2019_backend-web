@@ -1,5 +1,13 @@
 <div *ngIf='errorMsg' class="ui error message">{{errorMsg}}</div>
 
+<!--Terug knop-->
+<button *ngIf="update"
+        class="btn btn-primary"
+        [routerLink]='["/requests"]'
+        style="margin-bottom: 2em"><span class="glyphicon glyphicon-arrow-left"></span> Terug
+</button>
+
+
 <form class="form-horizontal" [formGroup]='user' (ngSubmit)='onSubmit()'>
   <h2 class="col-sm-offset-2" style="margin-bottom: 2em;">Aanvraag toegang tot <br/>platform</h2>
 

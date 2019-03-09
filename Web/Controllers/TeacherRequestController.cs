@@ -96,6 +96,17 @@ namespace Web.Controllers
         }
 
         /**
+        * return Request with id equal to parameter requestId.
+        */
+        [HttpGet("[Action]/{requestId}")]
+        public async Task<IActionResult> TeacherRequestExists(int requestId)
+        {
+            var request = await _teacherRequestRepository.GetById(requestId);
+           
+            return Ok(request != null);
+        }
+
+        /**
         * Admin declines Teacher Request.
         *
         **/

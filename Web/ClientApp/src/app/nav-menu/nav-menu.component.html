@@ -100,46 +100,42 @@
 
         <ng-template #loggedIn>
           <div class='clearfix' style="margin-bottom: 1.5em;"></div>
+
           <!-- Start User settings dropdown -->
-          <li>
-            <div dropdown>
-              <a dropdownToggle class="dropdown-toggle" aria-controls="dropdown-basic">
-                <i class="glyphicon glyphicon-user"> </i> Account
-                <span class="caret"></span>
-              </a>
+          <!--<li>-->
+          <!--<div dropdown>-->
+          <!--<a dropdownToggle class="dropdown-toggle" aria-controls="dropdown-basic">-->
+          <!--<i class="glyphicon glyphicon-user"> </i> Account-->
+          <!--<span class="caret"></span>-->
+          <!--</a>-->
 
-              <ul id="dropdown-basic" *dropdownMenu class="dropdown-menu"
-                  role="menu" aria-labelledby="button-basic">
+          <!--<ul id="dropdown-basic" *dropdownMenu class="dropdown-menu"-->
+          <!--role="menu" aria-labelledby="button-basic">-->
 
-                <!--<ng-container *ngIf='(isLoggedIn | async); else notLoggedIn'>-->
-                  <li role="menuitem">
-                    <a class="dropdown-item" (click)='collapse()' [routerLink]='["logout"]'>
-                      Uitloggen
-                    </a>
-                  </li>
-                  <li role="menuitem">
-                    <a class="dropdown-item" (click)='collapse()' [routerLink]='["wachtwoord-veranderen"]'>
-                      Wachtwoord wijzigen
-                    </a>
-                  </li>
-                <!--</ng-container>-->
-
-                <!--<ng-template #notLoggedIn>-->
-                  <!--<li role="menuitem">-->
-                    <!--<a class="dropdown-item" (click)='collapse()' [routerLink]='["forgot-password"]'>-->
-                      <!--Wachtwoord vergeten-->
-                    <!--</a>-->
-                  <!--</li>-->
-                  <!--<li role="menuitem">-->
-                    <!--<a class="dropdown-item" (click)='collapse()' [routerLink]='["login"]'>-->
-                      <!--Login-->
-                    <!--</a>-->
-                  <!--</li>-->
-                <!--</ng-template>-->
-              </ul>
-            </div>
-          </li>
+          <!--<li role="menuitem">-->
+          <!--<a class="dropdown-item" (click)='collapse()' [routerLink]='["logout"]'>-->
+          <!--Uitloggen-->
+          <!--</a>-->
+          <!--</li>-->
+          <!--<li role="menuitem">-->
+          <!--<a class="dropdown-item" (click)='collapse()' [routerLink]='["wachtwoord-veranderen"]'>-->
+          <!--Wachtwoord wijzigen-->
+          <!--</a>-->
+          <!--</li>-->
+          <!--</ul>-->
+          <!--</div>-->
+          <!--</li>-->
           <!-- End User settings dropdown -->
+          <li role="menuitem">
+            <a class="dropdown-item" (click)='collapse()' [routerLink]='["wachtwoord-veranderen"]'>
+              <i class="glyphicon glyphicon-pencil"></i> Wachtwoord wijzigen
+            </a>
+          </li>
+          <li role="menuitem">
+            <a class="dropdown-item" (click)='collapse()' [routerLink]='["logout"]'>
+              <i class="glyphicon glyphicon-off"></i> Uitloggen
+            </a>
+          </li>
 
           <li *ngIf='!(isAdmin | async)'>
             <p (click)='collapse()'>
