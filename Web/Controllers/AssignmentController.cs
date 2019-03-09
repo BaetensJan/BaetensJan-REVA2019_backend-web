@@ -95,10 +95,10 @@ namespace Web.Controllers
             //todo make new relation in db where Category knows its Questions.
             // Only get Exhibitors of which there exists a Question with given categoryId. 
             if (previousExhibitorId != -1)
-            questions = questions.Where(q => q.CategoryExhibitor.CategoryId == categoryId &&
-                                             q.CategoryExhibitor.Exhibitor.Id != previousExhibitorId).ToList();
-            else  questions = questions.Where(q => q.CategoryExhibitor.CategoryId == categoryId).ToList();
-            
+                questions = questions.Where(q => q.CategoryExhibitor.CategoryId == categoryId &&
+                                                 q.CategoryExhibitor.Exhibitor.Id != previousExhibitorId).ToList();
+            else questions = questions.Where(q => q.CategoryExhibitor.CategoryId == categoryId).ToList();
+
             // Check if group is doing an Extra Round
             if (assignments != null && assignments.Count >= _configuration.GetValue<int>("AmountOfQuestions"))
             {
@@ -213,7 +213,7 @@ namespace Web.Controllers
                 // Group created Exhibitor in Extra Round
                 var createdExhibitor =
                     assignment.WithCreatedExhibitor(_configuration.GetValue<int>("CreatedExhibitorQuestionId"));
-                
+
                 if (createdExhibitor)
                 {
                     answer = $"{assignment.Answer}. Antwoord groep: {model.Answer}";
@@ -234,12 +234,13 @@ namespace Web.Controllers
                 assignment.SubmissionDate = DateTime.Now;
 
                 await _assignmentRepository.SaveChanges();
-                
+
                 // make backup of assignment
                 var group = await GetGroup();
-                await _assignmentBackupRepository.Add(assignment, User.ToString(), group.Name,
-                    createdExhibitor);
-                
+
+                await _assignmentBackupRepository.Add(assignment, User.Claims.ElementAt(3).ToString(),
+                    group.Name, createdExhibitor);
+
 //                if (result.Succeeded)
                 //TODO: temporary, recursive loop anders:
                 assignment = await _assignmentRepository.GetByIdLight(assignment.Id);

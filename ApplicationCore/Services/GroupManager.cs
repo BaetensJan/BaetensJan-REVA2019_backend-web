@@ -55,7 +55,7 @@ namespace ApplicationCore.Services
                 new
                 {
                     startDate,
-                    canStartTour = group.Name == "group1" || IsValidDate(startDate), // check if group can start Tour based on date.
+                    canStartTour = group.Name == "groep1" || IsValidDate(startDate), // check if group can start Tour based on date.
                     hasNoAssignments, // we need this attribute, because numberOfAssignments != numberOfSubmittedAssignments
                     // (and the app only knows the latter) 
                     numberOfSubmittedAssignments,

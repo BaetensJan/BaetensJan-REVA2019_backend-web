@@ -70,9 +70,10 @@ namespace ApplicationCore.Services
 
                 if (exh.TotalNumberOfVisits > maxTotalVisitors) maxTotalVisitors = exh.TotalNumberOfVisits;
             });
-           
+
             var nextExhibitor = potentialExhibitors[0];
-            var highestWeight = GetWeight(nextExhibitor,distances[0], maxDistance, maxVisitorsAtExhibitor, maxTotalVisitors);
+            var highestWeight = GetWeight(nextExhibitor, distances[0], maxDistance, maxVisitorsAtExhibitor,
+                maxTotalVisitors);
 
             for (var i = 1; i < potentialExhibitors.Count; i++)
             {
@@ -99,13 +100,17 @@ namespace ApplicationCore.Services
         {
             // every weight is a number between 0 and 1.
             var distanceWeight = distance / maxDistance;
-            var visitorsAtExhibitorWeight = exhibitor.GroupsAtExhibitor / maxVisitorsAtExhibitor;
-            var totalVisitorsWeight = exhibitor.TotalNumberOfVisits / maxTotalVisitors;
+            var visitorsAtExhibitorWeight = maxVisitorsAtExhibitor == 0
+                ? maxVisitorsAtExhibitor
+                : exhibitor.GroupsAtExhibitor / maxVisitorsAtExhibitor;
+            var totalVisitorsWeight = maxTotalVisitors == 0
+                ? maxTotalVisitors
+                : exhibitor.TotalNumberOfVisits / maxTotalVisitors;
 
             // We multiply each weight-attribute with a vector that represents its procentual (total is 100) rate of
             // importance.
             var weight = distanceWeight * 0.25 + visitorsAtExhibitorWeight * 0.5 + totalVisitorsWeight * 0.25;
-            
+
             // the weight of the Exhibitor is a number between 0 and 1.
             return weight;
         }
