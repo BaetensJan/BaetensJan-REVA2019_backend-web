@@ -3,6 +3,7 @@ import {HttpClient} from '@angular/common/http';
 import {Observable} from 'rxjs/Observable';
 import {map} from 'rxjs/operators';
 import {School} from "../models/school.model";
+import {Group} from "../models/group.model";
 
 @Injectable({
   providedIn: 'root'
@@ -31,6 +32,17 @@ export class SchoolDataService {
     return this.http
       .get(`${this._appUrl}/${schoolId}`)
       .pipe(map(School.fromJSON));
+  }
+
+  /**
+   * Makes call to the backend and returns all schools
+   *
+   * @param schoolId
+   */
+  schools(): Observable<School[]> {
+    return this.http
+      .get(`${this._appUrl}`)
+      .pipe(map((list: any[]): School[] => list.map(School.fromJSON)));
   }
 
   /**

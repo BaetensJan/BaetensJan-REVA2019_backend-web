@@ -1,9 +1,6 @@
 using System.Threading.Tasks;
-using ApplicationCore.Entities;
 using ApplicationCore.Interfaces;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Configuration;
 
 namespace Web.Controllers
 {
@@ -14,24 +11,29 @@ namespace Web.Controllers
     [ApiController]
     public class SchoolController : Controller
     {
-        private readonly UserManager<ApplicationUser> _userManager;
-        private readonly IConfiguration _configuration;
         private readonly ISchoolRepository _schoolRepository;
 
-        public SchoolController(UserManager<ApplicationUser> userManager,
-            IConfiguration configuration, ISchoolRepository schoolRepository)
+        public SchoolController(ISchoolRepository schoolRepository)
         {
-            _userManager = userManager;
-            _configuration = configuration;
             _schoolRepository = schoolRepository;
         }
 
         [HttpGet("{schoolId}")]
-        public IActionResult School(int schoolId)
+        public async Task<IActionResult> School(int schoolId)
         {
             //var school = _schoolRepository.GetById(schoolId); //Todo: fix error: Process is Terminated due to StackOverFlowException 
-            var school = _schoolRepository.GetByIdLight(schoolId);
+            var school = await _schoolRepository.GetByIdLight(schoolId);
             return Ok(school);
+        }
+
+        /**
+         * Gets all the schools. 
+         */
+        [HttpGet]
+        public async Task<IActionResult> Schools()
+        {
+            var schools = await _schoolRepository.GetAll();
+            return Ok(schools);
         }
 
         [HttpGet("[action]/{schoolName}")]

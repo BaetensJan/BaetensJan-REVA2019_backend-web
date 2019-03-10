@@ -8,7 +8,7 @@ namespace ApplicationCore.Interfaces
     {
         Task<List<School>> GetAll();
         Task<School> GetById(int schoolId);
-        School GetByIdLight(int schoolId);
+        Task<School> GetByIdLight(int schoolId);
         Task<School> GetByName(string schoolName);
         Task Add(School school);
         void Remove(School school);

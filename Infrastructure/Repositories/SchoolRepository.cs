@@ -18,13 +18,12 @@ namespace Infrastructure.Repositories
             _schools = dbContext.Schools;
         }
 
-        public Task<List<School>> GetAll()
+        public async Task<List<School>> GetAll()
         {
-            return _schools.Include(a => a.Groups).ThenInclude(g => g.Assignments).ToListAsync();
-            //.Select(s => MapSchool(s)).ToList();
+            return await _schools.Include(a => a.Groups).ToListAsync();
         }
 
-        private School MapSchool(School school)
+        private static School MapSchool(School school)
         {
             var groups = new List<Group>(school.Groups);
             groups.ForEach(g =>
@@ -47,28 +46,28 @@ namespace Infrastructure.Repositories
             return sch;
         }
 
-        public Task<School> GetById(int id)
+        public async Task<School> GetById(int id)
         {
             var school = _schools.Include(s => s.Groups).ThenInclude(g => g.Assignments).ThenInclude(a => a.Question)
                 .ThenInclude(q => q.CategoryExhibitor)
                 .SingleOrDefaultAsync(c => c.Id == id);
-            return school;
+            return await school;
         }
 
-        public School GetByIdLight(int id)
+        public async Task<School> GetByIdLight(int id)
         {
             var school = _schools.Include(a => a.Groups).ThenInclude(g => g.Assignments).ThenInclude(a => a.Question)
                 .ThenInclude(q => q.CategoryExhibitor).ThenInclude(ce => ce.Exhibitor)
                 .Include(a => a.Groups).ThenInclude(g => g.Assignments).ThenInclude(a => a.Question)
                 .ThenInclude(q => q.CategoryExhibitor).ThenInclude(ce => ce.Category)
-                .SingleOrDefault(c => c.Id == id);
-            return MapSchool(school);
+                .SingleOrDefaultAsync(c => c.Id == id);
+            return MapSchool(await school);
         }
 
-        public Task<School> GetByName(string schoolName)
+        public async Task<School> GetByName(string schoolName)
         {
             var school = _schools.SingleOrDefaultAsync(s => s.Name.ToLower().Equals(schoolName.ToLower()));
-            return school;
+            return await school;
         }
 
         public Task Add(School school)

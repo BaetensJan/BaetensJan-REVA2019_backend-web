@@ -20,7 +20,7 @@
 <table class="table" *ngIf="returnedArray; else noGroups">
   <thead>
   <tr>
-    <th scope="col">#</th>
+    <th scope="col">{{totalNumberOfAssignments}}</th>
     <th scope="col">Groepsnaam</th>
     <th scope="col">Download PDF</th>
     <th scope="col">Aantal Ingediende Opdrachten</th>
@@ -29,7 +29,7 @@
   </thead>
   <tbody>
   <tr *ngFor="let group of returnedArray; let i = index">
-    <th scope="row">{{i + 1}}</th>
+    <th scope="row">{{getIndex(i)}}</th>
     <td>{{group.name}}</td>
     <td>
 

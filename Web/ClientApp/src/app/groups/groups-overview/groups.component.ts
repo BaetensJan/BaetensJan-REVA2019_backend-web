@@ -1,18 +1,18 @@
 import {Component, TemplateRef} from '@angular/core';
-import {GroupsDataService} from "./groups-data.service";
-import {Group} from "../models/group.model";
+import {GroupsDataService} from "../groups-data.service";
+import {Group} from "../../models/group.model";
+import {School} from "../../models/school.model";
 import {Observable} from "rxjs/Rx";
 import {PageChangedEvent} from 'ngx-bootstrap/pagination';
 import {AbstractControl, FormBuilder, FormGroup, Validators} from "@angular/forms";
 import {BsModalRef, BsModalService} from "ngx-bootstrap";
-import {AppShareService} from "../app-share.service";
-import {School} from "../models/school.model";
-import {SchoolDataService} from "../schools/school-data.service";
-import {GroupSharedService} from "./group-shared.service";
+import {AppShareService} from "../../app-share.service";
+import {SchoolDataService} from "../../schools/school-data.service";
+import {GroupSharedService} from "../group-shared.service";
 import {Router} from "@angular/router";
 import {map} from "rxjs/operators";
-import {AuthenticationService} from "../user/authentication.service";
-import {AssignmentDataService} from "../assignment/assignment-data.service";
+import {AuthenticationService} from "../../user/authentication.service";
+import {AssignmentDataService} from "../../assignment/assignment-data.service";
 
 @Component({
   selector: 'groups',
@@ -24,6 +24,11 @@ export class GroupsComponent {
   memberToRemove = {name: "", group: null}; // member that should be removed from a group.
   modalRef: BsModalRef; // modal that appears asking for confirmation to remove a member from a group.
   modalMessage: string;
+
+  private _isAdmin: boolean = false;
+  get isAdmin(): boolean {
+    return this._isAdmin;
+  }
 
   currentPage; // the current page in the pagination (e.g. page 1, 2 ...)
   private _groups: Group[]; // array containing the groups that fits the filter.
@@ -108,10 +113,17 @@ export class GroupsComponent {
   ngOnInit(): void {
     let currentUser = AuthenticationService.parseJwt(localStorage.getItem("currentUser"));
     let schoolId = currentUser.school;
-    let isAdmin = currentUser.isAdmin;
-    if (isAdmin == "True") {
-      this._groupsDataService.allGroups.subscribe(value => {
-        this._groups = value;
+    this._isAdmin = currentUser.isAdmin;
+    if (this._isAdmin) {
+      this._schoolDataService.schools().subscribe((value: School[]) => {
+        this._groups = [];
+        value.forEach(school => {
+          school.groups.forEach((group: Group) => {
+            group.name = school.name + " " + group.name;
+            this._groups.push(group);
+          });
+        });
+
         this.initiateArrays();
       });
     } else {
@@ -119,7 +131,9 @@ export class GroupsComponent {
         /*Todo If teacher has multiple and different schools*/
         this._school = value;
         this.prepareFormGroup();
+
         this._groups = this._school.groups;
+
         this.initiateArrays();
       });
     }
@@ -283,6 +297,7 @@ export class GroupsComponent {
    * @param event
    */
   pageChanged(event: PageChangedEvent): void {
+    this.filterValue = "";
     const startItem = (event.page - 1) * event.itemsPerPage;
     const endItem = event.page * event.itemsPerPage;
     this._returnedArray = this._filteredGroups.slice(startItem, endItem);

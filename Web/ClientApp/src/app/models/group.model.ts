@@ -81,6 +81,14 @@ export class Group {
   }
 
   /**
+   * Setter for name
+   * used in groups overview so that an admin also sees the schoolName
+   */
+  set name(name: string) {
+    this._name = name;
+  }
+
+  /**
    * Getter for FinishedAssignments
    */
   get assignments()
