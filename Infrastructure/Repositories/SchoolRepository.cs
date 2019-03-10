@@ -20,7 +20,7 @@ namespace Infrastructure.Repositories
 
         public async Task<List<School>> GetAll()
         {
-            return await _schools.Include(a => a.Groups).ToListAsync();
+            return await _schools.Include(a => a.Groups).ThenInclude(g => g.Assignments).ToListAsync();
         }
 
         private static School MapSchool(School school)

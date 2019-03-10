@@ -25,9 +25,14 @@ export class GroupsComponent {
   modalRef: BsModalRef; // modal that appears asking for confirmation to remove a member from a group.
   modalMessage: string;
 
-  private _isAdmin: boolean = false;
+  private _isAdmin: string;
   get isAdmin(): boolean {
-    return this._isAdmin;
+    return this._isAdmin == "True";
+  }
+
+  private _groupNames: Map<string, string> = new Map<string, string>();
+  getGroupName(groupName: string){
+    return this.isAdmin ? this._groupNames.get(groupName) : groupName;
   }
 
   currentPage; // the current page in the pagination (e.g. page 1, 2 ...)
@@ -114,12 +119,14 @@ export class GroupsComponent {
     let currentUser = AuthenticationService.parseJwt(localStorage.getItem("currentUser"));
     let schoolId = currentUser.school;
     this._isAdmin = currentUser.isAdmin;
-    if (this._isAdmin) {
+
+    if (this.isAdmin) {
       this._schoolDataService.schools().subscribe((value: School[]) => {
         this._groups = [];
         value.forEach(school => {
           school.groups.forEach((group: Group) => {
-            group.name = school.name + " " + group.name;
+            this._groupNames.set(group.name, `${school.name} ${group.name}`);
+
             this._groups.push(group);
           });
         });

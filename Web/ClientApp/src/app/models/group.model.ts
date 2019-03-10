@@ -9,15 +9,17 @@ export class Group {
   /**
    * @ignore
    */
-  private _name: string;
+  private readonly _name: string;
+
+  private _schoolName: string;
   /**
    * @ignore
    */
-  private _assignments: Assignment[];
+  private readonly _assignments: Assignment[];
   /**
    * @ignore
    */
-  private _members: String[];
+  private readonly _members: String[];
 
   /**
    * Constructor
@@ -28,7 +30,7 @@ export class Group {
    */
   constructor(name: string, assignments: Assignment[], members: String[]) {
     this._name = name;
-    if(assignments) assignments.forEach(a => a.question = Question.fromJSON(a.question));
+    if (assignments) assignments.forEach(a => a.question = Question.fromJSON(a.question));
 
     this._assignments = assignments;
     if (!members) {
@@ -41,9 +43,7 @@ export class Group {
    *
    * @param json
    */
-  static
-
-  fromJSON(json:any): Group {
+  static fromJSON(json: any): Group {
     const rec = new Group(json.name, json.assignments, json.members);
 
     rec._id = json.id;
@@ -65,41 +65,41 @@ export class Group {
   /**
    * Getter for Id
    */
-  get id()
-    :
-    number {
+  get id(): number {
     return this._id;
   }
 
   /**
    * Getter for name
    */
-  get name()
-    :
-    string {
+  get name(): string {
     return this._name;
   }
 
   /**
-   * Setter for name
-   * used in groups overview so that an admin also sees the schoolName
+   * Getter for schoolAndGroupName
+   * used in groups and assignments overview so that an admin also sees the schoolName
    */
-  set name(name: string) {
-    this._name = name;
+  get schoolAndGroupName(): string {
+    return `${this._schoolName} ${this._name}`;
+  }
+
+  /**
+   * Setter for schoolName
+   * used in groups and assignments overview so that an admin also sees the schoolName
+   */
+  set schoolName(name: string) {
+    this._schoolName = name;
   }
 
   /**
    * Getter for FinishedAssignments
    */
-  get assignments()
-    :
-    Assignment[] {
+  get assignments(): Assignment[] {
     return this._assignments;
   }
 
-  get members()
-    :
-    String[] {
+  get members(): String[] {
     return this._members;
   }
 }

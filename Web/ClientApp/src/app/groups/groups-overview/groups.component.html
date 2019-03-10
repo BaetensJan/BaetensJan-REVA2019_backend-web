@@ -1,6 +1,6 @@
 <div id="header" class="row">
   <h1 class="col-md-2">Groepen</h1>
-  <h3 class="col-md-4" *ngIf="!appStartDateExpired && applicationStartDate">
+  <h3 *ngIf="!appStartDateExpired && applicationStartDate">
     De app is actief vanaf:
     <strong>{{applicationStartDate.toLocaleDateString()}}</strong></h3>
 </div>
@@ -127,7 +127,9 @@
               <div accordion-heading>
                 <div class="row">
                   <div class="col-md-9 col-sm-5">
-                    <b>{{group.name}}</b>
+                    <b>
+                      {{ getGroupName(group.name) }}
+                    </b>
                   </div>
                   <div class="col-md-2 col-sm-2">
                     leden: <span class="badge">{{group.members.length}}</span>

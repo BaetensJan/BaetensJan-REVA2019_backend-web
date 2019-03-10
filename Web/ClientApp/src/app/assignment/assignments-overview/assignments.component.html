@@ -30,11 +30,14 @@
   <tbody>
   <tr *ngFor="let group of returnedArray; let i = index">
     <th scope="row">{{getIndex(i)}}</th>
-    <td>{{group.name}}</td>
+    <td>{{ getGroupName(group.name) }}</td>
     <td>
-
-      <button class="" (click)="pdfDownload(group)"><img id="imageid" src="../../assets/logopdf.png" alt="logo pdf"
-                                                         width="50" height="50">
+      <button (click)="pdfDownload(group)">
+        <img id="imageid"
+             src="../../assets/logopdf.png"
+             alt="logo pdf"
+             width="50"
+             height="50">
       </button>
     </td>
     <td>

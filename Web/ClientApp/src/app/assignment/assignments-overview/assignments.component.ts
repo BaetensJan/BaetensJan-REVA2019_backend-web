@@ -8,6 +8,8 @@ import {Observable, Observer} from "rxjs";
 import {Group} from "../../models/group.model";
 import {GroupsDataService} from "../../groups/groups-data.service";
 import {PageChangedEvent} from 'ngx-bootstrap/pagination';
+import {School} from "../../models/school.model";
+import {SchoolDataService} from "../../schools/school-data.service";
 
 function parseJwt(token) {
   if (!token) {
@@ -30,9 +32,18 @@ function parseJwt(token) {
 export class AssignmentsComponent {
 
   currentPage = 1; // the current page in the pagination (e.g. page 1, 2 ...)
-
   getIndex(index: number): number {
     return (this.currentPage - 1) * this.maxNumberOfGroupsPerPage + index + 1;
+  }
+
+  private _groupNames: Map<string, string> = new Map<string, string>();
+  getGroupName(groupName: string){
+    return this.isAdmin ? this._groupNames.get(groupName) : groupName;
+  }
+
+  private _isAdmin: string;
+  get isAdmin(): boolean {
+    return this._isAdmin == "True";
   }
 
   private _groups: Group[];
@@ -67,11 +78,13 @@ export class AssignmentsComponent {
    * Constructor
    * @param router
    * @param _groupsDataService
+   * @param _schoolDataService
    * @param _cdref
    */
   constructor(
     private router: Router,
     private _groupsDataService: GroupsDataService,
+    private _schoolDataService: SchoolDataService,
     private _cdref: ChangeDetectorRef) {
   }
 
@@ -83,12 +96,21 @@ export class AssignmentsComponent {
     this.filterValue = "";
     let currentUser = parseJwt(localStorage.getItem("currentUser"));
     let schoolId = currentUser.school;
-    let isAdmin = currentUser.isAdmin;
+    this._isAdmin = currentUser.isAdmin;
 
-    if (isAdmin == "True") {
-      this._groupsDataService.groups.subscribe(value => {
-        this._groups = value;
-        this.initiateArrays();
+    if (this.isAdmin) {
+
+      this._schoolDataService.schools().subscribe((value: School[]) => {
+          this._groups = [];
+          value.forEach((school: School) => {
+            school.groups.forEach((group: Group) => {
+              this._groupNames.set(group.name, `${school.name} ${group.name}`);
+
+              this._groups.push(group);
+            });
+          });
+
+          this.initiateArrays();
       });
     } else {
       this._groupsDataService.groupsBySchoolId(schoolId).subscribe(value => {
