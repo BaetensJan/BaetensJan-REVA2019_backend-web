@@ -4,7 +4,7 @@ import {Group} from "../../models/group.model";
 import {School} from "../../models/school.model";
 import {Observable} from "rxjs/Rx";
 import {PageChangedEvent} from 'ngx-bootstrap/pagination';
-import {AbstractControl, FormBuilder, FormGroup, Validators} from "@angular/forms";
+import {AbstractControl, FormBuilder, FormControl, FormGroup, ValidatorFn, Validators} from "@angular/forms";
 import {BsModalRef, BsModalService} from "ngx-bootstrap";
 import {AppShareService} from "../../app-share.service";
 import {SchoolDataService} from "../../schools/school-data.service";
@@ -13,6 +13,35 @@ import {Router} from "@angular/router";
 import {map} from "rxjs/operators";
 import {AuthenticationService} from "../../user/authentication.service";
 import {AssignmentDataService} from "../../assignment/assignment-data.service";
+
+function passwordValidator(length: number): ValidatorFn {
+  return (control: AbstractControl): { [key: string]: any } => {
+    return control.value.length < length
+      ? {
+        passwordTooShort: {
+          requiredLength: length,
+          actualLength: control.value.length
+        }
+      }
+      : null;
+  };
+}
+
+function comparePasswords(control: AbstractControl): { [key: string]: any } {
+  const password = control.get('groupPassword');
+  const confirmPassword = control.get('confirmPassword');
+  return password.value === confirmPassword.value
+    ? null
+    : {passwordsDiffer: true};
+}
+
+// function groupMembersCheck(minLength: number, maxLength: number): ValidatorFn {
+//   return (control: AbstractControl): { [key: string]: any } => {
+//     const count = control.get("groupMembers").value.length;
+//     console.log(count);
+//     return count > minLength && count < maxLength + 1 ? null : {groupsMembersError: true};
+//   };
+// }
 
 @Component({
   selector: 'groups',
@@ -31,7 +60,8 @@ export class GroupsComponent {
   }
 
   private _groupNames: Map<string, string> = new Map<string, string>();
-  getGroupName(groupName: string){
+
+  getGroupName(groupName: string) {
     return this.isAdmin ? this._groupNames.get(groupName) : groupName;
   }
 
@@ -275,10 +305,23 @@ export class GroupsComponent {
 
   prepareFormGroup() {
     this.groupForm = this.fb.group({
-      groupName: ['', [Validators.required, Validators.minLength(2)], this.GroupNameAlreadyExists()],
-      groupPassword: ['', [Validators.required, Validators.minLength(6), Validators.maxLength(35)]],
-      groupMember: ['', /*[Validators.minLength(1)]*/]
-    });
+        groupName: ['', [Validators.required, Validators.minLength(2)], this.GroupNameAlreadyExists()],
+        passwordGroup: this.fb.group(
+          {
+            groupPassword: ['', [Validators.required, passwordValidator(6)]],
+            confirmPassword: ['', [Validators.required]],
+          },
+          {validator: comparePasswords}
+        ),
+        groupMember: ['', [Validators.minLength(2)]],
+        //groupMembers: [this.groupMembers]
+      },
+      //{validator: groupMembersCheck(0, 4)}
+    );
+  }
+
+  get passwordControl(): FormControl {
+    return <FormControl>this.groupForm.get('passwordGroup').get('groupPassword');
   }
 
   /**
@@ -346,22 +389,27 @@ export class GroupsComponent {
     // let newGroup = new Group(this.groupForm.value.groupName, null, this.groupMembers);
     let newGroup = {
       "name": this.groupForm.value.groupName,
-      "password": this.groupForm.value.groupPassword,
+      "password": this.passwordControl.value,
       "members": this.groupMembers
     };
     this._groupsDataService.addNewGroup(this.school.id, newGroup).subscribe(value => {
+
+      // add newly created group to list of groups.
       this._groups.push(value);
       this.initiateArrays();
+
+      // reset all fields and attributes of group creation.
       this.groupMembers = [];
-      this.groupForm.controls['groupName'].setValue("");
-      this.groupForm.controls['groupPassword'].setValue("");
+
+      this.groupForm.get("passwordGroup").get("confirmPassword").setValue("");
+      this.groupForm.reset();
+
       // show alert (modal)
       this.add(newGroup.name);
     });
   }
 
   private findGroupWithId(groupId: number) {
-    let group = this._groups.find(g => g.id == groupId);
-    return group;
+    return this._groups.find(g => g.id == groupId);
   }
 }

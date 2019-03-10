@@ -20,7 +20,7 @@
   </div>
 </div>
 
-<!--Search Filter Bar-->
+
 <div class="panel panel-default">
   <div class="panel-body">
     <label style="margin-bottom: 2em; font-size: 1.2em; margin-left: 1em;" *ngIf="!isAdmin">
@@ -30,7 +30,9 @@
       Vergeet niet om de logingegevens (login en paswoord) goed bij te houden en te delen met de groepjes!
     </label>
 
-    <div class="row">
+
+    <!--Search Filter Bar-->
+    <div class="row" *ngIf="returnedArray && returnedArray.length > 0">
       <div class="col-md-10">
         <div class="input-group">
       <span class="input-group-addon">Zoekfilter
@@ -46,10 +48,13 @@
       </div>
     </div>
 
+
     <!--Add new group button-->
     <div id="createGroupButton" style="margin-top: 2em;">
       <button (click)="createGroupClicked = !createGroupClicked" *ngIf="school"
-              class="btn btn-success"><span class=" glyphicon glyphicon-plus"></span> Groep aanmaken
+              class="btn btn-success">
+        <i [ngClass]="createGroupClicked ? 'glyphicon glyphicon-minus' : 'glyphicon glyphicon-plus'"></i>
+        Groep aanmaken
       </button>
     </div>
 
@@ -73,19 +78,38 @@
           <div class='alert alert-danger' *ngIf='groupForm.get("groupName").errors?.groupAlreadyExists'>
             Er bestaat al een groep met deze naam.
           </div>
-          <div class="input-group">
-            <span class="input-group-addon" id="pw"></span>
-            <input formControlName='groupPassword'
-                   type="password" class="form-control" placeholder="Wachtwoord van nieuwe groep."
-                   aria-describedby="pw">
-          </div>
-          <div class='alert alert-danger'
-               *ngIf='groupForm.get("groupPassword").errors?.minlength && groupForm.get("groupPassword").touched'>
-            Het wachtwoord moet minimum {{groupForm.get("groupPassword").errors?.minlength.requiredLength }} karakter
-            bevatten.
+
+
+          <div formGroupName='passwordGroup'>
+            <div class="input-group" style="margin-bottom: 1em;">
+              <span class="input-group-addon" id="pw"></span>
+              <input formControlName='groupPassword'
+                     type="password" class="form-control" placeholder="Wachtwoord van nieuwe groep."
+                     aria-describedby="pw">
+            </div>
+            <div class='alert alert-danger'
+                 *ngIf='passwordControl.errors?.passwordTooShort && passwordControl.touched'>
+              Het wachtwoord moet minimum {{ passwordControl.errors?.passwordTooShort.requiredLength }} karakters
+              bevatten. Momenteel bevat het maar {{passwordControl.errors?.passwordTooShort.actualLength}} karakter(s).
+            </div>
+
+            <div class="input-group">
+              <span class="input-group-addon" id="confirmPassword"></span>
+              <input formControlName='confirmPassword'
+                     type="password" class="form-control" placeholder="Bevestig wachtwoord."
+                     aria-describedby="confirmPassword">
+            </div>
+            <div class='alert alert-danger'
+                 *ngIf='groupForm.get("passwordGroup").errors?.passwordsDiffer
+                  && groupForm.get("passwordGroup").get("confirmPassword").touched
+               && passwordControl.touched'>
+              De 2 wachtwoorden moeten overeenkomen.
+            </div>
           </div>
 
-          <div class="form-inline" style="margin-top: 2em;">
+
+          <!-- Groepsleden toevoegen (max 4) -->
+          <div class="form-inline" style="margin-top: 2em;" *ngIf="groupMembers.length < 4; else maxMembersMessage">
             <div class="form-group">
               <label for="exampleInputName2" style="margin-right: 0.5em;">Groepslid toevoegen</label>
               <input formControlName="groupMember" type="text" class="form-control" id="exampleInputName2"
@@ -96,9 +120,13 @@
                     (click)="addNewMember()"></button>
           </div>
           <div class='alert alert-danger'
-               *ngIf='groupForm.get("groupMember").errors?.minlength && groupForm.get("groupMember").touched'>
-            De naam moet minimum {{groupForm.get("groupMember").errors?.minlength.requiredLength }} letters bevatten.
+               *ngIf='groupForm.get("groupMember").touched
+               && groupForm.get("groupMember").errors?.minlength.requiredLength'>
+            De naam moet minimum {{ groupForm.get("groupMember").errors?.minlength.requiredLength }} letters bevatten.
           </div>
+          <ng-template #maxMembersMessage>
+            <p style="margin-top: 2em;">U hebt het maximum van 4 groepsleden dat toegelaten is per groep bereikt.</p>
+          </ng-template>
 
           <div *ngIf="groupMembers.length > 0" style="margin-top: 1em;">
             <label>Groepsleden: </label>
@@ -112,11 +140,21 @@
           </div>
 
           <div class="col-md-offset-10 col-md-2">
-            <button type='submit' [disabled]='!groupForm.valid' class="btn btn-success">Groep aanmaken</button>
+            <button type='submit'
+                    [disabled]='!groupForm.valid || groupMembers.length < 1 || groupMembers.length > 4'
+                    class="btn btn-success">Groep aanmaken
+            </button>
+            <div class='alert alert-danger'
+                 *ngIf='groupForm.get("groupName").valid
+                 && groupForm.get("passwordGroup").valid
+                  && groupMembers.length < 1 || groupMembers.length > 4'>
+              Gelieve minimum 1 groepslid toe te voegen aan de groep.
+            </div>
           </div>
         </form>
       </div>
     </div>
+
 
     <!--Overview of groups-->
     <div class="row" *ngIf="returnedArray; else noGroups">
