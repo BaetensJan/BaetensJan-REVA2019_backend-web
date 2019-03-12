@@ -30,7 +30,7 @@
   <tbody>
   <tr *ngFor="let group of returnedArray; let i = index">
     <th scope="row">{{getIndex(i)}}</th>
-    <td>{{ getGroupName(group.name) }}</td>
+    <td>{{ isAdmin ? group.schoolName + " " + group.name : group.name }}</td>
     <td>
       <button (click)="pdfDownload(group)">
         <img id="imageid"
@@ -44,7 +44,7 @@
       <p>{{group.assignments.length}}</p>
     </td>
     <td>
-      <button (click)="detailAssignment(group)" class="btn btn-primary">Detailscherm van opdracht</button>
+      <button (click)="detailAssignment(group)" class="btn btn-primary">Detailscherm van opdrachten</button>
     </td>
   </tr>
   </tbody>

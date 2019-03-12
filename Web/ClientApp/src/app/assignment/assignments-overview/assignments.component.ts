@@ -36,17 +36,12 @@ export class AssignmentsComponent {
     return (this.currentPage - 1) * this.maxNumberOfGroupsPerPage + index + 1;
   }
 
-  private _groupNames: Map<string, string> = new Map<string, string>();
-  getGroupName(groupName: string){
-    return this.isAdmin ? this._groupNames.get(groupName) : groupName;
-  }
-
   private _isAdmin: string;
   get isAdmin(): boolean {
     return this._isAdmin == "True";
   }
 
-  private _groups: Group[];
+  private _groups: Group[] = [];
 
   get totalNumberOfAssignments(): number {
     return this._groups.length;
@@ -99,22 +94,31 @@ export class AssignmentsComponent {
     this._isAdmin = currentUser.isAdmin;
 
     if (this.isAdmin) {
+      this._schoolDataService.schools().subscribe((schools: School[]) => {
+        for (let i = 0; i < schools.length; i++) {
+          let school = schools[i];
+          for (let j = 0; j < school.groups.length; j++) {
+            let group = school.groups[j];
 
-      this._schoolDataService.schools().subscribe((value: School[]) => {
-          this._groups = [];
-          value.forEach((school: School) => {
-            school.groups.forEach((group: Group) => {
-              this._groupNames.set(group.name, `${school.name} ${group.name}`);
+            if (group.assignments.length > 0) {
+              group.schoolName = school.name;
 
               this._groups.push(group);
-            });
-          });
+            }
+          }
+        }
 
-          this.initiateArrays();
+        this.initiateArrays();
       });
     } else {
-      this._groupsDataService.groupsBySchoolId(schoolId).subscribe(value => {
-        this._groups = value;
+      this._groupsDataService.groupsBySchoolId(schoolId).subscribe((groups: Group[]) => {
+        for (let i = 0; i < groups.length; i++) {
+          let group = groups[i];
+
+          if (group.assignments.length > 0) {
+            this._groups.push(group);
+          }
+        }
         this.initiateArrays();
       });
     }

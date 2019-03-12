@@ -51,107 +51,21 @@
 
     <!--Add new group button-->
     <div id="createGroupButton" style="margin-top: 2em;">
-      <button (click)="createGroupClicked = !createGroupClicked" *ngIf="school"
+      <button (click)="createGroupClicked()" *ngIf="school"
               class="btn btn-success">
-        <i [ngClass]="createGroupClicked ? 'glyphicon glyphicon-minus' : 'glyphicon glyphicon-plus'"></i>
+        <i [ngClass]="createGroup ? 'glyphicon glyphicon-minus' : 'glyphicon glyphicon-plus'"></i>
         Groep aanmaken
       </button>
     </div>
 
     <!--Add new group panel-->
-    <div class="panel panel-default" *ngIf="createGroupClicked">
+    <div *ngIf="createGroup">
       <div class="panel-body">
-        <h3>Groep aanmaken</h3>
 
-        <form (ngSubmit)="onSubmit()" [formGroup]='groupForm'>
-          <div class="input-group" style="margin-bottom: 1em;">
-            <span class="input-group-addon" id="basic-addon1"></span>
-            <input formControlName='groupName'
-                   type="text" class="form-control" placeholder="Naam van nieuwe groep."
-                   aria-describedby="basic-addon1">
-          </div>
-          <div class='alert alert-danger'
-               *ngIf='groupForm.get("groupName").errors?.minlength && groupForm.get("groupName").touched'>
-            De groepsnaam moet minimum {{groupForm.get("groupName").errors?.minlength.requiredLength }} karakter
-            bevatten.
-          </div>
-          <div class='alert alert-danger' *ngIf='groupForm.get("groupName").errors?.groupAlreadyExists'>
-            Er bestaat al een groep met deze naam.
-          </div>
-
-
-          <div formGroupName='passwordGroup'>
-            <div class="input-group" style="margin-bottom: 1em;">
-              <span class="input-group-addon" id="pw"></span>
-              <input formControlName='groupPassword'
-                     type="password" class="form-control" placeholder="Wachtwoord van nieuwe groep."
-                     aria-describedby="pw">
-            </div>
-            <div class='alert alert-danger'
-                 *ngIf='passwordControl.errors?.passwordTooShort && passwordControl.touched'>
-              Het wachtwoord moet minimum {{ passwordControl.errors?.passwordTooShort.requiredLength }} karakters
-              bevatten. Momenteel bevat het maar {{passwordControl.errors?.passwordTooShort.actualLength}} karakter(s).
-            </div>
-
-            <div class="input-group">
-              <span class="input-group-addon" id="confirmPassword"></span>
-              <input formControlName='confirmPassword'
-                     type="password" class="form-control" placeholder="Bevestig wachtwoord."
-                     aria-describedby="confirmPassword">
-            </div>
-            <div class='alert alert-danger'
-                 *ngIf='groupForm.get("passwordGroup").errors?.passwordsDiffer
-                  && groupForm.get("passwordGroup").get("confirmPassword").touched
-               && passwordControl.touched'>
-              De 2 wachtwoorden moeten overeenkomen.
-            </div>
-          </div>
-
-
-          <!-- Groepsleden toevoegen (max 4) -->
-          <div class="form-inline" style="margin-top: 2em;" *ngIf="groupMembers.length < 4; else maxMembersMessage">
-            <div class="form-group">
-              <label for="exampleInputName2" style="margin-right: 0.5em;">Groepslid toevoegen</label>
-              <input formControlName="groupMember" type="text" class="form-control" id="exampleInputName2"
-                     placeholder="Naam nieuw groepslid.">
-            </div>
-            <button style="margin-left: 0.2em;" type="button" class="btn glyphicon glyphicon-plus-sign"
-                    [disabled]='groupForm.get("groupMember").value.length < 1'
-                    (click)="addNewMember()"></button>
-          </div>
-          <div class='alert alert-danger'
-               *ngIf='groupForm.get("groupMember").touched
-               && groupForm.get("groupMember").errors?.minlength.requiredLength'>
-            De naam moet minimum {{ groupForm.get("groupMember").errors?.minlength.requiredLength }} letters bevatten.
-          </div>
-          <ng-template #maxMembersMessage>
-            <p style="margin-top: 2em;">U hebt het maximum van 4 groepsleden dat toegelaten is per groep bereikt.</p>
-          </ng-template>
-
-          <div *ngIf="groupMembers.length > 0" style="margin-top: 1em;">
-            <label>Groepsleden: </label>
-            <button style="margin-left: 0.4em;"
-                    type="button"
-                    *ngFor="let member of groupMembers"
-                    (click)="openModal(template, -1, member)"><span class="glyphicon glyphicon-remove"></span>
-              {{member}}
-            </button>
-
-          </div>
-
-          <div class="col-md-offset-10 col-md-2">
-            <button type='submit'
-                    [disabled]='!groupForm.valid || groupMembers.length < 1 || groupMembers.length > 4'
-                    class="btn btn-success">Groep aanmaken
-            </button>
-            <div class='alert alert-danger'
-                 *ngIf='groupForm.get("groupName").valid
-                 && groupForm.get("passwordGroup").valid
-                  && groupMembers.length < 1 || groupMembers.length > 4'>
-              Gelieve minimum 1 groepslid toe te voegen aan de groep.
-            </div>
-          </div>
-        </form>
+        <app-update-group
+          (submit)="onSubmit()"
+        >
+        </app-update-group>
       </div>
     </div>
 
@@ -164,22 +78,28 @@
             <accordion-group *ngFor="let group of returnedArray; let i = index" [isOpen]="i == 0">
               <div accordion-heading>
                 <div class="row">
-                  <div class="col-md-9 col-sm-5">
+                  <div class="col-md-7 col-sm-6 col-xs-4">
                     <b>
-                      {{ getGroupName(group.name) }}
+                      {{ isAdmin ? group.schoolName + " " + group.name : group.name }}
                     </b>
                   </div>
-                  <div class="col-md-2 col-sm-2">
+
+                  <div class="col-md-2 col-sm-2 col-xs-4">
                     leden: <span class="badge">{{group.members.length}}</span>
                   </div>
-                  <!--<button *ngIf="school" (click)="updateGroup(group)" style="margin-right: 0.2em;"-->
-                  <!--class="btn btn-primary">-->
-                  <!--<span class="glyphicon glyphicon-edit"></span>-->
-                  <!--</button> TODO implementation of update-group is not finished-->
-                  <button (click)="openModal(template, group.id)"
-                          class="btn btn-danger">
-                    <i class="glyphicon glyphicon-remove"></i>
-                  </button>
+
+                  <div class="col-md-3 col-sm-4 col-xs-4">
+                    <button *ngIf="!isAdmin"
+                            (click)="updateGroup(group)" style="margin-right: 0.2em;"
+                            class="btn btn-primary">
+                      <span class="glyphicon glyphicon-edit"></span>
+                    </button>
+
+                    <button (click)="openModal(template, group.id)"
+                            class="btn btn-danger">
+                      <i class="glyphicon glyphicon-remove"></i>
+                    </button>
+                  </div>
                 </div>
               </div>
 
@@ -192,32 +112,10 @@
               </div>
 
               <label>Groepsleden:</label>
-              <button style="margin-left: 0.4em;"
-                      *ngFor="let member of group.members"
-                      (click)="openModal(template, group.id, member)">
-                <span class="glyphicon glyphicon-remove"></span> {{member}}
-              </button>
-
-              <br><br>
-
-              <div class="form-inline" style="margin-top: 2em;">
-                <div class="form-group">
-                  <label style="margin-right: 0.5em;" [for]="addMember + i">Groepslid toevoegen</label>
-                  <input type="text" [id]="addMember + i"
-                         class="form-control"
-                         placeholder="Naam nieuw groepslid."
-                         [(ngModel)]="newMemberName"
-                         [ngModelOptions]="{updateOn: 'change'}">
-                </div>
-                <button style="margin-left: 0.2em;"
-                        class="btn"
-                        type="button"
-                        (click)="addMember(group.id)"
-                        [disabled]="isNewMemberInputEmpty()">
-                  <span class="glyphicon glyphicon-plus-sign"></span>
-                </button>
-              </div>
-
+              <span style="margin-left: 0.4em;"
+                    *ngFor="let member of group.members">
+                {{member}}
+              </span>
             </accordion-group>
           </accordion>
         </div>

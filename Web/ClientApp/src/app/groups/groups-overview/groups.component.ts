@@ -1,47 +1,16 @@
-import {Component, TemplateRef} from '@angular/core';
+import {Component, TemplateRef, ViewChild} from '@angular/core';
 import {GroupsDataService} from "../groups-data.service";
 import {Group} from "../../models/group.model";
 import {School} from "../../models/school.model";
-import {Observable} from "rxjs/Rx";
 import {PageChangedEvent} from 'ngx-bootstrap/pagination';
-import {AbstractControl, FormBuilder, FormControl, FormGroup, ValidatorFn, Validators} from "@angular/forms";
+import {FormBuilder, FormControl, FormGroup, FormGroupDirective, NgForm} from "@angular/forms";
 import {BsModalRef, BsModalService} from "ngx-bootstrap";
 import {AppShareService} from "../../app-share.service";
 import {SchoolDataService} from "../../schools/school-data.service";
 import {GroupSharedService} from "../group-shared.service";
 import {Router} from "@angular/router";
-import {map} from "rxjs/operators";
 import {AuthenticationService} from "../../user/authentication.service";
 import {AssignmentDataService} from "../../assignment/assignment-data.service";
-
-function passwordValidator(length: number): ValidatorFn {
-  return (control: AbstractControl): { [key: string]: any } => {
-    return control.value.length < length
-      ? {
-        passwordTooShort: {
-          requiredLength: length,
-          actualLength: control.value.length
-        }
-      }
-      : null;
-  };
-}
-
-function comparePasswords(control: AbstractControl): { [key: string]: any } {
-  const password = control.get('groupPassword');
-  const confirmPassword = control.get('confirmPassword');
-  return password.value === confirmPassword.value
-    ? null
-    : {passwordsDiffer: true};
-}
-
-// function groupMembersCheck(minLength: number, maxLength: number): ValidatorFn {
-//   return (control: AbstractControl): { [key: string]: any } => {
-//     const count = control.get("groupMembers").value.length;
-//     console.log(count);
-//     return count > minLength && count < maxLength + 1 ? null : {groupsMembersError: true};
-//   };
-// }
 
 @Component({
   selector: 'groups',
@@ -50,19 +19,22 @@ function comparePasswords(control: AbstractControl): { [key: string]: any } {
   animations: []
 })
 export class GroupsComponent {
-  memberToRemove = {name: "", group: null}; // member that should be removed from a group.
-  modalRef: BsModalRef; // modal that appears asking for confirmation to remove a member from a group.
+
+  modalRef: BsModalRef; // modal that appears, asking for confirmation to remove a member from a group.
   modalMessage: string;
+
+  private _createGroup: boolean = false;
+  get createGroup(): boolean {
+    return this._createGroup;
+  }
+
+  get groupForm(): FormGroup{
+    return this._groupSharedService.groupForm;
+  }
 
   private _isAdmin: string;
   get isAdmin(): boolean {
-    return this._isAdmin == "True";
-  }
-
-  private _groupNames: Map<string, string> = new Map<string, string>();
-
-  getGroupName(groupName: string) {
-    return this.isAdmin ? this._groupNames.get(groupName) : groupName;
+    return this._isAdmin == 'True';
   }
 
   currentPage; // the current page in the pagination (e.g. page 1, 2 ...)
@@ -84,17 +56,14 @@ export class GroupsComponent {
   }
 
   maxNumberOfGroupsPerPage = 5; // amount of groups that will be showed on the current page, to keep the page neat.
-  newMemberName: string = ""; // value of input-field in an already existing group. Will be used to add a new member to an existing group.
-  createGroupClicked: boolean = false; // if the + button (for creating a group) was clicked.
-  groupMembers: string[]; // members that were added to the newly created group.
-  groupForm: FormGroup;
+
   filterValue: string = "";
 
   /**
    * Constructor
    * @param router
    * @param _groupsDataService
-   * @param _groupsSharedService
+   * @param _groupSharedService
    * @param _assignmentDataService
    * @param _schoolDataService
    * @param fb
@@ -104,7 +73,7 @@ export class GroupsComponent {
    */
   constructor(private router: Router,
               private _groupsDataService: GroupsDataService,
-              private _groupsSharedService: GroupSharedService,
+              private _groupSharedService: GroupSharedService,
               private _schoolDataService: SchoolDataService,
               private _assignmentDataService: AssignmentDataService,
               private fb: FormBuilder,
@@ -148,67 +117,55 @@ export class GroupsComponent {
   ngOnInit(): void {
     let currentUser = AuthenticationService.parseJwt(localStorage.getItem("currentUser"));
     let schoolId = currentUser.school;
+    this._groupSharedService.setCreateGroup(schoolId);
+
     this._isAdmin = currentUser.isAdmin;
 
     if (this.isAdmin) {
       this._schoolDataService.schools().subscribe((value: School[]) => {
         this._groups = [];
-        value.forEach(school => {
-          school.groups.forEach((group: Group) => {
-            this._groupNames.set(group.name, `${school.name} ${group.name}`);
+        this._schoolDataService.schools().subscribe((schools: School[]) => {
+          for (let i = 0; i < schools.length; i++) {
+            let school = schools[i];
+            for (let j = 0; j < school.groups.length; j++) {
+              let group = school.groups[j];
+              group.schoolName = school.name;
 
-            this._groups.push(group);
-          });
+              this._groups.push(group);
+            }
+          }
+          this.initiateArrays();
         });
-
-        this.initiateArrays();
       });
     } else {
-      this._schoolDataService.getSchool(schoolId).subscribe(value => {
-        /*Todo If teacher has multiple and different schools*/
-        this._school = value;
-        this.prepareFormGroup();
+      this._schoolDataService.getSchool(schoolId).subscribe((school: School) => {
+        this._school = school;
 
         this._groups = this._school.groups;
 
         this.initiateArrays();
       });
     }
-    this.groupMembers = [];
     this._assignmentDataService.getApplicationStartDate().subscribe(value => this._applicationStartDate = new Date(value));
   }
 
-  updateGroup(group: Group) {
-    this._groupsSharedService.updateGroup(this._school.id, group);
+  public createGroupClicked() {
+    this._createGroup = !this._createGroup;
+  }
+
+  public updateGroup(group: Group) {
+    this._groupSharedService.updateGroup(this._school.id, group);
     this.router.navigate(["/group/updateGroup"]);
   }
 
+  private removeGroup(group: Group) {
+    let index = this._groups.indexOf(group, 0);
+    if (index > -1) {
+      this._groups.splice(index, 1);
+    }
 
-  removeMemberFromAlreadyCreatedGroup(group, memberName) {
-    this._groupsDataService.removeMember(group.id, memberName).subscribe(value => {
-      const index = group.members.indexOf(memberName, 0);
-      if (index > -1) {
-        group.members.splice(index, 1);
-      }
-    });
-  }
+    this.initiateArrays();
 
-  removeGroup(group) {
-    this._groupsDataService.removeGroup(group).subscribe(value => {
-      let index = this._groups.indexOf(group, 0);
-      if (index > -1) {
-        this._groups.splice(index, 1);
-      }
-      index = this._returnedArray.indexOf(group, 0);
-      if (index > -1) {
-        this._returnedArray.splice(index, 1);
-      }
-    });
-  }
-
-  decline(): void {
-    this.memberToRemove.name = "";
-    this.memberToRemove.group = null;
     this.modalRef.hide();
   }
 
@@ -253,45 +210,9 @@ export class GroupsComponent {
     this.currentPage = 1; // switches current page in pagination back to page 1
   }
 
-  /** MODAL / POPUP **/
   openModal(template: TemplateRef<any>, groupId: number, memberName?: string) {
-    if (memberName) {
-      if (groupId != -1) {
-        let group = this.findGroupWithId(groupId);
-        this.memberToRemove.group = group;
-        this.modalMessage = `Ben je zeker dat ${memberName} verwijderd mag worden uit ${group.name}?`;
-      } else { // delete member of not-yet-created group.
-        this.modalMessage = `Ben je zeker dat ${memberName} verwijderd mag worden uit de groep?`;
-      }
-      this.memberToRemove.name = memberName;
-    } else { // deleting of a group.
-      let group = this.findGroupWithId(groupId);
-      this.memberToRemove.group = group;
-      this.modalMessage = `Ben je zeker dat de groep met groepsnaam ${group.name} verwijderd mag worden? 
-      De ingediende opdrachten van deze groep worden hierdoor ook verwijderd.`;
-    }
-    this.modalRef = this._modalService.show(template, {class: 'modal-sm'});
-  }
-
-  /**
-   * When Teacher confirms to remove a group / member of group in the Modal (popup).
-   */
-  confirm(): void {
-    if (this.memberToRemove.name != "") {
-      if (this.memberToRemove.group != null) {
-        this.removeMemberFromAlreadyCreatedGroup(this.memberToRemove.group, this.memberToRemove.name);
-      }
-      const index = this.groupMembers.indexOf(this.memberToRemove.name, 0);
-      if (index > -1) {
-        this.groupMembers.splice(index, 1);
-      }
-    } else { // member to remove is from an already existing group.
-      this.removeGroup(this.memberToRemove.group);
-    }
-    this.memberToRemove.name = "";
-    this.memberToRemove.group = null;
-
-    this.modalRef.hide();
+    let group = groupId == -1 ? null : this.findGroupWithId(groupId);
+    this._groupSharedService.openModal(this._modalService, template, group, memberName);
   }
 
   /**
@@ -301,44 +222,6 @@ export class GroupsComponent {
     this._groups.sort(/*(a, b) => a.name > b.name ? 1 : -1*/);
     this._filteredGroups = this._groups;
     this._returnedArray = this._filteredGroups.slice(0, this.maxNumberOfGroupsPerPage);
-  }
-
-  prepareFormGroup() {
-    this.groupForm = this.fb.group({
-        groupName: ['', [Validators.required, Validators.minLength(2)], this.GroupNameAlreadyExists()],
-        passwordGroup: this.fb.group(
-          {
-            groupPassword: ['', [Validators.required, passwordValidator(6)]],
-            confirmPassword: ['', [Validators.required]],
-          },
-          {validator: comparePasswords}
-        ),
-        groupMember: ['', [Validators.minLength(2)]],
-        //groupMembers: [this.groupMembers]
-      },
-      //{validator: groupMembersCheck(0, 4)}
-    );
-  }
-
-  get passwordControl(): FormControl {
-    return <FormControl>this.groupForm.get('passwordGroup').get('groupPassword');
-  }
-
-  /**
-   * Checks GroupName for availability
-   */
-  GroupNameAlreadyExists(): (control: AbstractControl) => Observable<{ [p: string]: any }> {
-    return (control: AbstractControl): Observable<{ [key: string]: any }> => {
-      return this._groupsDataService
-        .checkGroupNameAvailability(this._school.id.toString(), control.value)
-        .pipe(map(available => {
-            if (available) {
-              return null;
-            }
-            return {groupAlreadyExists: true};
-          })
-        );
-    };
   }
 
   /**
@@ -354,55 +237,17 @@ export class GroupsComponent {
   }
 
   /**
-   * add a member to an already existing group.
-   * @param groupId
-   */
-  addMember(groupId: number) {
-    this._groupsDataService.addMember(groupId, this.newMemberName)
-      .subscribe(value => {
-        this.findGroupWithId(groupId).members.push(this.newMemberName);
-        this.newMemberName = "";
-      });
-  }
-
-  /**
-   * add a member to a new group.
-   */
-  addNewMember() {
-    let memberName = String(this.groupForm.value.groupMember.toString());
-    this.groupMembers.push(memberName);
-    this.groupForm.controls['groupMember'].setValue(""); //.reset();
-  }
-
-  /**
-   * check if the input field for adding a new member to a group is not empty,
-   * Used by the add-button, so if it is empty -> hide the add-button.
-   */
-  isNewMemberInputEmpty(): boolean {
-    return this.newMemberName === "";
-  }
-
-  /**
    * When submitting the form in order to create a new group.
    */
   onSubmit() {
-    // let newGroup = new Group(this.groupForm.value.groupName, null, this.groupMembers);
-    let newGroup = {
-      "name": this.groupForm.value.groupName,
-      "password": this.passwordControl.value,
-      "members": this.groupMembers
-    };
+    const newGroup = this._groupSharedService.getGroup();
     this._groupsDataService.addNewGroup(this.school.id, newGroup).subscribe(value => {
 
       // add newly created group to list of groups.
       this._groups.push(value);
       this.initiateArrays();
 
-      // reset all fields and attributes of group creation.
-      this.groupMembers = [];
-
-      this.groupForm.get("passwordGroup").get("confirmPassword").setValue("");
-      this.groupForm.reset();
+      this._groupSharedService.resetGroupForm();
 
       // show alert (modal)
       this.add(newGroup.name);
@@ -411,5 +256,14 @@ export class GroupsComponent {
 
   private findGroupWithId(groupId: number) {
     return this._groups.find(g => g.id == groupId);
+  }
+
+  decline(): void {
+    this._groupSharedService.decline();
+    this.modalRef.hide();
+  }
+
+  confirm(): void {
+    this._groupSharedService.confirm();
   }
 }

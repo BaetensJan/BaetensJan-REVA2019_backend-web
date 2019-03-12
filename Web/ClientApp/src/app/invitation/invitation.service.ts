@@ -74,8 +74,13 @@ export class InvitationService {
    * @param id
    */
   getTeacherRequest(id: number): Observable<TeacherRequest> {
-    return this.http.get(`${this._url}/teacherRequest/teacherRequest/${id}`)
-      .pipe(map(TeacherRequest.fromJSON));
+    return this.http.get(`${this._url}/teacherRequest/teacherRequest/${id}`).pipe(
+      map((res: any) => {
+        console.log(res);
+        return res;
+      })
+    );
+    //.pipe(map(TeacherRequest.fromJSON));
   }
 
   teacherRequestExist(id: number): Observable<boolean> {

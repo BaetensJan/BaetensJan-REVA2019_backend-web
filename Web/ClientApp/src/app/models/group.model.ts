@@ -19,7 +19,7 @@ export class Group {
   /**
    * @ignore
    */
-  private readonly _members: String[];
+  private readonly _members: string[];
 
   /**
    * Constructor
@@ -28,7 +28,7 @@ export class Group {
    * @param assignments
    * @param members
    */
-  constructor(name: string, assignments: Assignment[], members: String[]) {
+  constructor(name: string, assignments: Assignment[], members: string[]) {
     this._name = name;
     if (assignments) assignments.forEach(a => a.question = Question.fromJSON(a.question));
 
@@ -80,7 +80,7 @@ export class Group {
    * Getter for schoolAndGroupName
    * used in groups and assignments overview so that an admin also sees the schoolName
    */
-  get schoolAndGroupName(): string {
+  public get schoolAndGroupName() {
     return `${this._schoolName} ${this._name}`;
   }
 
@@ -92,6 +92,10 @@ export class Group {
     this._schoolName = name;
   }
 
+  get schoolName(): string {
+    return this._schoolName;
+  }
+
   /**
    * Getter for FinishedAssignments
    */
@@ -99,7 +103,7 @@ export class Group {
     return this._assignments;
   }
 
-  get members(): String[] {
+  get members(): string[] {
     return this._members;
   }
 }
