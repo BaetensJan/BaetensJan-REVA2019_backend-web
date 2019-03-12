@@ -322,18 +322,18 @@ namespace Web.Controllers
             var school = await _schoolRepository.GetByName(model.Username);
             if (school == null)
             {
-                return Ok(new
-                {
-                    Message = "School not found"
-                });
+                return Unauthorized();
             }
 
             if (school.Password.Equals(model.Password))
+            {
                 return Ok(
                     new
                     {
                         SchoolId = school.Id
                     });
+            }
+
             return Unauthorized();
         }
 
