@@ -171,10 +171,16 @@ namespace Web.Controllers
 
             // create group.
             var group = await CreateGroup(model, groupApplicationUser.Id);
-            if (group == null) return StatusCode(500);
+            if (group == null)
+            {
+                await _userManager.DeleteAsync(groupApplicationUser);
+                return StatusCode(500);
+            }
 
             // add group to school.
-            school = AddGroupToSchool(school, group);
+            AddGroupToSchool(school, group);
+
+            await _groupRepository.SaveChanges();
 
             // create token.
             var token = GetToken(groupApplicationUser, group.Id);
@@ -234,10 +240,16 @@ namespace Web.Controllers
 
             // create group.
             var group = await CreateGroup(model, groupApplicationUser.Id);
-            if (group == null) return StatusCode(500);
+            if (group == null)
+            {
+                await _userManager.DeleteAsync(groupApplicationUser);
+                return StatusCode(500);
+            }
 
             // add group to school.
-            school = AddGroupToSchool(school, group);
+            AddGroupToSchool(school, group);
+
+            await _groupRepository.SaveChanges();
 
             // return group object if creation of ApplicationUser succeeded.
             return Ok(group);
@@ -256,11 +268,10 @@ namespace Web.Controllers
                 Assignments = new List<Assignment>(),
 
                 // add ApplicationUserId of group to group.
-                ApplicationUserId = Convert.ToInt32(groupApplicationUserId),
+                ApplicationUserId = groupApplicationUserId,
             };
 
             await _groupRepository.Add(group);
-            await _groupRepository.SaveChanges();
 
             return group;
         }
@@ -281,7 +292,7 @@ namespace Web.Controllers
             return user;
         }
 
-        private static School AddGroupToSchool(School school, Group group)
+        private static void AddGroupToSchool(School school, Group group)
         {
             if (school.Groups == null)
             {
@@ -289,8 +300,6 @@ namespace Web.Controllers
             }
 
             school.Groups.Add(group);
-
-            return school;
         }
 
         //Todo: dit moet in de AuthenticationManager (wordt ook door AuthController gebruikt)
@@ -338,7 +347,7 @@ namespace Web.Controllers
                 return NotFound();
             }
 
-            var applicationUser = await _userManager.FindByIdAsync(group.ApplicationUserId.ToString());
+            var applicationUser = await _userManager.FindByIdAsync(group.ApplicationUserId);
             if (applicationUser == null)
             {
                 return NotFound();
@@ -346,11 +355,16 @@ namespace Web.Controllers
 
             if (model.PasswordChanged)
             {
-                _userManager.PasswordHasher.HashPassword(applicationUser, model.Password);
+               applicationUser.PasswordHash = _userManager.PasswordHasher.HashPassword(applicationUser, model.Password);
             }
 
             group.Name = model.Name;
             group.Members = model.Members;
+
+            var newApplicationUserName = ConstructApplicationUserUsername(school.Name, group.Name);
+            applicationUser.UserName = newApplicationUserName;
+            applicationUser.NormalizedUserName = newApplicationUserName.Normalize();
+            await _userManager.UpdateAsync(applicationUser);
 
             _groupRepository.Update(group);
             await _groupRepository.SaveChanges();
@@ -389,7 +403,7 @@ namespace Web.Controllers
             }
 
             // delete ApplicationUser of Group.
-            var groupApplicationUser = await _userManager.FindByIdAsync(group.ApplicationUserId.ToString());
+            var groupApplicationUser = await _userManager.FindByIdAsync(group.ApplicationUserId);
             await _userManager.DeleteAsync(groupApplicationUser);
 
             // delete Group.
@@ -400,8 +414,8 @@ namespace Web.Controllers
             return Ok(
                 new
                 {
-                    Id = group.Id,
-                    Name = group.Name
+                    group.Id,
+                    group.Name,
                 });
         }
     }

@@ -94,7 +94,6 @@ export class GroupsDataService {
    * @param group
    */
   updateGroup(group): Observable<Group> {
-    console.log(group);
     return this.http
       .put(`${this._appUrl}/UpdateGroup/${group.groupId}`, group)
       .pipe(map(Group.fromJSON));

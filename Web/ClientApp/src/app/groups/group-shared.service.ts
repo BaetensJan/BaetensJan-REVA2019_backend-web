@@ -54,7 +54,6 @@ export class GroupSharedService {
   public groupToRemove: Group;
 
   public groupForm: FormGroup;
-  public groupsDataService: GroupsDataService;
   private _groupMembers: string[] = []; // members that were added to the newly created group.
 
   private _formDirective: NgForm;
@@ -62,7 +61,7 @@ export class GroupSharedService {
     this._formDirective = formDirective;
   }
 
-  constructor() {
+  constructor(private _groupsDataService: GroupsDataService,) {
   }
 
   get groupMembers(): string[] {
@@ -184,7 +183,7 @@ export class GroupSharedService {
         return of(null);
       }
 
-      return this.groupsDataService
+      return this._groupsDataService
         .checkGroupNameAvailability(this._schoolId.toString(), control.value)
         .pipe(map(available => {
             if (available) {
@@ -207,7 +206,7 @@ export class GroupSharedService {
       this.removeMember(this.memberToRemove);
       this.memberToRemove = '';
     } else {
-      this.groupsDataService.removeGroup(this.groupToRemove).subscribe(value => {
+      this._groupsDataService.removeGroup(this.groupToRemove).subscribe(value => {
         component.removeGroup(this.groupToRemove);
       });
     }

@@ -32,7 +32,10 @@
           Groepsnaam
         </span>
         <input formControlName='groupName'
-               type="text" class="form-control" placeholder="Naam van nieuwe groep."
+               type="text"
+               class="form-control"
+               placeholder="Naam van nieuwe groep."
+               autocomplete="off"
                aria-describedby="basic-addon1">
       </div>
       <div class='alert alert-danger'
@@ -67,7 +70,10 @@
               Wachtwoord
             </span>
             <input formControlName='groupPassword'
-                   type="password" class="form-control" placeholder="Wachtwoord van nieuwe groep."
+                   autocomplete="off"
+                   type="password"
+                   class="form-control"
+                   placeholder="Wachtwoord van nieuwe groep."
                    aria-describedby="pw">
           </div>
           <div class='alert alert-danger'

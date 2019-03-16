@@ -12,7 +12,7 @@ namespace ApplicationCore.Entities
         public List<Assignment> Assignments { get; set; }
         [NotMapped] public List<string> Members { get; set; }
         public DateTime CreationDate { get; set; }
-        public int ApplicationUserId { get; set; }
+        public string ApplicationUserId { get; set; }
 
         /**
          * Attribute is only used by backend (groupConfiguration) to store members as string

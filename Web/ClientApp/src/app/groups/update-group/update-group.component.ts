@@ -28,7 +28,6 @@ export class UpdateGroupComponent implements OnInit, AfterViewInit {
 
   modalRef: BsModalRef; // modal that appears asking for confirmation to remove a member from a group.
   modalMessage: string;
-  private _school: School;
 
   constructor(private _groupSharedService: GroupSharedService,
               private _groupDataService: GroupsDataService,
@@ -45,8 +44,6 @@ export class UpdateGroupComponent implements OnInit, AfterViewInit {
       } else {
         this._group = this._groupSharedService.group;
       }
-    } else {
-      this._groupSharedService.groupsDataService = this._groupDataService;
     }
   }
 
@@ -126,15 +123,13 @@ export class UpdateGroupComponent implements OnInit, AfterViewInit {
       this.submit.emit(this.group);
     } else { // updating of existing group.
       const groupId = this._groupSharedService.group.id;
-      const changePassword = this.changePassword;
+      const passwordChanged = this.changePassword;
       const group =
         {
           groupId,
-          changePassword,
+          passwordChanged,
           ...this._groupSharedService.getGroup()
         };
-
-      console.log(group);
 
       this._groupDataService.updateGroup(group).subscribe(_ => {
         this.goToGroupsOverview();
