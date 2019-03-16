@@ -2,14 +2,18 @@ using System;
 using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
+using System.Net;
+using System.Net.Http;
 using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
 using ApplicationCore.Entities;
 using ApplicationCore.Interfaces;
 using ApplicationCore.Services;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 using Web.DTOs;
@@ -127,17 +131,46 @@ namespace Web.Controllers
          * Creates a Group and returns a JwtToken.
          */
         [HttpPost("[action]/{schoolId}")]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<ActionResult> CreateGroup([FromBody] GroupDTO model, int schoolId)
         {
-            if (ModelState.IsValid)
+            if (!ModelState.IsValid)
             {
-                var group = await CreateGroup(model);
-                var school = await AddGroupToSchool(schoolId, group);
+                return BadRequest();
+            }
 
-                var user = await CreateGroupUser(school, model.Name,
-                    model.Password); //todo: add column group to appuser table
+            var school = await _schoolRepository.GetById(schoolId);
+            if (school == null)
+            {
+                return NotFound();
+            }
 
-                var token = GetToken(user, group.Id);
+            // check if school already has a group with given groupName.
+            var found = school.Groups.SingleOrDefault(g => g.Name.ToLower().Equals(model.Name.ToLower()));
+            if (found != null)
+            {
+                return StatusCode(500);
+            }
+
+            // check if applicationUser for group already exists.
+            var userName = school.Name + model.Name;
+            var appUser = await _userManager.Users.SingleOrDefaultAsync(u => u.UserName == userName);
+            if (appUser != null) // there already exists an ApplicationUser with given schoolName and groupName. 
+            {
+                return StatusCode(500);
+            }
+
+            // create group.
+            var group = await CreateGroup(model);
+            if (group == null) return StatusCode(500);
+
+            school = AddGroupToSchool(school, group);
+            var groupApplicationUser = await CreateGroupUser(school, model.Name, model.Password);
+            if (groupApplicationUser != null)
+            {
+                var token = GetToken(groupApplicationUser, group.Id);
                 return
                     Ok( //Todo vervangen door return _authenticationManager.GetToken(); (duplicate code van AuthController)
                         new
@@ -149,31 +182,60 @@ namespace Web.Controllers
                         });
             }
 
-            return Ok(
-                new
-                {
-                    Message = "Zorg dat naam ingevuld is."
-                });
+            return StatusCode(500);
         }
 
         /**
          * Creates a Group and returns the created group.
          */
         [HttpPost("[action]/{schoolId}")]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<ActionResult> CreateAndReturnGroup([FromBody] GroupDTO model, int schoolId)
         {
             if (!ModelState.IsValid)
-                return Ok(
-                    new
-                    {
-                        Message = "Zorg dat naam ingevuld is."
-                    });
+            {
+                return BadRequest();
+            }
+
+            var school = await _schoolRepository.GetById(schoolId);
+            if (school == null)
+            {
+                return NotFound();
+            }
+
+            // check if school already has a group with given groupName.
+            var found = school.Groups.SingleOrDefault(g => g.Name.ToLower().Equals(model.Name.ToLower()));
+            if (found != null)
+            {
+                return StatusCode(500);
+            }
+
+            // check if applicationUser for group already exists.
+            var userName = school.Name + model.Name;
+            var appUser = await _userManager.Users.SingleOrDefaultAsync(u => u.UserName == userName);
+            if (appUser != null) // there already exists an ApplicationUser with given schoolName and groupName. 
+            {
+                return StatusCode(500);
+            }
+
+            // create group.
             var group = await CreateGroup(model);
-            var school = await AddGroupToSchool(schoolId, group);
+            if (group == null) return StatusCode(500);
 
-            await CreateGroupUser(school, model.Name, model.Password); //todo: add column group to appuser table
+            school = AddGroupToSchool(school, group);
+            
+            // create ApplicationUser of group.
+            var groupApplicationUser = await CreateGroupUser(school, model.Name, model.Password);
+            
+            // return group object if creation of ApplicationUser succeeded.
+            if (groupApplicationUser != null)
+            {
+                return Ok(group);
+            }
 
-            return Ok(group);
+            return StatusCode(500);
         }
 
         /**
@@ -194,23 +256,32 @@ namespace Web.Controllers
             return group;
         }
 
-        private async Task<ApplicationUser> CreateGroupUser(School school, string username, string password)
+        private async Task<ApplicationUser> CreateGroupUser(School school, string groupName, string password)
         {
             // Creation of ApplicationUser
-            var userName = school.Name + username;
-            var user = _authenticationManager.CreateApplicationUserObject("test@test.be",
-                userName, password);
+            var email = $"{groupName}@{school.Name}.be";
+            var username = $"{school.Name}.{groupName}";
+            
+            var user = _authenticationManager.CreateApplicationUserObject(email, username, password);
+            
             user.School = school;
+            
             await _userManager.CreateAsync(user, password);
+            
             //await _userManager.AddToRoleAsync(user, "Group");//Todo error at this point.
+            
             return user;
         }
 
-        private async Task<School> AddGroupToSchool(int schoolId, Group group)
+        private static School AddGroupToSchool(School school, Group group)
         {
-            var school = await _schoolRepository.GetById(schoolId);
-            if (school.Groups == null) school.Groups = new List<Group>();
+            if (school.Groups == null)
+            {
+                school.Groups = new List<Group>();
+            }
+
             school.Groups.Add(group);
+
             return school;
         }
 

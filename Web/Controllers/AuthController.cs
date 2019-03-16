@@ -224,48 +224,34 @@ namespace Web.Controllers
         public async Task<ActionResult> LoginWebTeacher([FromBody] LoginDTO model)
         {
             var appUser = await GetApplicationUser(model.Username);
-            if (appUser == null)
-                return Ok(
-                    new
-                    {
-                        Message = "User not found"
-                    });
+            if (appUser == null) return NotFound();
+
             if (!await CheckValidPassword(appUser, model.Password)) return Unauthorized();
 
             // check if user is a teacher or admin.
             if (!await _userManager.IsInRoleAsync(appUser, "Admin") &&
                 !await _userManager.IsInRoleAsync(appUser, "Teacher"))
+            {
                 return Unauthorized();
+            }
+
             var claim = await CreateClaims(appUser);
 
             // if user is Teacher, add schoolId to Claims.
             if (appUser.School != null)
+            {
                 claim = _authenticationManager.AddClaim(claim.ToList(), "school", appUser.School.Id.ToString())
                     .ToArray();
+            }
 
             var token = GetToken(claim);
+
             return Ok(
                 new
                 {
                     token = new JwtSecurityTokenHandler().WriteToken(token),
                     expiration = token.ValidTo
                 });
-            //THIS IS FOR FUTURE POSSIBILITY OF A GROUP LOGGING IN IN WEB, remove isInRoleAsync Teacher check above
-            // login could be with DNS (e.g. hogent.group1) or concat (e.g. hogentgroup1), so check if "."
-//            // check if userLogin is from a group. (groupLogin is a concat of schoolName + groupName)
-//            var schoolName = appUser.School.Name;
-//            if (schoolName.Length < model.Username.Length)
-//            {
-//                var groupName = model.Username.Substring(schoolName.Length);
-//
-//            var group = appUser.School.Groups.SingleOrDefault(g => g.Name == groupName);
-//                // Group login
-//                if (group != null)
-//                    claim = _authenticationManager
-//                        .AddClaim(claim.ToList(), "group", group.Id.ToString()).ToArray();
-//            } else{
-//                // this is not a group login => schoolName characters are bigger than the login username.
-// }
         }
 
         /**
@@ -275,12 +261,15 @@ namespace Web.Controllers
         [HttpPost("[Action]")]
         public async Task<ActionResult> LoginAndroidGroup([FromBody] LoginGroupDTO model)
         {
-            var username =
-                model.SchoolName +
-                model.GroupName; //ApplicationUser-username is a concat of both school- and groupname.
+            //ApplicationUser.UserName consist of (DNS): schoolName.groupName.
+            var username = $"{model.SchoolName}.{model.GroupName}";
             var appUser = await GetApplicationUser(username);
-            if (appUser == null || !await CheckValidPassword(appUser, model.Password)) return Unauthorized();
 
+            // check if group exists (ApplicationUser exists) and has a school + check if password is correct.
+            if (appUser?.School == null || !await CheckValidPassword(appUser, model.Password))
+            {
+                return Unauthorized();
+            }
 
             var group = appUser.School.Groups.SingleOrDefault(g => g.Name == model.GroupName);
 
