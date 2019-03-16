@@ -1,9 +1,13 @@
 <!--Add new group panel-->
 <div class="panel panel-default">
   <div class="panel-body">
-    <h3 style="margin-bottom: 2em;">{{ createGroup ? 'Groep aanmaken' : 'Groep Wijzigen' }}</h3>
+    <h3 style="margin-bottom: 2em;">{{ createGroup ? 'Groep aanmaken' : 'Groep Wijzigen: ' + group.name }}</h3>
 
-    <form (ngSubmit)="onSubmit()" [formGroup]='groupForm' *ngIf="groupForm">
+    <form (ngSubmit)="onSubmit()"
+          [formGroup]="groupForm"
+          *ngIf="groupForm"
+          #formDirective="ngForm"
+    >
 
 
       <div *ngIf="!createGroup">
@@ -24,7 +28,9 @@
 
 
       <div class="input-group" style="margin-bottom: 1em;">
-        <span class="input-group-addon" id="basic-addon1"></span>
+        <span class="input-group-addon" id="basic-addon1">
+          Groepsnaam
+        </span>
         <input formControlName='groupName'
                type="text" class="form-control" placeholder="Naam van nieuwe groep."
                aria-describedby="basic-addon1">
@@ -46,18 +52,20 @@
 
       <button
         style="margin-bottom: 1em; margin-top: 2em;"
-        *ngIf="!createGroup"
+        *ngIf="!createGroup && !changePassword"
         type="button"
         class="btn btn-primary"
         (click)="changePasswordClicked()">
-        <i [ngClass]="changePassword ? 'glyphicon glyphicon-minus' : 'glyphicon glyphicon-plus'"></i>
+        <!--<i [ngClass]="changePassword ? 'glyphicon glyphicon-minus' : 'glyphicon glyphicon-plus'"></i>-->
         Wachtwoord wijzigen
       </button>
 
       <div *ngIf="createGroup || changePassword">
         <div formGroupName='passwordGroup'>
           <div class="input-group" style="margin-bottom: 1em;">
-            <span class="input-group-addon" id="pw"></span>
+            <span class="input-group-addon" id="pw">
+              Wachtwoord
+            </span>
             <input formControlName='groupPassword'
                    type="password" class="form-control" placeholder="Wachtwoord van nieuwe groep."
                    aria-describedby="pw">
@@ -69,7 +77,9 @@
           </div>
 
           <div class="input-group">
-            <span class="input-group-addon" id="confirmPassword"></span>
+            <span class="input-group-addon" id="confirmPassword">
+              Bevestig Wachtwoord
+            </span>
             <input formControlName='confirmPassword'
                    type="password" class="form-control" placeholder="Bevestig wachtwoord."
                    aria-describedby="confirmPassword">
@@ -85,11 +95,15 @@
 
 
       <!-- Groepsleden toevoegen (max 4) -->
-      <div class="form-inline" style="margin-top: 2em;" *ngIf="groupMembers.length < 4; else maxMembersMessage">
+      <div class="form-inline" style="margin-top: 4em;" *ngIf="groupMembers.length < 4; else maxMembersMessage">
         <div class="form-group">
-          <label for="groupMember" style="margin-right: 0.5em;">Groepslid toevoegen</label>
-          <input formControlName="groupMember" type="text" class="form-control" id="groupMember"
-                 placeholder="Naam nieuw groepslid.">
+          <div class="input-group">
+            <span class="input-group-addon" id="groupMemberAddon">
+              Groepslid toevoegen
+            </span>
+            <input formControlName="groupMember" type="text" class="form-control" id="groupMember"
+                   placeholder="Naam nieuw groepslid.">
+          </div>
         </div>
         <button style="margin-left: 0.2em;" type="button" class="btn glyphicon glyphicon-plus-sign"
                 [disabled]='groupForm.get("groupMember").value.length < 1'

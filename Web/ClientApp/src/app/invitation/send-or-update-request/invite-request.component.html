@@ -59,6 +59,41 @@
       U heeft momenteel {{user.get("surname").errors?.maxlength.actualLength}} lettertekens gebruikt.
     </div>
   </div>
+  
+
+  <!--Email-->
+  <div class="form-group">
+    <label class="col-sm-2 control-label" for="email">E-mailadres:</label>
+    <div class="col-sm-10 col-md-3">
+      <input class="form-control" id="email" formControlName="email" type="email">
+    </div>
+  </div>
+  <div class="row">
+    <div class="col-sm-offset-2 col-sm-10 col-md-3 alert alert-danger"
+         *ngIf='user.get("email").errors?.required && user.get("email").touched'>
+      Uw emailadres is verplicht.
+    </div>
+    <div class="row">
+      <div class="col-sm-offset-2 col-sm-10 col-md-3 alert alert-danger"
+           *ngIf='user.get("email").errors?.emailAlreadyExists && user.get("email").touched'>
+        Er is al een gebruiker teruggevonden met dit emailadres
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-sm-offset-2 col-sm-10 col-md-3 alert alert-danger"
+           *ngIf='user.get("email").errors?.wrongInput && user.get("email").touched'>
+        Gelieve een geldig emailadres in te vullen.
+      </div>
+    </div>
+  </div>
+  <div class="row">
+    <div class="col-sm-offset-2 col-sm-10 col-md-3 alert alert-danger"
+         *ngIf='user.get("email").errors?.maxlength && user.get("email").touched'>
+      Dit veld mag maximum {{user.get("email").errors?.maxlength.requiredLength }} letters bevatten.
+      U heeft momenteel {{user.get("email").errors?.maxlength.actualLength}} lettertekens gebruikt.
+    </div>
+  </div>
+
 
   <!--SchoolName-->
   <div class="form-group">
@@ -116,39 +151,6 @@
     </div>
   </div>
 
-
-  <!--Email-->
-  <div class="form-group">
-    <label class="col-sm-2 control-label" for="email">E-mailadres:</label>
-    <div class="col-sm-10 col-md-3">
-      <input class="form-control" id="email" formControlName="email" type="email">
-    </div>
-  </div>
-  <div class="row">
-    <div class="col-sm-offset-2 col-sm-10 col-md-3 alert alert-danger"
-         *ngIf='user.get("email").errors?.required && user.get("email").touched'>
-      Uw emailadres is verplicht.
-    </div>
-    <div class="row">
-      <div class="col-sm-offset-2 col-sm-10 col-md-3 alert alert-danger"
-           *ngIf='user.get("email").errors?.emailAlreadyExists && user.get("email").touched'>
-        Er is al een gebruiker teruggevonden met dit emailadres
-      </div>
-    </div>
-    <div class="row">
-      <div class="col-sm-offset-2 col-sm-10 col-md-3 alert alert-danger"
-           *ngIf='user.get("email").errors?.wrongInput && user.get("email").touched'>
-        Gelieve een geldig emailadres in te vullen.
-      </div>
-    </div>
-  </div>
-  <div class="row">
-    <div class="col-sm-offset-2 col-sm-10 col-md-3 alert alert-danger"
-         *ngIf='user.get("email").errors?.maxlength && user.get("email").touched'>
-      Dit veld mag maximum {{user.get("email").errors?.maxlength.requiredLength }} letters bevatten.
-      U heeft momenteel {{user.get("email").errors?.maxlength.actualLength}} lettertekens gebruikt.
-    </div>
-  </div>
 
   <!--Note-->
   <div class="form-group">

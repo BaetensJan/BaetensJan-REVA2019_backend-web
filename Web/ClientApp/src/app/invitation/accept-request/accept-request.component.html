@@ -1,22 +1,27 @@
-<h1>Uw Reva app account werd aangemaakt!</h1>
-<br/>
-<p>
-  Uw login gegevens:
-</p>
-<p>
-  Gebruikersnaam: {{email}}
-</p>
-<p>
-  Wachtwoord: {{password}}
-</p>
-<br>
-<p>U kan met deze gegevens inloggen via volgende link: <strong>http://app.reva.be/login</strong></p>
-<b>
-  Verander zeker uw wachtwoord na inloggen!
-</b>
-<br>
-<br>
-<br>
-<footer>
-  <p>Contacteer freddy@reva.be bij problemen.</p>
-</footer>
+<div *ngIf="email && password; else waiting">
+  <h1>Uw Reva app account werd aangemaakt!</h1>
+  <br/>
+  <p>
+    Uw login gegevens:
+  </p>
+  <p>
+    Gebruikersnaam: {{email}}
+  </p>
+  <p>
+    Wachtwoord: {{password}}
+  </p>
+  <br>
+  <p>U kan met deze gegevens inloggen via volgende link: <strong>http://app.reva.be/login</strong></p>
+  <b>
+    Verander zeker uw wachtwoord na inloggen!
+  </b>
+  <br>
+  <br>
+  <br>
+  <footer>
+    <p>Contacteer freddy@reva.be bij problemen.</p>
+  </footer>
+</div>
+<ng-template #waiting>
+  Even geduld, de aanvraag wordt verwerkt...
+</ng-template>

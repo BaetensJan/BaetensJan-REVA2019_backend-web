@@ -4,11 +4,11 @@ import {
   AbstractControl,
   FormBuilder,
   FormControl,
-  FormGroup,
+  FormGroup, NgForm,
   ValidatorFn,
   Validators
 } from "@angular/forms";
-import {Observable} from "rxjs";
+import {Observable, of} from "rxjs";
 import {map} from "rxjs/operators";
 import {GroupsDataService} from "./groups-data.service";
 import {BsModalService} from "ngx-bootstrap";
@@ -57,7 +57,10 @@ export class GroupSharedService {
   public groupsDataService: GroupsDataService;
   private _groupMembers: string[] = []; // members that were added to the newly created group.
 
-  public component: any;
+  private _formDirective: NgForm;
+  public set formDirective(formDirective: NgForm) {
+    this._formDirective = formDirective;
+  }
 
   constructor() {
   }
@@ -84,6 +87,8 @@ export class GroupSharedService {
 
     this.prepareFormGroup();
 
+    this.setPasswordGroupValidators();
+
     this._createGroup = true;
   }
 
@@ -98,6 +103,7 @@ export class GroupSharedService {
     this._groupMembers = group.members;
 
     this.prepareFormGroup();
+    this.groupForm.get("passwordGroup").clearValidators();
 
     this.groupForm.patchValue({
       groupName: group.name
@@ -126,11 +132,9 @@ export class GroupSharedService {
           this.GroupNameAlreadyExists()],
         passwordGroup: fb.group(
           {
-            groupPassword: ['', [Validators.required, passwordValidator(6)]],
-            confirmPassword: ['', [Validators.required]],
-          },
-          {validator: comparePasswords}
-        ),
+            groupPassword: [''],
+            confirmPassword: [''],
+          }),
         groupMember: ['', Validators.minLength(2)],
         //groupMembers: [this.groupMembers]
       },
@@ -138,12 +142,18 @@ export class GroupSharedService {
     );
   }
 
+  public setPasswordGroupValidators() {
+    this.groupForm.get("passwordGroup").setValidators(comparePasswords);
+    this.passwordControl.setValidators([Validators.required, passwordValidator(6)]);
+    this.groupForm.get("passwordGroup").get("confirmPassword").setValidators(Validators.required);
+  }
+
   public resetGroupForm() {
     // reset all fields and attributes of group creation.
     while (this._groupMembers.length) this._groupMembers.pop();
 
     // also reset the errors
-    // formDirective.resetForm();
+    this._formDirective.resetForm();
 
     // reset form
     this.groupForm.reset();
@@ -167,6 +177,13 @@ export class GroupSharedService {
    */
   GroupNameAlreadyExists(): (control: AbstractControl) => Observable<{ [p: string]: any }> {
     return (control: AbstractControl): Observable<{ [key: string]: any }> => {
+
+      // no need to check if username exists when updating a group AND input value == groupName.
+      let controlValue = control.value;
+      if (!this._createGroup && this._group && this._group.name == controlValue) {
+        return of(null);
+      }
+
       return this.groupsDataService
         .checkGroupNameAvailability(this._schoolId.toString(), control.value)
         .pipe(map(available => {
@@ -181,16 +198,17 @@ export class GroupSharedService {
 
   /**
    * When Teacher confirms to remove a group / member of group in the Modal (popup).
+   *
+   * Parameter (optional): the component Object that calls this method.
+   * Expected when removing a Group.
    */
-  confirm(): void {
-    if (this.memberToRemove != '') {
+  confirm(component?: any): void {
+    if (component && this.memberToRemove != '') {
       this.removeMember(this.memberToRemove);
       this.memberToRemove = '';
     } else {
       this.groupsDataService.removeGroup(this.groupToRemove).subscribe(value => {
-
-        this.component.removeGroup(this.groupToRemove);
-
+        component.removeGroup(this.groupToRemove);
       });
     }
   }
@@ -209,14 +227,15 @@ export class GroupSharedService {
 
   getGroup(): any {
     return {
-      "name": this.groupForm.value.groupName,
-      "password": this.passwordControl.value,
-      "members": this._groupMembers
+      'schoolId': this._schoolId,
+      'name': this.groupForm.value.groupName,
+      'password': this.passwordControl.value,
+      'members': this._groupMembers
     };
   }
 
   /** MODAL / POPUP **/
-  openModal(modalService: BsModalService, template: TemplateRef<any>, group: Group, memberName?: string): any {
+  openModal(component: any, modalService: BsModalService, template: TemplateRef<any>, group: Group, memberName?: string): any {
     let modalMessage;
 
     if (memberName) {
@@ -228,7 +247,7 @@ export class GroupSharedService {
       modalMessage = `Ben je zeker dat de groep met groepsnaam ${group.name} verwijderd mag worden? 
       De ingediende opdrachten van deze groep worden hierdoor ook verwijderd.`;
     }
-    this.component.modalMessage = modalMessage;
-    this.component.modalRef = modalService.show(template, {class: 'modal-sm'});
+    component.modalMessage = modalMessage;
+    component.modalRef = modalService.show(template, {class: 'modal-sm'});
   }
 }

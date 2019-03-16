@@ -24,6 +24,7 @@ namespace Infrastructure.Configurations
 //            builder.Property(t => t.Password);
             //builder.Property(t => t.School).IsRequired().HasMaxLength(100);
             builder.Property(t => t.CreationDate);
+            builder.Property(g => g.ApplicationUserId);
         }
     }
 }

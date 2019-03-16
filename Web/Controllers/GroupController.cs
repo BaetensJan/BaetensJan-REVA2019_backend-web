@@ -155,34 +155,39 @@ namespace Web.Controllers
             }
 
             // check if applicationUser for group already exists.
-            var userName = school.Name + model.Name;
-            var appUser = await _userManager.Users.SingleOrDefaultAsync(u => u.UserName == userName);
+            var userName = ConstructApplicationUserUsername(school.Name, model.Name);
+            var appUser = await _userManager.FindByNameAsync(userName);
             if (appUser != null) // there already exists an ApplicationUser with given schoolName and groupName. 
             {
                 return StatusCode(500);
             }
 
-            // create group.
-            var group = await CreateGroup(model);
-            if (group == null) return StatusCode(500);
-
-            school = AddGroupToSchool(school, group);
+            // create ApplicationUser for group.
             var groupApplicationUser = await CreateGroupUser(school, model.Name, model.Password);
-            if (groupApplicationUser != null)
+            if (groupApplicationUser == null)
             {
-                var token = GetToken(groupApplicationUser, group.Id);
-                return
-                    Ok( //Todo vervangen door return _authenticationManager.GetToken(); (duplicate code van AuthController)
-                        new
-                        {
-//                            Username = user.UserName,
-//                            Token = GetToken(user, group.Id)
-                            token = new JwtSecurityTokenHandler().WriteToken(token),
-                            expiration = token.ValidTo
-                        });
+                return StatusCode(500);
             }
 
-            return StatusCode(500);
+            // create group.
+            var group = await CreateGroup(model, groupApplicationUser.Id);
+            if (group == null) return StatusCode(500);
+
+            // add group to school.
+            school = AddGroupToSchool(school, group);
+
+            // create token.
+            var token = GetToken(groupApplicationUser, group.Id);
+
+            return
+                Ok( //Todo vervangen door return _authenticationManager.GetToken(); (duplicate code van AuthController)
+                    new
+                    {
+//                            Username = user.UserName,
+//                            Token = GetToken(user, group.Id)
+                        token = new JwtSecurityTokenHandler().WriteToken(token),
+                        expiration = token.ValidTo
+                    });
         }
 
         /**
@@ -213,46 +218,50 @@ namespace Web.Controllers
             }
 
             // check if applicationUser for group already exists.
-            var userName = school.Name + model.Name;
-            var appUser = await _userManager.Users.SingleOrDefaultAsync(u => u.UserName == userName);
+            var userName = ConstructApplicationUserUsername(school.Name, model.Name);
+            var appUser = await _userManager.FindByNameAsync(userName);
             if (appUser != null) // there already exists an ApplicationUser with given schoolName and groupName. 
             {
                 return StatusCode(500);
             }
 
-            // create group.
-            var group = await CreateGroup(model);
-            if (group == null) return StatusCode(500);
-
-            school = AddGroupToSchool(school, group);
-            
-            // create ApplicationUser of group.
+            // create ApplicationUser for group.
             var groupApplicationUser = await CreateGroupUser(school, model.Name, model.Password);
-            
-            // return group object if creation of ApplicationUser succeeded.
-            if (groupApplicationUser != null)
+            if (groupApplicationUser == null)
             {
-                return Ok(group);
+                return StatusCode(500);
             }
 
-            return StatusCode(500);
+            // create group.
+            var group = await CreateGroup(model, groupApplicationUser.Id);
+            if (group == null) return StatusCode(500);
+
+            // add group to school.
+            school = AddGroupToSchool(school, group);
+
+            // return group object if creation of ApplicationUser succeeded.
+            return Ok(group);
         }
 
         /**
          * Sub method, used in Group Creation Methods (CreateGroup and CreateAndReturnGroup).
          */
-        private async Task<Group> CreateGroup(GroupDTO model)
+        private async Task<Group> CreateGroup(GroupDTO model, string groupApplicationUserId)
         {
             // Creation of Group Entity
             var group = new Group
             {
                 Name = model.Name,
                 Members = model.Members,
-                Assignments = new List<Assignment>()
+                Assignments = new List<Assignment>(),
+
+                // add ApplicationUserId of group to group.
+                ApplicationUserId = Convert.ToInt32(groupApplicationUserId),
             };
 
             await _groupRepository.Add(group);
             await _groupRepository.SaveChanges();
+
             return group;
         }
 
@@ -260,16 +269,15 @@ namespace Web.Controllers
         {
             // Creation of ApplicationUser
             var email = $"{groupName}@{school.Name}.be";
-            var username = $"{school.Name}.{groupName}";
-            
-            var user = _authenticationManager.CreateApplicationUserObject(email, username, password);
-            
+            var userName = ConstructApplicationUserUsername(school.Name, groupName);
+            var user = _authenticationManager.CreateApplicationUserObject(email, userName, password);
+
             user.School = school;
-            
+
             await _userManager.CreateAsync(user, password);
-            
+
             //await _userManager.AddToRoleAsync(user, "Group");//Todo error at this point.
-            
+
             return user;
         }
 
@@ -310,62 +318,49 @@ namespace Web.Controllers
         }
 
         [HttpPut("[action]/{id}")]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<ActionResult> UpdateGroup([FromRoute] int id, [FromBody] GroupUpdateDTO model)
         {
-            if (ModelState.IsValid)
+            if (!ModelState.IsValid)
             {
-                string schname = "";
-                IEnumerable<School> school = _userManager.Users.Where(t => t.School.Groups.Any(i => i.Id == id))
-                    .Select(s => s.School);
-                foreach (var var in school)
-                {
-                    schname = var.Name;
-                }
-
-                IEnumerable<ApplicationUser> users =
-                    _userManager.Users;
-
-                Task<Group> groups = _groupRepository.GetById(id);
-                string hashpassword = "";
-
-                //String schoolnaam = sch.Name;
-                //String schoolUsername = sch.Name + model.Name;
-                String beforeChangeSchoolName = schname + groups.Result.Name;
-
-                ApplicationUser user = users.SingleOrDefault(t => t.UserName == beforeChangeSchoolName);
-                if (!string.IsNullOrWhiteSpace(model.Password))
-                {
-                    hashpassword = _userManager.PasswordHasher.HashPassword(user, model.Password);
-                }
-
-                var group = await _groupRepository.GetById(id);
-
-                // name was updated.
-                if (!group.Name.ToLower().Equals(model.Name.ToLower()))
-                {
-                    //groupApplicationUser.UserName = model.Name;
-                    user.UserName = schname + model.Name;
-                }
-
-
-                //updaten password
-
-                //Console.WriteLine(hashpassword);
-                if (model.Members != null && model.Members.Count > 0)
-                    group.Members = model.Members;
-                group.Name = model.Name;
-                user.PasswordHash = hashpassword;
-                _groupRepository.Update(group);
-                await _groupRepository.SaveChanges();
-
-                return Ok(group);
+                return BadRequest();
             }
 
-            return Ok(
-                new
-                {
-                    Message = "Zorg dat naam ingevuld is."
-                });
+            var group = await _groupRepository.GetById(id);
+            if (group == null)
+            {
+                return NotFound();
+            }
+
+            var school = await _schoolRepository.GetById(model.SchoolId);
+            if (school == null)
+            {
+                return NotFound();
+            }
+
+            var applicationUser = await _userManager.FindByIdAsync(group.ApplicationUserId.ToString());
+            if (applicationUser == null)
+            {
+                return NotFound();
+            }
+
+            if (model.PasswordChanged)
+            {
+                _userManager.PasswordHasher.HashPassword(applicationUser, model.Password);
+            }
+
+            group.Name = model.Name;
+            group.Members = model.Members;
+
+            _groupRepository.Update(group);
+            await _groupRepository.SaveChanges();
+
+            return Ok(group);
+        }
+
+        private static string ConstructApplicationUserUsername(string schoolName, string groupName)
+        {
+            return $"{schoolName}.{groupName}";
         }
 
         [HttpGet("[Action]/{groupId}/{memberName}")]
@@ -388,11 +383,19 @@ namespace Web.Controllers
         public async Task<ActionResult> DeleteGroup(int groupId)
         {
             var group = await _groupRepository.GetById(groupId);
-            if (group != null)
+            if (group == null)
             {
-                _groupRepository.Remove(group);
-                await _groupRepository.SaveChanges();
+                return NotFound();
             }
+
+            // delete ApplicationUser of Group.
+            var groupApplicationUser = await _userManager.FindByIdAsync(group.ApplicationUserId.ToString());
+            await _userManager.DeleteAsync(groupApplicationUser);
+
+            // delete Group.
+            _groupRepository.Remove(group);
+
+            await _groupRepository.SaveChanges();
 
             return Ok(
                 new

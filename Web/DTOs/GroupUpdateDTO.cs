@@ -1,6 +1,5 @@
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
-using ApplicationCore.Entities;
 
 namespace Web.DTOs
 {
@@ -8,12 +7,9 @@ namespace Web.DTOs
     {
         [Required] public string Name { get; set; }
         [Required] public int GroupId { get; set; }
-        public List<string> Members { get; set; }
-        public List<Assignment> Assignments { get; set; }
+        [Required] public int SchoolId { get; set; }
+        [Required] public bool PasswordChanged { get; set; }
+        [Required] public List<string> Members { get; set; }
         public string Password { get; set; }
-
-        public GroupUpdateDTO(Group group)
-        {
-        }
     }
 }

@@ -1,7 +1,7 @@
-import {Component, EventEmitter, OnInit, Output} from '@angular/core';
+import {AfterViewInit, Component, EventEmitter, OnInit, Output, ViewChild} from '@angular/core';
 import {GroupSharedService} from "../group-shared.service";
 import {Group} from "../../models/group.model";
-import {FormBuilder, FormControl, FormGroup} from "@angular/forms";
+import {FormBuilder, FormControl, FormGroup, NgForm} from "@angular/forms";
 import {GroupsDataService} from "../groups-data.service";
 import {Router} from "@angular/router";
 import {BsModalRef, BsModalService} from "ngx-bootstrap";
@@ -13,10 +13,14 @@ import {SchoolDataService} from "../../schools/school-data.service";
   templateUrl: './update-group.component.html',
   styleUrls: ['./update-group.component.css']
 })
-export class UpdateGroupComponent implements OnInit {
+export class UpdateGroupComponent implements OnInit, AfterViewInit {
+  @ViewChild('formDirective') private _formDirective: NgForm;
 
   private _group: Group;
   public changePassword: boolean = false;
+
+  // counts number of times the changePassword Button has been clicked.
+  // private _changePasswordCounter: number = 0;
 
   public get createGroup() {
     return this._groupSharedService.createGroup;
@@ -42,9 +46,12 @@ export class UpdateGroupComponent implements OnInit {
         this._group = this._groupSharedService.group;
       }
     } else {
-      this._groupSharedService.component = this;
       this._groupSharedService.groupsDataService = this._groupDataService;
     }
+  }
+
+  ngAfterViewInit(): void {
+    this._groupSharedService.formDirective = this._formDirective;
   }
 
   get groupMembers(): string[] {
@@ -59,12 +66,14 @@ export class UpdateGroupComponent implements OnInit {
     return this._group;
   }
 
-  get school(): School {
-    return this._school;
-  }
-
   public changePasswordClicked() {
     this.changePassword = !this.changePassword;
+    // this._changePasswordCounter++;
+
+    // when a Teacher clicks on the changePassword button for the first time => set password validators.
+    // if (this._changePasswordCounter == 1) {
+    this._groupSharedService.setPasswordGroupValidators();
+    // }
   }
 
   addNewMember() {
@@ -102,7 +111,7 @@ export class UpdateGroupComponent implements OnInit {
    * METHODS THAT ARE ONLY USED WHEN UPDATING A GROUP
    */
 
-  @Output() submit = new EventEmitter<boolean>();
+  @Output() submit: EventEmitter<Group> = new EventEmitter();
 
   goToGroupsOverview() {
     this.router.navigate(["group/groups"]);
@@ -112,20 +121,24 @@ export class UpdateGroupComponent implements OnInit {
    * When submitting the form in order to create a new group.
    */
   onSubmit() {
-    const groupId = {"groupId": this._groupSharedService.group.id};
-    const changePassword = {"changePassword": this.changePassword};
-    const group =
-      {
-        groupId,
-        changePassword,
-        ...this._groupSharedService.getGroup()
-      };
+    // if creation of new Group.
+    if (this.createGroup) {
+      this.submit.emit(this.group);
+    } else { // updating of existing group.
+      const groupId = this._groupSharedService.group.id;
+      const changePassword = this.changePassword;
+      const group =
+        {
+          groupId,
+          changePassword,
+          ...this._groupSharedService.getGroup()
+        };
 
-    console.log(group);
+      console.log(group);
 
-    this._groupDataService.updateGroup(group).subscribe(_ => {
-      this.goToGroupsOverview();
-    });
+      this._groupDataService.updateGroup(group).subscribe(_ => {
+        this.goToGroupsOverview();
+      });
+    }
   }
-
 }

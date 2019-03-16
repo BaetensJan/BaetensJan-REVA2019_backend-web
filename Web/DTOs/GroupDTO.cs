@@ -10,9 +10,5 @@ namespace Web.DTOs
         public List<string> Members { get; set; }
         public List<Assignment> Assignments { get; set; }
         [Required] public string Password { get; set; }
-
-        public GroupDTO(Group group)
-        {
-        }
     }
 }

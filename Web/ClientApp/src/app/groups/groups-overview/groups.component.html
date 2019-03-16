@@ -62,10 +62,7 @@
     <div *ngIf="createGroup">
       <div class="panel-body">
 
-        <app-update-group
-          (submit)="onSubmit()"
-        >
-        </app-update-group>
+        <app-update-group (submit)="onSubmit($event)"></app-update-group>
       </div>
     </div>
 

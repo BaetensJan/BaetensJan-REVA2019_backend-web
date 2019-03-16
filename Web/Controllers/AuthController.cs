@@ -10,6 +10,7 @@ using System.Threading.Tasks;
 using ApplicationCore.Entities;
 using ApplicationCore.Interfaces;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -101,42 +102,47 @@ namespace Web.Controllers
         * Parameter = model: CreateTeacherViewModel
         */
         [HttpGet("[Action]/{teacherRequestId}")]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<ActionResult> CreateTeacher(int teacherRequestId)
         {
-            var model = await _teacherRequestRepository.GetById(teacherRequestId);
+            var teacherRequest = await _teacherRequestRepository.GetById(teacherRequestId);
+            
             // creating the school
-            var school = new School(model.SchoolName, GetRandomString(8));
+            var school = new School(teacherRequest.SchoolName, GetRandomString(8));
             await _schoolRepository.Add(school);
             await _schoolRepository.SaveChanges();
 
-            var password = GetRandomString(8);
-
             // creating teacher consisting of his school
-            var user = _authenticationManager.CreateApplicationUserObject(model.Email, model.Email,
+            var password = GetRandomString(8);
+            var user = _authenticationManager.CreateApplicationUserObject(teacherRequest.Email, teacherRequest.Email,
                 password);
-            user.School = await _schoolRepository.GetByName(model.SchoolName);
+            user.School = await _schoolRepository.GetByName(teacherRequest.SchoolName); // todo teacherRequest should have schoolId
             var result = await _userManager.CreateAsync(user, password);
 
-            if (result.Succeeded)
+            if (!result.Succeeded)
             {
-                user = _userManager.Users.SingleOrDefault(u => u.Id == user.Id);
-                if (user.School == null)
-                    return Ok(
-                        new
-                        {
-                            Message = "Something went wrong when creating your account."
-                        });
-                await _userManager.AddToRoleAsync(user, "Teacher");
-                //todo change email once out of sandbox (amazon)
-                await _emailSender.SendMailAsync(model.Email,
-                    "Uw Account voor de REVA app is hier!",
-                    $@"
+                return StatusCode(500);
+            }
+
+            user = await _userManager.FindByIdAsync(user.Id);
+
+            if (user.School == null)
+            {
+                return StatusCode(500);
+            }
+
+            await _userManager.AddToRoleAsync(user, "Teacher");
+
+            //todo change email once out of sandbox (amazon)
+            await _emailSender.SendMailAsync(teacherRequest.Email,
+                "Uw Account voor de REVA app is hier!",
+                $@"
                         <h1>Uw Reva app account werd aangemaakt!</h1>
                         <p>
                         Uw login gegevens:
                         </p>
                         <p>
-                        Gebruikersnaam: {model.Email}
+                        Gebruikersnaam: {teacherRequest.Email}
                         </p>
                         <p>
                         Wachtwoord: {password}
@@ -155,21 +161,15 @@ namespace Web.Controllers
                         <p>Contacteer freddy@reva.be bij problemen.</p>
                         </footer>", new string[] { });
 
-                _teacherRequestRepository.Remove(model);
-                await _teacherRequestRepository.SaveChanges();
+            _teacherRequestRepository.Remove(teacherRequest);
+            await _teacherRequestRepository.SaveChanges();
 
-                return Ok(
-                    new
-                    {
-                        login = user.UserName,
-                        password
-                    });
-            }
-
-            return Ok(new
-            {
-                Message = "Error when creating Teacher."
-            });
+            return Ok(
+                new
+                {
+                    login = user.UserName,
+                    password
+                });
         }
 
 
@@ -223,10 +223,13 @@ namespace Web.Controllers
         [HttpPost("[Action]")]
         public async Task<ActionResult> LoginWebTeacher([FromBody] LoginDTO model)
         {
-            var appUser = await GetApplicationUser(model.Username);
+            var appUser = await GetApplicationUserWithIncludes(model.Username);
             if (appUser == null) return NotFound();
 
-            if (!await CheckValidPassword(appUser, model.Password)) return Unauthorized();
+            if (!await CheckValidPassword(appUser, model.Password))
+            {
+                return Unauthorized();
+            }
 
             // check if user is a teacher or admin.
             if (!await _userManager.IsInRoleAsync(appUser, "Admin") &&
@@ -263,7 +266,7 @@ namespace Web.Controllers
         {
             //ApplicationUser.UserName consist of (DNS): schoolName.groupName.
             var username = $"{model.SchoolName}.{model.GroupName}";
-            var appUser = await GetApplicationUser(username);
+            var appUser = await GetApplicationUserWithIncludes(username);
 
             // check if group exists (ApplicationUser exists) and has a school + check if password is correct.
             if (appUser?.School == null || !await CheckValidPassword(appUser, model.Password))
@@ -295,7 +298,7 @@ namespace Web.Controllers
             return await _userManager.CheckPasswordAsync(applicationUser, password);
         }
 
-        private async Task<ApplicationUser> GetApplicationUser(string username)
+        private async Task<ApplicationUser> GetApplicationUserWithIncludes(string username)
         {
             return await _userManager.Users.Include(u => u.School).ThenInclude(s => s.Groups)
                 .SingleOrDefaultAsync(u => u.UserName == username);

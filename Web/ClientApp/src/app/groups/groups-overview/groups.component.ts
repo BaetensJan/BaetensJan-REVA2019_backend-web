@@ -3,7 +3,7 @@ import {GroupsDataService} from "../groups-data.service";
 import {Group} from "../../models/group.model";
 import {School} from "../../models/school.model";
 import {PageChangedEvent} from 'ngx-bootstrap/pagination';
-import {FormBuilder, FormControl, FormGroup, FormGroupDirective, NgForm} from "@angular/forms";
+import {FormBuilder, FormGroup} from "@angular/forms";
 import {BsModalRef, BsModalService} from "ngx-bootstrap";
 import {AppShareService} from "../../app-share.service";
 import {SchoolDataService} from "../../schools/school-data.service";
@@ -212,7 +212,7 @@ export class GroupsComponent {
 
   openModal(template: TemplateRef<any>, groupId: number, memberName?: string) {
     let group = groupId == -1 ? null : this.findGroupWithId(groupId);
-    this._groupSharedService.openModal(this._modalService, template, group, memberName);
+    this._groupSharedService.openModal(this, this._modalService, template, group, memberName);
   }
 
   /**
@@ -239,19 +239,22 @@ export class GroupsComponent {
   /**
    * When submitting the form in order to create a new group.
    */
-  onSubmit() {
-    const newGroup = this._groupSharedService.getGroup();
-    this._groupsDataService.addNewGroup(this.school.id, newGroup).subscribe(value => {
+  onSubmit(event: any) {
+    // todo get group out of event rather than groupSharedService
+    if (event) {
+      const newGroup = this._groupSharedService.getGroup();
+      this._groupsDataService.addNewGroup(this.school.id, newGroup).subscribe(value => {
 
-      // add newly created group to list of groups.
-      this._groups.push(value);
-      this.initiateArrays();
+        // add newly created group to list of groups.
+        this._groups.push(value);
+        this.initiateArrays();
 
-      this._groupSharedService.resetGroupForm();
+        this._groupSharedService.resetGroupForm();
 
-      // show alert (modal)
-      this.add(newGroup.name);
-    });
+        // show alert (modal)
+        this.add(newGroup.name);
+      });
+    }
   }
 
   private findGroupWithId(groupId: number) {
@@ -264,6 +267,6 @@ export class GroupsComponent {
   }
 
   confirm(): void {
-    this._groupSharedService.confirm();
+    this._groupSharedService.confirm(this);
   }
 }
