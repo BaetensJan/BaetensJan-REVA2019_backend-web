@@ -1,20 +1,8 @@
 import {AuthenticationService} from '../authentication.service';
 import {Component, OnInit} from '@angular/core';
 import {Router} from '@angular/router';
-import {AbstractControl, FormBuilder, FormGroup, ValidatorFn, Validators} from '@angular/forms';
+import {FormBuilder, FormGroup, Validators} from '@angular/forms';
 import {HttpErrorResponse} from '@angular/common/http';
-
-
-/**
- * Validator for password length
- */
-function passwordValidator(): ValidatorFn {
-  return (control: AbstractControl): { [key: string]: any } => {
-    return control.value.length < 12
-      ? {passwordTooShort: {value: control.value.length}}
-      : null;
-  };
-}
 
 @Component({
   selector: 'app-login',
@@ -68,7 +56,7 @@ export class LoginComponent implements OnInit {
               this.router.navigateByUrl(this.authService.redirectUrl);
               this.authService.redirectUrl = undefined;
             } else {*/
-              this.router.navigate(['/home']);
+            this.router.navigate(['/home']);
             //}
           } else {
             this.errorMsg = `De gebruikersnaam of het paswoord is verkeerd`;
@@ -80,9 +68,9 @@ export class LoginComponent implements OnInit {
               this.user.value.username
               }: ${err.error.message}`;
           } else {
-            if(err.status == 0) {
+            if (err.status == 0) {
               this.errorMsg = `Er is een probleem met de server. Gelieve later opnieuw te proberen`;
-            } else if(err.status == 404){
+            } else if (err.status == 404) {
               this.errorMsg = `Er is een probleem opgetreden`;
             } else {
               this.errorMsg = `Error ${err.status} voor het inloggen met user ${

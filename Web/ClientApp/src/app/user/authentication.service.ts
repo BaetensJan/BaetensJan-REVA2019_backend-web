@@ -2,8 +2,9 @@ import {BehaviorSubject} from 'rxjs/BehaviorSubject';
 import {Observable} from 'rxjs/Observable';
 import {HttpClient} from '@angular/common/http';
 import {Injectable} from '@angular/core';
-import {map} from 'rxjs/operators';
+import {catchError, map} from 'rxjs/operators';
 import {Router} from '@angular/router';
+import {throwError} from "rxjs";
 
 @Injectable()
 export class AuthenticationService {
@@ -209,11 +210,13 @@ export class AuthenticationService {
   }
 
   changePassword(password: string, newPassword: string): Observable<boolean> {
-    return this.http.post(`${this._url}/ChangePassword`, {CurrentPassword: password, NewPassword: newPassword}).pipe(
-      map((res: any) => {
-        return true;
-      })
-    );
+    return this.http.post(`${this._url}/ChangePassword`, {CurrentPassword: password, NewPassword: newPassword})
+      .pipe(
+        map((res: any) => {
+          return res;
+        }),
+        catchError(err => throwError(new Error('wrong password')))
+      )
   }
 
   private setTokenAndInitiateAttributes(token, username: string, schoolName: string) {

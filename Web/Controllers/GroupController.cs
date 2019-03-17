@@ -163,7 +163,7 @@ namespace Web.Controllers
             }
 
             // create ApplicationUser for group.
-            var groupApplicationUser = await CreateGroupUser(school, model.Name, model.Password);
+            var groupApplicationUser = await CreateGroupUser(school, userName, model.Name, model.Password);
             if (groupApplicationUser == null)
             {
                 return StatusCode(500);
@@ -179,7 +179,7 @@ namespace Web.Controllers
 
             // add group to school.
             AddGroupToSchool(school, group);
-
+            
             await _groupRepository.SaveChanges();
 
             // create token.
@@ -220,7 +220,7 @@ namespace Web.Controllers
             var found = school.Groups.SingleOrDefault(g => g.Name.ToLower().Equals(model.Name.ToLower()));
             if (found != null)
             {
-                return StatusCode(500);
+                return StatusCode(500, Json("GroupName already exists."));
             }
 
             // check if applicationUser for group already exists.
@@ -232,7 +232,7 @@ namespace Web.Controllers
             }
 
             // create ApplicationUser for group.
-            var groupApplicationUser = await CreateGroupUser(school, model.Name, model.Password);
+            var groupApplicationUser = await CreateGroupUser(school, userName, model.Name, model.Password);
             if (groupApplicationUser == null)
             {
                 return StatusCode(500);
@@ -248,7 +248,7 @@ namespace Web.Controllers
 
             // add group to school.
             AddGroupToSchool(school, group);
-
+            
             await _groupRepository.SaveChanges();
 
             // return group object if creation of ApplicationUser succeeded.
@@ -276,18 +276,19 @@ namespace Web.Controllers
             return group;
         }
 
-        private async Task<ApplicationUser> CreateGroupUser(School school, string groupName, string password)
+        private async Task<ApplicationUser> CreateGroupUser(School school, string userName, string groupName,
+            string password)
         {
             // Creation of ApplicationUser
             var email = $"{groupName}@{school.Name}.be";
-            var userName = ConstructApplicationUserUsername(school.Name, groupName);
             var user = _authenticationManager.CreateApplicationUserObject(email, userName, password);
 
             user.School = school;
 
             await _userManager.CreateAsync(user, password);
 
-            //await _userManager.AddToRoleAsync(user, "Group");//Todo error at this point.
+            // add ApplicationUser for Group to 'Group' Role.
+            await _userManager.AddToRoleAsync(user, "Group");
 
             return user;
         }
