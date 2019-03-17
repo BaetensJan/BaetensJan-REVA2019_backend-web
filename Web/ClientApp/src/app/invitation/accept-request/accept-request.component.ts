@@ -33,9 +33,7 @@ export class AcceptRequestComponent implements OnInit {
       if (requestId != -1) {
         this._invitationService.teacherRequestExist(requestId).subscribe((value: any) => {
           if (value) {
-            console.log(value);
             this._invitationService.createTeacher(requestId).subscribe((value: any) => {
-              console.log(value);
               this._email = value.login;
               this._password = value.password;
             });

@@ -86,9 +86,14 @@ export class InviteRequestComponent implements OnInit {
       ],
       email: [
         '',
-        Validators.compose([
-          Validators.required, Validators.minLength(1), Validators.maxLength(60),
-          this.emailPatternValidator()]),
+        Validators.compose(
+          [
+            Validators.required,
+            Validators.minLength(1),
+            Validators.maxLength(60),
+            this.emailPatternValidator(),
+          ]
+        ),
         this.serverSideValidateEmail()
       ],
       note: ''
@@ -124,8 +129,8 @@ export class InviteRequestComponent implements OnInit {
     return (control: AbstractControl): { [key: string]: any } => {
       const email = control.value;
       let regexp = new RegExp(
-        /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/);
-      //"^[^\s@]+@[^\s@]+\.[^\s@]{2,}$");
+        /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
+      );
       let correctInput = regexp.test(email);
       return correctInput ? null : {wrongInput: true};
     };

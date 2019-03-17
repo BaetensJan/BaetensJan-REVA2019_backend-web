@@ -289,8 +289,11 @@ namespace Web.Controllers
             var username = $"{model.SchoolName}.{model.GroupName}";
             var appUser = await GetApplicationUserWithIncludes(username);
 
-            // check if group exists (ApplicationUser exists) and has a school + check if password is correct.
-            if (appUser?.School == null || !await CheckValidPassword(appUser, model.Password))
+            // check if group exists (ApplicationUser exists) and has a school
+            // check if password is correct.
+            // check if user is a group
+            if (appUser?.School == null || !await CheckValidPassword(appUser, model.Password)
+                || !await _userManager.IsInRoleAsync(appUser, "Group"))
             {
                 return Unauthorized();
             }
@@ -444,18 +447,25 @@ namespace Web.Controllers
         [HttpPost("[action]")]
         public async Task<IActionResult> ChangePassword([FromBody] ChangePasswordDTO model)
         {
+            model.CurrentPassword = model.CurrentPassword.Trim();
+            model.NewPassword = model.NewPassword.Trim();
+
             var errors = new List<string>();
             if (!ModelState.IsValid)
             {
                 return BadRequest();
             }
-            
+
             var user = await _userManager.GetUserAsync(User);
             var result = await _userManager.ChangePasswordAsync(user, model.CurrentPassword, model.NewPassword);
             if (result.Succeeded)
             {
                 return Ok();
             }
+//            else
+//            {
+//                //todo if 3 x fails => lock user.
+//            }
 
             foreach (var error in result.Errors)
             {

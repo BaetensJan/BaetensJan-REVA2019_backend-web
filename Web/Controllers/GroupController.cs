@@ -280,7 +280,7 @@ namespace Web.Controllers
             string password)
         {
             // Creation of ApplicationUser
-            var email = $"{groupName}@{school.Name}.be";
+            var email = ConstructApplicationUserEmail(school.Name, groupName);
             var user = _authenticationManager.CreateApplicationUserObject(email, userName, password);
 
             user.School = school;
@@ -358,13 +358,20 @@ namespace Web.Controllers
             {
                applicationUser.PasswordHash = _userManager.PasswordHasher.HashPassword(applicationUser, model.Password);
             }
-
+            
+            // update Group.
             group.Name = model.Name;
             group.Members = model.Members;
 
+            // update ApplicationUser
             var newApplicationUserName = ConstructApplicationUserUsername(school.Name, group.Name);
             applicationUser.UserName = newApplicationUserName;
             applicationUser.NormalizedUserName = newApplicationUserName.Normalize();
+            
+            var email = ConstructApplicationUserEmail(school.Name, group.Name);
+            applicationUser.Email = email;
+            applicationUser.NormalizedEmail = email.Normalize();
+
             await _userManager.UpdateAsync(applicationUser);
 
             _groupRepository.Update(group);
@@ -376,6 +383,11 @@ namespace Web.Controllers
         private static string ConstructApplicationUserUsername(string schoolName, string groupName)
         {
             return $"{schoolName}.{groupName}";
+        }
+        
+        private static string ConstructApplicationUserEmail(string schoolName, string groupName)
+        {
+            return $"{groupName}@{schoolName}.be";
         }
 
         [HttpGet("[Action]/{groupId}/{memberName}")]
@@ -403,9 +415,17 @@ namespace Web.Controllers
                 return NotFound();
             }
 
-            // delete ApplicationUser of Group.
             var groupApplicationUser = await _userManager.FindByIdAsync(group.ApplicationUserId);
-            await _userManager.DeleteAsync(groupApplicationUser);
+
+            if (groupApplicationUser != null)
+            {
+
+                // remove ApplicationUser of Group from Group Role.
+                await _userManager.RemoveFromRoleAsync(groupApplicationUser, "Group");
+
+                // delete ApplicationUser of Group.
+                await _userManager.DeleteAsync(groupApplicationUser);
+            }
 
             // delete Group.
             _groupRepository.Remove(group);
