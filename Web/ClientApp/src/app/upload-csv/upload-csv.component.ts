@@ -51,11 +51,11 @@ export class UploadCsvComponent implements OnInit {
   private categoriess : Category[] = [];
   private categorie: Category;
   private extractData(data) { // Input csv data to the function
-    this._questionDataService.removeQuestions().subscribe(questions => {
+    /*this._questionDataService.removeQuestions().subscribe(questions => {
     });
     this._exhibitorDataService.removeExhibitors().subscribe(exhibitors => {
     });
-    /*this._categoryDataService.removeCategories().subscribe(categories => {
+    this._categoryDataService.removeCategories().subscribe(categories => {
     });*/
 
     let csvData = data;
@@ -68,28 +68,29 @@ export class UploadCsvComponent implements OnInit {
 
 
     /*for ( let i = 1; i < allTextLines.length; i++) {
-      let data = allTextLines[i].split(';');
-      if (data.length == headers.length) {
-        let tarr = [];
-        for ( let j = 0; j < headers.length; j++) {
-          tarr.push(data[j]);
-        }
-        lines.push(tarr);
+     let data = allTextLines[i].split(';');
+     if (data.length == headers.length) {
+       let tarr = [];
+       for ( let j = 0; j < headers.length; j++) {
+         tarr.push(data[j]);
+       }
+       lines.push(tarr);
 
-      }
-      categoryToAdd = this.categoriess.find(x=>x.name == data[2]);
-      if(categoryToAdd == null){
-        this.categorie = new Category();
-        this.categorie.name = data[2];
-        this.categorie.description = "";
-        this.categoriess.push(this.categorie);
-      }
-    }
-
-    for(let cat of this.categoriess){
-      this._categoryDataService.voegCategorieToe(cat).subscribe(cate => {
-      });
-    }*/
+     }
+     console.log(data);
+     categoryToAdd = this.categoriess.find(x=>x.name == data[2]);
+     if(categoryToAdd == null){
+       this.categorie = new Category();
+       this.categorie.name = data[2];
+       this.categorie.description = "";
+       this.categoriess.push(this.categorie);
+     }
+   }
+    console.log(this.categoriess);
+   for(let cat of this.categoriess){
+     this._categoryDataService.voegCategorieToe(cat).subscribe(cate => {
+     });
+   }*/
 
 
 
@@ -104,7 +105,6 @@ export class UploadCsvComponent implements OnInit {
 
       }
       exhibitorToAdd = this.exhibitors.find(x=>x.name == data[0]);
-
       if (this.exhibitors.length != 0 && exhibitorToAdd != undefined) {
         this._categoryDataService.categorieByName(data[2]).subscribe(categoryByName => {
           exhibitorToAdd.categories.push(categoryByName);
@@ -116,6 +116,7 @@ export class UploadCsvComponent implements OnInit {
             categoryToAdd = exhibitorToAdd.categories.find(x=>x.name == data[2]);
             if(categoryToAdd == null) {
               exhibitorToAdd.categories.push(categoryByName);
+              console.log(exhibitorToAdd);
             }
             teller++;
           } else {
@@ -129,11 +130,20 @@ export class UploadCsvComponent implements OnInit {
               this.exhibitor.exhibitorNumber = data[1];
             }
             this.exhibitor.categories.push(categoryByName);
-            this.exhibitors.push(this.exhibitor);
-            if(allTextLines.length-4< teller){
+            console.log(this.exhibitor);
+            if(this.exhibitors.indexOf(this.exhibitor) !== -1) {
+
+            } else {
+              this.exhibitors.push(this.exhibitor);
+            }
+            console.log(allTextLines.length);
+            console.log(allTextLines.length-4);
+            console.log(teller);
+            if(allTextLines.length-7< teller){
               console.log("toe te voegen categorieen");
               console.log(this.categoriess);
               for(let exhib of this.exhibitors){
+                console.log(exhib);
                 this._exhibitorDataService.voegExhibitorToe(exhib).subscribe(exposant => {
                 });
               }
@@ -150,6 +160,7 @@ export class UploadCsvComponent implements OnInit {
 
                 this._categoryDataService.categorieByName(data[2]).subscribe(categoryByName => {
                   this._exhibitorDataService.exhibitorByName(data[0]).subscribe(exhibitorByName => {
+                    console.log("test");
                     if(data[3] == "") {
                       let question = {
                         "questionText": "geen vraag",
@@ -187,13 +198,14 @@ export class UploadCsvComponent implements OnInit {
         });
       }
     }
+    //console.log(lines);
     this.router.navigateByUrl('/questions', {skipLocationChange: true}).then(()=>
       this.router.navigate(["/"]));
   }
 
-  /*public replaceAll(input: string, find: string, replace: string): string {
+  public replaceAll(input: string, find: string, replace: string): string {
     return input.replace(new RegExp(find, 'g'), replace);
-  }*/
+  }
 
   public uploadCSV() {
     this.extractData(this._csv);
