@@ -48,7 +48,26 @@ export class InformatieschermComponent implements OnInit {
     var data = document.getElementById('contentToConvert');
     html2canvas(data).then(canvas => {
       // Few necessary setting options
-      let pdf = new jsPDF('p', 'pt', 'a4'); // A4 size page of PDF
+      var imgData = canvas.toDataURL('image/png');
+      var imgWidth = 210;
+      var pageHeight = 295;
+      var imgHeight = canvas.height * imgWidth / canvas.width;
+      var heightLeft = imgHeight;
+      var doc = new jsPDF('p', 'mm');
+      var position = 0;
+
+      doc.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+      heightLeft -= pageHeight;
+
+      while (heightLeft >= 0) {
+        position = heightLeft - imgHeight;
+        doc.addPage();
+        doc.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+        heightLeft -= pageHeight;
+      }
+
+
+      /*let pdf = new jsPDF('p', 'pt', 'a4'); // A4 size page of PDF
       let wid: number;
       let hgt: number;
       let img = canvas.toDataURL("image/png", wid = canvas.width, hgt = canvas.height);
@@ -56,8 +75,9 @@ export class InformatieschermComponent implements OnInit {
       let width = pdf.internal.pageSize.width - 20;
       let height = width * ratio - 20;
       pdf.addImage(img, 'JPEG', 20, 20, width, height);
-      pdf.addImage(img, 'JPEG', 20, 20, width, height);
-      pdf.save('informatie_applicatie.pdf'); // Generated PDF
+      pdf.addPage();
+      pdf.addImage(img, 'JPEG', 20, 20, width, height);*/
+      doc.save('informatie_applicatie.pdf'); // Generated PDF
     });
   }
 }
