@@ -2,8 +2,9 @@ import {BehaviorSubject} from 'rxjs/BehaviorSubject';
 import {Observable} from 'rxjs/Observable';
 import {HttpClient} from '@angular/common/http';
 import {Injectable} from '@angular/core';
-import {map} from 'rxjs/operators';
+import {catchError, map} from 'rxjs/operators';
 import {Router} from '@angular/router';
+import {throwError} from "rxjs";
 
 @Injectable()
 export class AuthenticationService {
@@ -118,12 +119,12 @@ export class AuthenticationService {
         if (token) {
           const token = res.token;
           let parsedToken = AuthenticationService.parseJwt(token);
-          if (this.checkUserRole(parsedToken)) { // check if user is a teacher
-            this.setTokenAndInitiateAttributes(res.token, username, parsedToken.schoolName);
-            return true;
-          }
-          return false; // checkUserRole failed => user is a group
-        } else return false;
+          this._isAdmin$ = new BehaviorSubject<boolean>(JSON.parse(parsedToken.isAdmin.toLowerCase()));
+
+          this.setTokenAndInitiateAttributes(res.token, username, parsedToken.schoolName);
+          return true;
+        }
+        return false;
       })
     )
   }
@@ -209,24 +210,18 @@ export class AuthenticationService {
   }
 
   changePassword(password: string, newPassword: string): Observable<boolean> {
-    return this.http.post(`${this._url}/ChangePassword`, {CurrentPassword: password, NewPassword: newPassword}).pipe(
-      map((res: any) => {
-        return true;
-      })
-    );
+    return this.http.post(`${this._url}/ChangePassword`, {CurrentPassword: password, NewPassword: newPassword})
+      .pipe(
+        map((res: any) => {
+          return res;
+        }),
+        catchError(err => throwError(new Error('wrong password')))
+      )
   }
 
   private setTokenAndInitiateAttributes(token, username: string, schoolName: string) {
     localStorage.setItem(this._tokenKey, token);
     this._user$.next(username);
     this._school$.next(schoolName);
-  }
-
-  private checkUserRole(parsedToken): boolean {
-    // check if user is administrator.
-    this._isAdmin$ = new BehaviorSubject<boolean>(JSON.parse(parsedToken.isAdmin.toLowerCase()));
-
-    // check if user is a group. Groups have no access to web.
-    return !(parsedToken && parsedToken.group);
   }
 }

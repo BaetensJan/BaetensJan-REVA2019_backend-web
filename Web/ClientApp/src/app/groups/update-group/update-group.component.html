@@ -81,6 +81,10 @@
             Het wachtwoord moet minimum {{ passwordControl.errors?.passwordTooShort.requiredLength }} karakters
             bevatten. Momenteel bevat het maar {{passwordControl.errors?.passwordTooShort.actualLength}} karakter(s).
           </div>
+          <div class='alert alert-danger'
+               *ngIf='passwordControl.errors?.whitespace && passwordControl.touched'>
+            Wachtwoord mag geen spaties (witruimtes) bevatten.
+          </div>
 
           <div class="input-group">
             <span class="input-group-addon" id="confirmPassword">

@@ -163,7 +163,7 @@ namespace Web.Controllers
             }
 
             // create ApplicationUser for group.
-            var groupApplicationUser = await CreateGroupUser(school, model.Name, model.Password);
+            var groupApplicationUser = await CreateGroupUser(school, userName, model.Name, model.Password);
             if (groupApplicationUser == null)
             {
                 return StatusCode(500);
@@ -179,7 +179,7 @@ namespace Web.Controllers
 
             // add group to school.
             AddGroupToSchool(school, group);
-
+            
             await _groupRepository.SaveChanges();
 
             // create token.
@@ -220,7 +220,7 @@ namespace Web.Controllers
             var found = school.Groups.SingleOrDefault(g => g.Name.ToLower().Equals(model.Name.ToLower()));
             if (found != null)
             {
-                return StatusCode(500);
+                return StatusCode(500, Json("GroupName already exists."));
             }
 
             // check if applicationUser for group already exists.
@@ -232,7 +232,7 @@ namespace Web.Controllers
             }
 
             // create ApplicationUser for group.
-            var groupApplicationUser = await CreateGroupUser(school, model.Name, model.Password);
+            var groupApplicationUser = await CreateGroupUser(school, userName, model.Name, model.Password);
             if (groupApplicationUser == null)
             {
                 return StatusCode(500);
@@ -248,7 +248,7 @@ namespace Web.Controllers
 
             // add group to school.
             AddGroupToSchool(school, group);
-
+            
             await _groupRepository.SaveChanges();
 
             // return group object if creation of ApplicationUser succeeded.
@@ -276,18 +276,19 @@ namespace Web.Controllers
             return group;
         }
 
-        private async Task<ApplicationUser> CreateGroupUser(School school, string groupName, string password)
+        private async Task<ApplicationUser> CreateGroupUser(School school, string userName, string groupName,
+            string password)
         {
             // Creation of ApplicationUser
-            var email = $"{groupName}@{school.Name}.be";
-            var userName = ConstructApplicationUserUsername(school.Name, groupName);
+            var email = ConstructApplicationUserEmail(school.Name, groupName);
             var user = _authenticationManager.CreateApplicationUserObject(email, userName, password);
 
             user.School = school;
 
             await _userManager.CreateAsync(user, password);
 
-            //await _userManager.AddToRoleAsync(user, "Group");//Todo error at this point.
+            // add ApplicationUser for Group to 'Group' Role.
+            await _userManager.AddToRoleAsync(user, "Group");
 
             return user;
         }
@@ -357,13 +358,20 @@ namespace Web.Controllers
             {
                applicationUser.PasswordHash = _userManager.PasswordHasher.HashPassword(applicationUser, model.Password);
             }
-
+            
+            // update Group.
             group.Name = model.Name;
             group.Members = model.Members;
 
+            // update ApplicationUser
             var newApplicationUserName = ConstructApplicationUserUsername(school.Name, group.Name);
             applicationUser.UserName = newApplicationUserName;
             applicationUser.NormalizedUserName = newApplicationUserName.Normalize();
+            
+            var email = ConstructApplicationUserEmail(school.Name, group.Name);
+            applicationUser.Email = email;
+            applicationUser.NormalizedEmail = email.Normalize();
+
             await _userManager.UpdateAsync(applicationUser);
 
             _groupRepository.Update(group);
@@ -375,6 +383,11 @@ namespace Web.Controllers
         private static string ConstructApplicationUserUsername(string schoolName, string groupName)
         {
             return $"{schoolName}.{groupName}";
+        }
+        
+        private static string ConstructApplicationUserEmail(string schoolName, string groupName)
+        {
+            return $"{groupName}@{schoolName}.be";
         }
 
         [HttpGet("[Action]/{groupId}/{memberName}")]
@@ -402,9 +415,17 @@ namespace Web.Controllers
                 return NotFound();
             }
 
-            // delete ApplicationUser of Group.
             var groupApplicationUser = await _userManager.FindByIdAsync(group.ApplicationUserId);
-            await _userManager.DeleteAsync(groupApplicationUser);
+
+            if (groupApplicationUser != null)
+            {
+
+                // remove ApplicationUser of Group from Group Role.
+                await _userManager.RemoveFromRoleAsync(groupApplicationUser, "Group");
+
+                // delete ApplicationUser of Group.
+                await _userManager.DeleteAsync(groupApplicationUser);
+            }
 
             // delete Group.
             _groupRepository.Remove(group);

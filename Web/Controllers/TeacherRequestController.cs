@@ -2,7 +2,9 @@ using System.Threading.Tasks;
 using ApplicationCore.Entities;
 using ApplicationCore.Interfaces;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Web.DTOs;
 
 namespace Web.Controllers
@@ -39,21 +41,19 @@ namespace Web.Controllers
         [HttpPost("[Action]")]
         public async Task<IActionResult> SendRequest([FromBody] CreateTeacherDTO model)
         {
-            if (ModelState.IsValid)
+            if (!ModelState.IsValid)
             {
-                var request = new TeacherRequest(model.Name, model.Surname, model.Email, model.SchoolName, model.Note);
-                await _teacherRequestRepository.Add(request);
-                await _teacherRequestRepository.SaveChanges();
-
-                return Ok(new
-                {
-                    Message = "Teacher request successfully added."
-                });
+                ModelState.AddModelError("", "Please fill in all required fields.");
+                return BadRequest(ModelState);
             }
+
+            var request = new TeacherRequest(model.Name, model.Surname, model.Email, model.SchoolName, model.Note);
+            await _teacherRequestRepository.Add(request);
+            await _teacherRequestRepository.SaveChanges();
 
             return Ok(new
             {
-                Message = "Please fill in all required fields."
+                Message = "Teacher request successfully added."
             });
         }
 
@@ -63,25 +63,23 @@ namespace Web.Controllers
         [HttpPut("[Action]/{requestId}")]
         public async Task<IActionResult> UpdateRequest([FromBody] CreateTeacherDTO model, int requestId)
         {
-            if (ModelState.IsValid)
+            if (!ModelState.IsValid)
             {
-                var request = await _teacherRequestRepository.GetById(requestId);
-                request.Name = model.Name;
-                request.Surname = model.Surname;
-                request.Note = model.Note;
-                request.Email = model.Email;
-                request.SchoolName = model.SchoolName;
-                await _teacherRequestRepository.SaveChanges();
-
-                return Ok(new
-                {
-                    Message = "Teacher request successfully updated."
-                });
+                ModelState.AddModelError("", "Please fill in all required fields.");
+                return BadRequest(ModelState);
             }
+
+            var request = await _teacherRequestRepository.GetById(requestId);
+            request.Name = model.Name;
+            request.Surname = model.Surname;
+            request.Note = model.Note;
+            request.Email = model.Email;
+            request.SchoolName = model.SchoolName;
+            await _teacherRequestRepository.SaveChanges();
 
             return Ok(new
             {
-                Message = "Please fill in all required fields."
+                Message = "Teacher request successfully updated."
             });
         }
 
@@ -102,7 +100,7 @@ namespace Web.Controllers
         public async Task<IActionResult> TeacherRequestExists(int requestId)
         {
             var request = await _teacherRequestRepository.GetById(requestId);
-           
+
             return Ok(request != null);
         }
 

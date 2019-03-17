@@ -106,7 +106,7 @@ namespace Web.Controllers
         public async Task<ActionResult> CreateTeacher(int teacherRequestId)
         {
             var teacherRequest = await _teacherRequestRepository.GetById(teacherRequestId);
-            
+
             // creating the school
             var school = new School(teacherRequest.SchoolName, GetRandomString(8));
             await _schoolRepository.Add(school);
@@ -116,12 +116,14 @@ namespace Web.Controllers
             var password = GetRandomString(8);
             var user = _authenticationManager.CreateApplicationUserObject(teacherRequest.Email, teacherRequest.Email,
                 password);
-            user.School = await _schoolRepository.GetByName(teacherRequest.SchoolName); // todo teacherRequest should have schoolId
+            user.School =
+                await _schoolRepository.GetByName(teacherRequest
+                    .SchoolName); // todo teacherRequest should have schoolId
             var result = await _userManager.CreateAsync(user, password);
 
             if (!result.Succeeded)
             {
-                return StatusCode(500);
+                return StatusCode(500, Json("Teacher creation failed."));
             }
 
             user = await _userManager.FindByIdAsync(user.Id);
@@ -131,8 +133,28 @@ namespace Web.Controllers
                 return StatusCode(500);
             }
 
+            // add Teacher to Teacher Role.
             await _userManager.AddToRoleAsync(user, "Teacher");
 
+            // send email to teacher.
+            await SendEmailToTeacher(teacherRequest, password);
+
+            _teacherRequestRepository.Remove(teacherRequest);
+            await _teacherRequestRepository.SaveChanges();
+
+            return Ok(
+                new
+                {
+                    login = user.UserName,
+                    password
+                });
+        }
+
+        /**
+         * Sends an email to the Teacher when the TeacherRequest has been accepted by admin on web.
+         */
+        private async Task SendEmailToTeacher(TeacherRequest teacherRequest, string password)
+        {
             //todo change email once out of sandbox (amazon)
             await _emailSender.SendMailAsync(teacherRequest.Email,
                 "Uw Account voor de REVA app is hier!",
@@ -160,18 +182,7 @@ namespace Web.Controllers
                         <p>Deze email werd automatisch verzonden! Reageer niet op dit bericht.</p>
                         <p>Contacteer freddy@reva.be bij problemen.</p>
                         </footer>", new string[] { });
-
-            _teacherRequestRepository.Remove(teacherRequest);
-            await _teacherRequestRepository.SaveChanges();
-
-            return Ok(
-                new
-                {
-                    login = user.UserName,
-                    password
-                });
         }
-
 
         /**
          * Creating the Claim Array for a specific ApplicationUser.
@@ -223,8 +234,14 @@ namespace Web.Controllers
         [HttpPost("[Action]")]
         public async Task<ActionResult> LoginWebTeacher([FromBody] LoginDTO model)
         {
+            model.Username = model.Username.Trim();
+            model.Password = model.Password.Trim();
+
             var appUser = await GetApplicationUserWithIncludes(model.Username);
-            if (appUser == null) return NotFound();
+            if (appUser == null)
+            {
+                return NotFound(Json("User not found."));
+            }
 
             if (!await CheckValidPassword(appUser, model.Password))
             {
@@ -235,7 +252,7 @@ namespace Web.Controllers
             if (!await _userManager.IsInRoleAsync(appUser, "Admin") &&
                 !await _userManager.IsInRoleAsync(appUser, "Teacher"))
             {
-                return Unauthorized();
+                return Unauthorized(Json("Not allowed."));
             }
 
             var claim = await CreateClaims(appUser);
@@ -264,12 +281,19 @@ namespace Web.Controllers
         [HttpPost("[Action]")]
         public async Task<ActionResult> LoginAndroidGroup([FromBody] LoginGroupDTO model)
         {
+            model.GroupName = model.GroupName.Trim();
+            model.SchoolName = model.SchoolName.Trim();
+            model.Password = model.Password.Trim();
+
             //ApplicationUser.UserName consist of (DNS): schoolName.groupName.
             var username = $"{model.SchoolName}.{model.GroupName}";
             var appUser = await GetApplicationUserWithIncludes(username);
 
-            // check if group exists (ApplicationUser exists) and has a school + check if password is correct.
-            if (appUser?.School == null || !await CheckValidPassword(appUser, model.Password))
+            // check if group exists (ApplicationUser exists) and has a school
+            // check if password is correct.
+            // check if user is a group
+            if (appUser?.School == null || !await CheckValidPassword(appUser, model.Password)
+                || !await _userManager.IsInRoleAsync(appUser, "Group"))
             {
                 return Unauthorized();
             }
@@ -311,6 +335,9 @@ namespace Web.Controllers
         [HttpPost("[Action]")]
         public async Task<ActionResult> LoginAndroidSchool([FromBody] LoginDTO model)
         {
+            model.Username = model.Username.Trim();
+            model.Password = model.Password.Trim();
+
             var school = await _schoolRepository.GetByName(model.Username);
             if (school == null)
             {
@@ -420,6 +447,9 @@ namespace Web.Controllers
         [HttpPost("[action]")]
         public async Task<IActionResult> ChangePassword([FromBody] ChangePasswordDTO model)
         {
+            model.CurrentPassword = model.CurrentPassword.Trim();
+            model.NewPassword = model.NewPassword.Trim();
+
             var errors = new List<string>();
             if (!ModelState.IsValid)
             {
@@ -432,6 +462,10 @@ namespace Web.Controllers
             {
                 return Ok();
             }
+//            else
+//            {
+//                //todo if 3 x fails => lock user.
+//            }
 
             foreach (var error in result.Errors)
             {

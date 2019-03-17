@@ -34,6 +34,15 @@ function comparePasswords(control: AbstractControl): { [key: string]: any } {
     : {passwordsDiffer: true};
 }
 
+/**
+ * Check on whitespaces.
+ *
+ */
+function noWhitespaceValidator(control: AbstractControl): { [key: string]: any } {
+  const containsWhitespaces = /\s/.test(control.value);
+  return containsWhitespaces ? {whitespace: true} : null;
+}
+
 // function groupMembersCheck(minLength: number, maxLength: number): ValidatorFn {
 //   return (control: AbstractControl): { [key: string]: any } => {
 //     const count = control.get("groupMembers").value.length;
@@ -143,7 +152,7 @@ export class GroupSharedService {
 
   public setPasswordGroupValidators() {
     this.groupForm.get("passwordGroup").setValidators(comparePasswords);
-    this.passwordControl.setValidators([Validators.required, passwordValidator(6)]);
+    this.passwordControl.setValidators([Validators.required, passwordValidator(6), noWhitespaceValidator]);
     this.groupForm.get("passwordGroup").get("confirmPassword").setValidators(Validators.required);
   }
 
