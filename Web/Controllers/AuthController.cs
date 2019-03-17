@@ -188,22 +188,34 @@ namespace Web.Controllers
          * Creating the Claim Array for a specific ApplicationUser.
          * Return: Claim[]
          */
-        private async Task<Claim[]> CreateClaims(ApplicationUser user)
+        private async Task<Claim[]> CreateClaims(ApplicationUser user, string groupId = null)
         {
-            var isAdmin = await _userManager.IsInRoleAsync(user, "Admin");
+            // RESPECT THE ORDER OF THE CLAIMS, METHODS WILL GET INFO FROM CLAIMS VIA FIXED INDEXES
+            // todo work with claimtypes, which makes the order unimportant
+            // source: https://stackoverflow.com/questions/22246538/access-claim-values-in-controller-in-mvc-5
+            var roles = await _userManager.GetRolesAsync(user);
+            var isAdmin = roles.Contains("Admin");
 
             var claims = new List<Claim>()
             {
                 new Claim(JwtRegisteredClaimNames.Sub,
-                    user.Id), //Todo: In case something doesn't work anymore with User, this has been changed from user.Email
+                    user.Id),
                 new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
                 new Claim(ClaimTypes.NameIdentifier, user.Id),
                 new Claim("username", user.UserName),
                 new Claim("isAdmin", isAdmin.ToString()),
             };
-            if (await _userManager.IsInRoleAsync(user, "Teacher"))
+
+            if (groupId != null && roles.Contains("Group"))
+            {
+                claims.Add(new Claim("groupId", groupId));
+            }
+            else if (roles.Contains("Teacher"))
+            {
                 claims.Add(new Claim("schoolName", user.School.Name));
-            claims.AddRange((await _userManager.GetRolesAsync(user)).Select(role => new Claim(ClaimTypes.Role, role)));
+            }
+
+            claims.AddRange(roles.Select(role => new Claim(ClaimTypes.Role, role)));
 
             return claims.ToArray();
         }
@@ -293,7 +305,7 @@ namespace Web.Controllers
             // check if password is correct.
             // check if user is a group
             if (appUser?.School == null || !await CheckValidPassword(appUser, model.Password)
-                || !await _userManager.IsInRoleAsync(appUser, "Group"))
+                                        || !await _userManager.IsInRoleAsync(appUser, "Group"))
             {
                 return Unauthorized();
             }
@@ -305,10 +317,9 @@ namespace Web.Controllers
                 return Unauthorized();
             }
 
-            var claim = await CreateClaims(appUser);
-            claim = _authenticationManager.AddClaim(claim.ToList(), "group", group.Id.ToString()).ToArray();
+            var claims = await CreateClaims(appUser, group.Id.ToString());
 
-            var token = GetToken(claim);
+            var token = GetToken(claims);
             return Ok(
                 new
                 {

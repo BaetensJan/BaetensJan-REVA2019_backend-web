@@ -2,8 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
-using System.Net;
-using System.Net.Http;
 using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
@@ -13,7 +11,6 @@ using ApplicationCore.Services;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 using Web.DTOs;
@@ -50,11 +47,34 @@ namespace Web.Controllers
         * Gets groupId via token -> groupId
         */
         [HttpGet("[action]")]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<IActionResult> GroupInfo()
         {
-            // get username from jwt token.
-            var groupId = User.Claims.ElementAt(5).Value;
-            var group = await _groupRepository.GetById(Convert.ToInt32(groupId));
+            string claim;
+            int groupId;
+
+            try
+            {
+                // get groupId from jwt token.
+                claim = User.Claims.ElementAt(5).Value;
+            }
+            catch (IndexOutOfRangeException e)
+            {
+                // token has less than 6 items and does not have the groupId Claim.
+                return StatusCode(500, $"Token does not consist of a groupId. {e}");
+            }
+
+            try
+            {
+                groupId = Convert.ToInt32(claim);
+            }
+            catch (FormatException formatException)
+            {
+                // System.FormatException: Input string was not in a correct format.
+                return StatusCode(500, $"Token does not consist of a groupId. {formatException}");
+            }
+
+            var group = await _groupRepository.GetById(groupId);
             if (group == null) return Ok(new {Message = "Group not found or groupId not in token."});
             var groupInfo = _groupManager.GetGroupInfo(group);
             return groupInfo;
@@ -179,7 +199,7 @@ namespace Web.Controllers
 
             // add group to school.
             AddGroupToSchool(school, group);
-            
+
             await _groupRepository.SaveChanges();
 
             // create token.
@@ -248,7 +268,7 @@ namespace Web.Controllers
 
             // add group to school.
             AddGroupToSchool(school, group);
-            
+
             await _groupRepository.SaveChanges();
 
             // return group object if creation of ApplicationUser succeeded.
@@ -356,9 +376,10 @@ namespace Web.Controllers
 
             if (model.PasswordChanged)
             {
-               applicationUser.PasswordHash = _userManager.PasswordHasher.HashPassword(applicationUser, model.Password);
+                applicationUser.PasswordHash =
+                    _userManager.PasswordHasher.HashPassword(applicationUser, model.Password);
             }
-            
+
             // update Group.
             group.Name = model.Name;
             group.Members = model.Members;
@@ -367,7 +388,7 @@ namespace Web.Controllers
             var newApplicationUserName = ConstructApplicationUserUsername(school.Name, group.Name);
             applicationUser.UserName = newApplicationUserName;
             applicationUser.NormalizedUserName = newApplicationUserName.Normalize();
-            
+
             var email = ConstructApplicationUserEmail(school.Name, group.Name);
             applicationUser.Email = email;
             applicationUser.NormalizedEmail = email.Normalize();
@@ -384,7 +405,7 @@ namespace Web.Controllers
         {
             return $"{schoolName}.{groupName}";
         }
-        
+
         private static string ConstructApplicationUserEmail(string schoolName, string groupName)
         {
             return $"{groupName}@{schoolName}.be";
@@ -419,7 +440,6 @@ namespace Web.Controllers
 
             if (groupApplicationUser != null)
             {
-
                 // remove ApplicationUser of Group from Group Role.
                 await _userManager.RemoveFromRoleAsync(groupApplicationUser, "Group");
 
