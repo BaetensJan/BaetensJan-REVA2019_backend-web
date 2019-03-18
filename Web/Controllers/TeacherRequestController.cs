@@ -1,3 +1,5 @@
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using ApplicationCore.Entities;
 using ApplicationCore.Interfaces;
@@ -32,6 +34,7 @@ namespace Web.Controllers
         public async Task<IActionResult> Requests()
         {
             var requests = await _teacherRequestRepository.All();
+            requests = requests.Where(req => req.Accepted == null).ToList();
             return Ok(requests);
         }
 
@@ -112,7 +115,8 @@ namespace Web.Controllers
         public async Task<ActionResult> DeclineRequest(int teacherRequestId)
         {
             var request = await _teacherRequestRepository.GetById(teacherRequestId);
-            _teacherRequestRepository.Remove(request);
+//            _teacherRequestRepository.Remove(request);
+            request.Accepted = false;
             await _teacherRequestRepository.SaveChanges();
 
             return Ok(new

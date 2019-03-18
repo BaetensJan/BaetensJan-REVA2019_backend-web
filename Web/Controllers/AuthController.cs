@@ -139,7 +139,8 @@ namespace Web.Controllers
             // send email to teacher.
             await SendEmailToTeacher(teacherRequest, password);
 
-            _teacherRequestRepository.Remove(teacherRequest);
+            // accept TeacherRequest.
+            teacherRequest.Accepted = true;
             await _teacherRequestRepository.SaveChanges();
 
             return Ok(

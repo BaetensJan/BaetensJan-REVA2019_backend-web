@@ -20,6 +20,7 @@ namespace Infrastructure.Configurations
             builder.Property(t => t.SchoolName);
             builder.Property(t => t.Email);
             builder.Property(t => t.CreationDate);
+            builder.Property(t => t.Accepted);
         }
     }
 }
