@@ -1,5 +1,6 @@
 using System.Threading.Tasks;
 using ApplicationCore.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Web.Controllers
@@ -19,6 +20,7 @@ namespace Web.Controllers
         }
 
         [HttpGet("{schoolId}")]
+        [Authorize]
         public async Task<IActionResult> School(int schoolId)
         {
             //var school = _schoolRepository.GetById(schoolId); //Todo: fix error: Process is Terminated due to StackOverFlowException 
@@ -30,6 +32,7 @@ namespace Web.Controllers
          * Gets all the schools. 
          */
         [HttpGet]
+        [Authorize]
         public async Task<IActionResult> Schools()
         {
             var schools = await _schoolRepository.GetAll();
@@ -41,7 +44,12 @@ namespace Web.Controllers
         {
             var test = await _schoolRepository.GetByName(schoolName);
             var exists = test != null;
-            return exists ? Ok(new {schoolName = "alreadyexists"}) : Ok(new {schoolName = "ok"});
+            if (exists)
+            {
+                Ok(new {schoolName = "alreadyexists"});
+            }
+
+            return Ok(new {schoolName = "ok"});
         }
     }
 }

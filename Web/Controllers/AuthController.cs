@@ -44,56 +44,43 @@ namespace Web.Controllers
             _emailSender = emailSender;
         }
 
-        [HttpGet("[Action]")]
-        public async Task<IActionResult> TestMail()
-        {
-            await _emailSender.SendMailAsync("baetens-jan@vivaldi.net",
-                "Amazon SES test (SMTP interface accessed using C#)",
-                "<h1>Amazon SES Test</h1>" +
-                "<p>This email was sent through the " +
-                "<a href='https://aws.amazon.com/ses'>Amazon SES</a> SMTP interface " +
-                "using the .NET System.Net.Mail library.</p>", new string[] { });
-            return Ok("OK");
-        }
-
         /**
          * This method is used to manually Create an ApplicationUser (e.g. create admin) via e.g. Postman.
          * Parameter = model: CreateUserViewModel
          */
         [HttpPost("[Action]")]
+        [Authorize]
         public async Task<ActionResult> CreateUser([FromBody] CreateUserDTO model)
         {
-            if (ModelState.IsValid)
+            if (!ModelState.IsValid)
             {
-                var user = _authenticationManager.CreateApplicationUserObject(model.Email, model.Username,
-                    model.Password);
-                var result = await _userManager.CreateAsync(user, model.Password);
+                return BadRequest("Error please make sure your details are correct");
+            }
 
-                if (result.Succeeded)
-                {
-                    user = _userManager.Users.SingleOrDefault(u => u.Id == user.Id);
+            var user = _authenticationManager.CreateApplicationUserObject(model.Email, model.Username,
+                model.Password);
+            var result = await _userManager.CreateAsync(user, model.Password);
+
+            if (result.Succeeded)
+            {
+                user = _userManager.Users.SingleOrDefault(u => u.Id == user.Id);
 
 //                    TODO: uncomment line beneath if you want to create an admin.
 //                    await _userManager.AddToRoleAsync(user, "Admin");
 
-                    user = _userManager.Users.SingleOrDefault(u => u.Id == user.Id);
+                user = _userManager.Users.SingleOrDefault(u => u.Id == user.Id);
 
-                    var claim = await CreateClaims(user);
+                var claim = await CreateClaims(user);
 
-                    return Ok(
-                        new
-                        {
-                            Username = user.UserName,
-                            Token = GetToken(claim)
-                        });
-                }
+                return Ok(
+                    new
+                    {
+                        Username = user.UserName,
+                        Token = GetToken(claim)
+                    });
             }
 
-            return Ok(
-                new
-                {
-                    Message = "Error please make sure your details are correct"
-                });
+            return StatusCode(500, "Creation of user failed");
         }
 
         /**
@@ -103,6 +90,7 @@ namespace Web.Controllers
         */
         [HttpGet("[Action]/{teacherRequestId}")]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        [Authorize]
         public async Task<ActionResult> CreateTeacher(int teacherRequestId)
         {
             var teacherRequest = await _teacherRequestRepository.GetById(teacherRequestId);
@@ -156,7 +144,7 @@ namespace Web.Controllers
             teacherRequest.ApplicationUserId = user.Id;
 
             await _teacherRequestRepository.SaveChanges();
-            
+
             // send email to teacher.
             await SendEmailToTeacher(teacherRequest, password);
 

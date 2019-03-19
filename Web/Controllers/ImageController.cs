@@ -1,5 +1,6 @@
 using System.Threading.Tasks;
 using ApplicationCore.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
@@ -17,12 +18,14 @@ namespace Web.Controllers
         }
 
         [HttpPost("[action]")]
+        [Authorize]
         public async Task<IActionResult> UploadImage(IFormFile file)
         {
             return Ok(await _imageWriter.UploadImage(file, ""));
         }
 
         [HttpPost("[action]")]
+        [Authorize]
         [RequestSizeLimit(100_000_000)]
         public async Task<IActionResult> UpdateExhibitionRoutePlanImage(IFormFile file)
         {

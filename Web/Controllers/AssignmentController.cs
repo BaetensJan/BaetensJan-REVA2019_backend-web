@@ -4,10 +4,8 @@ using System.Threading.Tasks;
 using ApplicationCore.Entities;
 using ApplicationCore.Interfaces;
 using ApplicationCore.Services;
-using Infrastructure.Repositories;
-using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore.Internal;
 using Microsoft.Extensions.Configuration;
 using Web.DTOs;
 
@@ -56,12 +54,14 @@ namespace Web.Controllers
         }
 
         [HttpGet("[Action]")]
+        [Authorize]
         public IActionResult GetAmountOfAssignments()
         {
             return Ok(_configuration["AmountOfQuestions"]);
         }
 
         [HttpGet("[Action]")]
+        [Authorize]
         public IActionResult GetStartDateOfApplication()
         {
             return Ok(new
@@ -86,6 +86,7 @@ namespace Web.Controllers
         * RETURN an Assignment, containing an Exhibitor object that represent the current, newly assigned Exhibitor.
         */
         [HttpGet("[Action]/{categoryId}/{previousExhibitorId}/{isExtraRound}")]
+        [Authorize]
         public async Task<IActionResult> CreateAssignment(int categoryId, int previousExhibitorId, bool isExtraRound)
         {
             var group = await GetGroup();
@@ -137,6 +138,7 @@ namespace Web.Controllers
         * A group has created a new Exhibitor in the Extra Tour, as they didn't find the Exhibitor in the list.
         */
         [HttpGet("[Action]")]
+        [Authorize]
         public async Task<IActionResult> CreateAssignmentNewExhibitor([FromBody] CreatedExhibitorDTO createdExhibitor)
         {
             //We take a specific question for this assignment, as an assignment needs a question
@@ -165,9 +167,7 @@ namespace Web.Controllers
             group.AddAssignment(assignment);
             await _assignmentRepository.SaveChanges();
 
-            assignment =
-                await _assignmentRepository
-                    .GetByIdLight(assignment.Id); //Todo temporary, otherwise we have recursive catExh data
+            assignment = await _assignmentRepository.GetByIdLight(assignment.Id); //Todo temporary, otherwise we have recursive catExh data
 
             assignment.Answer = ""; // empty answer for android (we will re-add the exhibitor information @ submit)
 
@@ -186,6 +186,7 @@ namespace Web.Controllers
         * RETURN an Assignment, containing an Exhibitor object that represent the current, newly assigned Exhibitor.
         */
         [HttpGet("[Action]/{categoryId}/{exhibitorId}")]
+        [Authorize]
         public async Task<IActionResult> CreateAssignmentOfExhibitorAndCategory(int categoryId, int exhibitorId)
         {
             var question = await _questionRepository.GetQuestion(categoryId, exhibitorId);
@@ -203,61 +204,59 @@ namespace Web.Controllers
         * When a group submits an Assignment in the application, this controller method will be called.
         */
         [HttpPost("SubmitAssignment")]
+        [Authorize]
         public async Task<IActionResult> Submit([FromBody] AssignmentDTO model)
         {
-            if (ModelState.IsValid)
+            if (!ModelState.IsValid)
             {
-                var assignment = await _assignmentRepository.GetById(model.Id);
-                var answer = "";
-
-                // Group created Exhibitor in Extra Round
-                var createdExhibitor =
-                    assignment.WithCreatedExhibitor(_configuration.GetValue<int>("CreatedExhibitorQuestionId"));
-
-                if (createdExhibitor)
-                {
-                    answer = $"{assignment.Answer}. Antwoord groep: {model.Answer}";
-                }
-                else // assignment of normal tour
-                {
-                    answer = model.Answer;
-
-                    var exhibitor =
-                        await _exhibitorRepository.GetById(assignment.Question.CategoryExhibitor.ExhibitorId);
-                    exhibitor.GroupsAtExhibitor--;
-                }
-
-                assignment.Answer = answer;
-                assignment.Notes = model.Notes;
-                if (!string.IsNullOrEmpty(model.Photo)) assignment.Photo = _imageWriter.WriteBase64ToFile(model.Photo);
-                assignment.Submitted = true;
-                assignment.SubmissionDate = DateTime.Now;
-
-                await _assignmentRepository.SaveChanges();
-
-                // make backup of assignment
-                var group = await GetGroup();
-
-                await _assignmentBackupRepository.Add(assignment, User.Claims.ElementAt(3).ToString(),
-                    group.Name, createdExhibitor);
-
-//                if (result.Succeeded)
-                //TODO: temporary, recursive loop anders:
-                assignment = await _assignmentRepository.GetByIdLight(assignment.Id);
-                return Ok(assignment);
+                return BadRequest("Error, the submitted assignment is not valid.");
             }
 
-            return Ok(
-                new
-                {
-                    Message = "Error, the submitted assignment is not valid."
-                });
+            var assignment = await _assignmentRepository.GetById(model.Id);
+            var answer = "";
+
+            // Group created Exhibitor in Extra Round
+            var createdExhibitor =
+                assignment.WithCreatedExhibitor(_configuration.GetValue<int>("CreatedExhibitorQuestionId"));
+
+            if (createdExhibitor)
+            {
+                answer = $"{assignment.Answer}. Antwoord groep: {model.Answer}";
+            }
+            else // assignment of normal tour
+            {
+                answer = model.Answer;
+
+                var exhibitor =
+                    await _exhibitorRepository.GetById(assignment.Question.CategoryExhibitor.ExhibitorId);
+                exhibitor.GroupsAtExhibitor--;
+            }
+
+            assignment.Answer = answer;
+            assignment.Notes = model.Notes;
+            if (!string.IsNullOrEmpty(model.Photo)) assignment.Photo = _imageWriter.WriteBase64ToFile(model.Photo);
+            assignment.Submitted = true;
+            assignment.SubmissionDate = DateTime.Now;
+
+            await _assignmentRepository.SaveChanges();
+
+            // make backup of assignment
+            var group = await GetGroup();
+
+            await _assignmentBackupRepository.Add(assignment, User.Claims.ElementAt(3).ToString(),
+                group.Name, createdExhibitor);
+
+//                if (result.Succeeded)
+            //TODO: temporary, recursive loop anders:
+            assignment = await _assignmentRepository.GetByIdLight(assignment.Id);
+            return Ok(assignment);
         }
 
         /**
          * If a group decides to cancel the Assignment in the application.
          */
         [HttpDelete("RemoveAssignment/{assignmentId}")]
+        [Authorize]
         public async Task<IActionResult> Remove(int assignmentId)
         {
             var assignment = await _assignmentRepository.GetById(assignmentId);
@@ -265,18 +264,8 @@ namespace Web.Controllers
             await _assignmentRepository.SaveChanges();
             return Ok(new
             {
-                //Message = "Assignment with assignmentId " + assignmentId + " was successfully deleted."
                 AssignmentId = assignment.Id
             });
         }
-
-//        /**
-//         * Gets all the Assignment objects from the database.
-//         */
-//        [HttpGet("[action]")]
-//        public IEnumerable<Assignment> Assignments()
-//        {
-//            return _assignmentRepository.All();
-//        }
     }
 }

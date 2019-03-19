@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using ApplicationCore.Entities;
 using ApplicationCore.Interfaces;
 using ApplicationCore.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 
@@ -31,18 +32,20 @@ namespace Web.Controllers
         }
 
         [HttpGet("[action]")]
-        public Task<IEnumerable<Category>> Categories()
+        [Authorize]
+        public async Task<IActionResult> Categories()
         {
-            return _categoryRepository.All();
+            return Ok(await _categoryRepository.All());
         }
 
         /**
-         * returns category with name equal to parameter categoryname.
+         * returns category with name equal to parameter categoryName.
          */
         [HttpGet("[action]/{categoryName}")]
-        public async Task<Category> CategorieByName(string categoryName)
+        [Authorize]
+        public async Task<IActionResult> CategoryByName(string categoryName)
         {
-            return await _categoryRepository.GetByName(categoryName);
+            return Ok(await _categoryRepository.GetByName(categoryName));
         }
 
         /**
@@ -53,6 +56,7 @@ namespace Web.Controllers
          * 
          */
         [HttpGet("[action]/{exhibitorId}")]
+        [Authorize]
         public async Task<IActionResult> GetUnpickedCategories(int exhibitorId)
         {
             var group = await _groupRepository.GetById(Convert.ToInt32(User.Claims.ElementAt(5).Value));
@@ -69,16 +73,18 @@ namespace Web.Controllers
          * Where a question exists for the Category - Exhibitor combination.
          */
         [HttpGet("[action]/{exhibitorId}")]
-        public Task<List<Category>> CategoryExhibitorComboWithQuestion(int exhibitorId)
+        [Authorize]
+        public async Task<IActionResult> CategoryExhibitorComboWithQuestion(int exhibitorId)
         {
-            var categories = _categoryRepository.ExhibitorsCategoryComboWithQuestion(exhibitorId);
-            return categories;
+            var categories = await _categoryRepository.ExhibitorsCategoryComboWithQuestion(exhibitorId);
+            return Ok(categories);
         }
 
         [HttpPost("[action]")]
-        public async Task<Category> AddCategory([FromBody] Category category)
+        [Authorize]
+        public async Task<IActionResult> AddCategory([FromBody] Category category)
         {
-            Category c = new Category()
+            var c = new Category
             {
                 Name = category.Name,
                 Description = category.Description,
@@ -88,23 +94,26 @@ namespace Web.Controllers
             await _categoryRepository.Add(c);
 
             await _categoryRepository.SaveChanges();
-            return c;
+            
+            return Ok(c);
         }
 
         [HttpDelete("[action]/{id}")]
-        public async Task<Category> RemoveCategory([FromRoute] int id)
+        [Authorize]
+        public async Task<IActionResult> RemoveCategory([FromRoute] int id)
         {
-            Category category = await _categoryRepository.GetById(id);
+            var category = await _categoryRepository.GetById(id);
             _categoryRepository.Remove(category);
 
             await _categoryRepository.SaveChanges();
-            return category;
+            return Ok(category);
         }
 
         [HttpDelete("RemoveCategories")]
+        [Authorize]
         public async Task<ActionResult> RemoveCategories()
         {
-            IEnumerable<Category> categories = await _categoryRepository.All();
+            var categories = await _categoryRepository.All();
             if (categories != null)
             {
                 _categoryRepository.RemoveAllCategories(categories);
@@ -115,15 +124,16 @@ namespace Web.Controllers
         }
 
         [HttpPut("[action]/{id}")]
-        public async Task<Category> UpdateCategory([FromRoute] int id, [FromBody] Category category)
+        [Authorize]
+        public async Task<IActionResult> UpdateCategory([FromRoute] int id, [FromBody] Category category)
         {
-            Category c = await _categoryRepository.GetById(category.Id);
+            var c = await _categoryRepository.GetById(category.Id);
             c.Name = category.Name;
             c.Description = category.Description;
             _categoryRepository.Update(c);
 
             await _categoryRepository.SaveChanges();
-            return category;
+            return Ok(category);
         }
     }
 }

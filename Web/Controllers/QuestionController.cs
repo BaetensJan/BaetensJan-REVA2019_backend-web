@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using ApplicationCore.Entities;
 using ApplicationCore.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Web.DTOs;
 
@@ -23,33 +24,31 @@ namespace Web.Controllers
         }
 
         [HttpGet("[action]")]
-        public async Task<IEnumerable<Question>> Questions()
+        [Authorize]
+        public async Task<IActionResult> Questions()
         {
-            return await _questionRepository.GetAllLight();
+            return Ok(await _questionRepository.GetAllLight());
         }
 
         [HttpPost("CreateQuestion")]
-        public async Task<ActionResult> CreateQuestion([FromBody] QuestionDTO model)
+        [Authorize]
+        public async Task<IActionResult> CreateQuestion([FromBody] QuestionDTO model)
         {
             if (ModelState.IsValid)
             {
-                var ce = await GetOrCreateCategoryExhibitor(model.CategoryId, model.ExhibitorId);
-                var question = new Question()
-                {
-                    QuestionText = model.QuestionText,
-                    Answer = model.AnswerText,
-                    CategoryExhibitor = ce
-                };
-                await _questionRepository.Add(question);
-                await _questionRepository.SaveChanges();
-                return Ok(question);
+                return BadRequest("Zorg dat naam ingevuld is.");
             }
 
-            return Ok(
-                new
-                {
-                    Message = "Zorg dat naam ingevuld is."
-                });
+            var ce = await GetOrCreateCategoryExhibitor(model.CategoryId, model.ExhibitorId);
+            var question = new Question()
+            {
+                QuestionText = model.QuestionText,
+                Answer = model.AnswerText,
+                CategoryExhibitor = ce
+            };
+            await _questionRepository.Add(question);
+            await _questionRepository.SaveChanges();
+            return Ok(question);
         }
 
         /*public void TruncateTable()
@@ -58,42 +57,23 @@ namespace Web.Controllers
             SqlCommand cmd = new SqlCommand(sqlTrunc);
             cmd.ExecuteNonQuery();
         }*/
-        
+
         [HttpPut("[action]/{id}")]
-        public async Task<ActionResult> EditQuestion([FromRoute] int id,[FromBody] QuestionUpdateDTO model)
+        [Authorize]
+        public async Task<IActionResult> EditQuestion([FromRoute] int id, [FromBody] QuestionUpdateDTO model)
         {
             var ce = await GetOrCreateCategoryExhibitor(model.CategoryId, model.ExhibitorId);
-            var q =  await _questionRepository.EditQuestion(id, model.QuestionText, model.AnswerText, ce);
+            var q = await _questionRepository.EditQuestion(id, model.QuestionText, model.AnswerText, ce);
 
             if (q == null)
             {
-                return Ok(
-                    new
-                    {
-                        Message = "Zorg dat questionId correct is."
-                    });
+                NotFound("Zorg dat questionId correct is.");
             }
+
             await _questionRepository.SaveChanges();
+            
             return Ok(q);
         }
-        
-        /*[HttpPost("[Action]")]
-        public async Task<ActionResult> EditQuestion([FromBody] QuestionUpdateDTO model)
-        {
-            var ce = await GetOrCreateCategoryExhibitor(model.CategoryId, model.ExhibitorId);
-            var q =  await _questionRepository.EditQuestion(model.QuestionId, model.QuestionText, model.AnswerText, ce);
-
-            if (q == null)
-            {
-                return Ok(
-                    new
-                    {
-                        Message = "Zorg dat questionId correct is."
-                    });
-            }
-            await _questionRepository.SaveChanges();
-            return Ok(q);
-        }*/
 
         public async Task<CategoryExhibitor> GetOrCreateCategoryExhibitor(int categoryId, int exhibitorId)
         {
@@ -108,7 +88,8 @@ namespace Web.Controllers
         }
 
         [HttpDelete("DeleteQuestion/{QuestionId}")]
-        public async Task<ActionResult> DeleteQuestion(int QuestionId)
+        [Authorize]
+        public async Task<IActionResult> DeleteQuestion(int QuestionId)
         {
             var question = await _questionRepository.GetById(QuestionId);
             if (question != null)
@@ -123,11 +104,12 @@ namespace Web.Controllers
                     Id = question.Id,
                 });
         }
-        
+
         [HttpDelete("DeleteQuestions")]
+        [Authorize]
         public async Task<ActionResult> DeleteQuestions()
         {
-            IEnumerable<Question> questions = await _questionRepository.GetAll();
+            var questions = await _questionRepository.GetAll();
             if (questions != null)
             {
                 _questionRepository.RemoveAllQuestions(questions);
@@ -136,7 +118,5 @@ namespace Web.Controllers
 
             return Ok();
         }
-        
-        
     }
 }

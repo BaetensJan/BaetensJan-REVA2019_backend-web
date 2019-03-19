@@ -2,7 +2,7 @@
   <h1>Ingediende opdrachten</h1>
 </div>
 
-<div *ngIf="returnedArray.length > 0; else noGroups">
+<div *ngIf="returnedArray && returnedArray.length > 0; else noGroups">
   <div>
     <div class="col-md-8">
       <div class="input-group">

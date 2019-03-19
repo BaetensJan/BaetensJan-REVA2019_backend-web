@@ -30,11 +30,12 @@ namespace Web.Controllers
         * Gets all the pending requests.
         */
         [HttpGet("[Action]")]
+        [Authorize]
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Requests()
         {
             var requests = await _teacherRequestRepository.All();
-//            requests = requests.Where(req => req.Accepted == null).ToList();
+
             return Ok(requests);
         }
 
@@ -49,7 +50,7 @@ namespace Web.Controllers
                 ModelState.AddModelError("", "Please fill in all required fields.");
                 return BadRequest(ModelState);
             }
-            
+
             var request = new TeacherRequest(model.Name, model.Surname, model.Email, model.SchoolName, model.Note);
             await _teacherRequestRepository.Add(request);
             await _teacherRequestRepository.SaveChanges();
@@ -64,6 +65,7 @@ namespace Web.Controllers
         * Admin updates a Teacher-registration request.
         */
         [HttpPut("[Action]/{requestId}")]
+        [Authorize]
         public async Task<IActionResult> UpdateRequest([FromBody] CreateTeacherDTO model, int requestId)
         {
             if (!ModelState.IsValid)
@@ -90,6 +92,7 @@ namespace Web.Controllers
         * return Request with id equal to parameter requestId.
         */
         [HttpGet("[Action]/{requestId}")]
+        [Authorize]
         public async Task<IActionResult> TeacherRequest(int requestId)
         {
             var request = await _teacherRequestRepository.GetById(requestId);
@@ -97,9 +100,10 @@ namespace Web.Controllers
         }
 
         /**
-        * return Request with id equal to parameter requestId.
+        * return true if Request exists with id equal to parameter requestId.
         */
         [HttpGet("[Action]/{requestId}")]
+        [Authorize]
         public async Task<IActionResult> TeacherRequestExists(int requestId)
         {
             var request = await _teacherRequestRepository.GetById(requestId);
@@ -112,10 +116,10 @@ namespace Web.Controllers
         *
         **/
         [HttpGet("[Action]/{teacherRequestId}")]
+        [Authorize]
         public async Task<ActionResult> DeclineRequest(int teacherRequestId)
         {
             var request = await _teacherRequestRepository.GetById(teacherRequestId);
-//            _teacherRequestRepository.Remove(request);
             request.Accepted = false;
             await _teacherRequestRepository.SaveChanges();
 

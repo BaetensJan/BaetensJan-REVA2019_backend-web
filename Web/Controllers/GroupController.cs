@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using ApplicationCore.Entities;
 using ApplicationCore.Interfaces;
 using ApplicationCore.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -47,6 +48,7 @@ namespace Web.Controllers
         * Gets groupId via token -> groupId
         */
         [HttpGet("[action]")]
+        [Authorize]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<IActionResult> GroupInfo()
         {
@@ -75,7 +77,11 @@ namespace Web.Controllers
             }
 
             var group = await _groupRepository.GetById(groupId);
-            if (group == null) return Ok(new {Message = "Group not found or groupId not in token."});
+            if (group == null)
+            {
+                return NotFound(new {Message = "Group not found or groupId not in token."});
+            }
+
             var groupInfo = _groupManager.GetGroupInfo(group);
             return groupInfo;
         }
@@ -84,15 +90,17 @@ namespace Web.Controllers
          * return group with id equal to parameter groupId.
          */
         [HttpGet("[action]/{groupId}")]
-        public async Task<Group> Group(int groupId)
+        [Authorize]
+        public async Task<IActionResult> Group(int groupId)
         {
-            return await _groupRepository.GetById(groupId);
+            return Ok(await _groupRepository.GetById(groupId));
         }
 
         /**
          * Returns all groups of school with schoolId equal to parameter schoolId.
          */
         [HttpGet("[action]/{schoolId}")]
+        [Authorize]
         public async Task<IActionResult> Groups(int schoolId)
         {
             var school = await _schoolRepository.GetById(schoolId);
@@ -101,10 +109,7 @@ namespace Web.Controllers
                 return Ok(school.Groups);
             }
 
-            return Ok(new
-            {
-                Message = "School not found"
-            });
+            return NotFound();
         }
 
 
@@ -113,18 +118,22 @@ namespace Web.Controllers
          * If parameter schoolId is -1, then the schoolId can be extracted out of the token via User.claims.
          */
         [HttpGet("[action]/{schoolId}/{groupName}")]
+        [Authorize]
         public async Task<IActionResult> GetBySchoolIdAndGroupName(int schoolId, string groupName)
         {
             var school = await _schoolRepository.GetById(schoolId);
             if (school == null)
-                return Ok(new
-                {
-                    Message = "School not found"
-                });
+            {
+                return NotFound("School not found");
+            }
+
             var group = school.Groups.SingleOrDefault(g => g.Name == groupName);
-            return group == null
-                ? Ok(new {Message = "Group not found in school with school name: " + school.Name})
-                : Ok(group);
+            if (group == null)
+            {
+                return NotFound("Group not found in school with school name: " + school.Name);
+            }
+
+            return Ok(group);
         }
 
         /**
@@ -134,23 +143,33 @@ namespace Web.Controllers
         public async Task<IActionResult> CheckGroupName(int schoolId, string groupName)
         {
             var school = await _schoolRepository.GetById(schoolId);
-            if (school == null) return Ok(new {GroupName = "School not found"});
+            if (school == null)
+            {
+                return Ok(new {GroupName = "School not found"});
+            }
+
             var foundGroup = "alreadyexists";
+
             if (school.Groups.FindIndex(g => g.Name.ToLower().Equals(groupName.ToLower())) < 0)
+            {
                 foundGroup = "ok";
+            }
+
             return Ok(new {GroupName = foundGroup});
         }
 
         [HttpGet("[action]")]
-        public async Task<IEnumerable<Group>> Groups()
+        [Authorize]
+        public async Task<IActionResult> Groups()
         {
-            return await _groupRepository.GetAllLight();
+            return Ok(await _groupRepository.GetAllLight());
         }
 
         /**
          * Creates a Group and returns a JwtToken.
          */
         [HttpPost("[action]/{schoolId}")]
+        [Authorize]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
@@ -205,8 +224,7 @@ namespace Web.Controllers
             // create token.
             var token = GetToken(groupApplicationUser, group.Id);
 
-            return
-                Ok( //Todo vervangen door return _authenticationManager.GetToken(); (duplicate code van AuthController)
+            return Ok( //Todo vervangen door return _authenticationManager.GetToken(); (duplicate code van AuthController)
                     new
                     {
 //                            Username = user.UserName,
@@ -220,6 +238,7 @@ namespace Web.Controllers
          * Creates a Group and returns the created group.
          */
         [HttpPost("[action]/{schoolId}")]
+        [Authorize]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
@@ -348,6 +367,7 @@ namespace Web.Controllers
         }
 
         [HttpPut("[action]/{id}")]
+        [Authorize]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<ActionResult> UpdateGroup([FromRoute] int id, [FromBody] GroupUpdateDTO model)
         {
@@ -412,22 +432,28 @@ namespace Web.Controllers
         }
 
         [HttpGet("[Action]/{groupId}/{memberName}")]
-        public async Task<Group> AddMember(int groupId, string memberName)
+        [Authorize]
+        //todo authorize teacher or admin
+        public async Task<IActionResult> AddMember(int groupId, string memberName)
         {
             var group = await _groupRepository.AddMember(groupId, memberName);
             await _groupRepository.SaveChanges();
-            return group;
+            return Ok(group);
         }
 
         [HttpGet("[Action]/{groupId}/{memberName}")]
-        public async Task<Group> RemoveMember(int groupId, string memberName)
+        [Authorize]
+        //todo authorize teacher or admin
+        public async Task<IActionResult> RemoveMember(int groupId, string memberName)
         {
             var group = await _groupRepository.RemoveMember(groupId, memberName);
             await _groupRepository.SaveChanges();
-            return group;
+            return Ok(group);
         }
 
         [HttpDelete("DeleteGroup/{groupId}")]
+        [Authorize]
+        //todo authorize teacher or admin
         public async Task<ActionResult> DeleteGroup(int groupId)
         {
             var group = await _groupRepository.GetById(groupId);
