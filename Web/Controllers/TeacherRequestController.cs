@@ -34,7 +34,7 @@ namespace Web.Controllers
         public async Task<IActionResult> Requests()
         {
             var requests = await _teacherRequestRepository.All();
-            requests = requests.Where(req => req.Accepted == null).ToList();
+//            requests = requests.Where(req => req.Accepted == null).ToList();
             return Ok(requests);
         }
 
@@ -49,7 +49,7 @@ namespace Web.Controllers
                 ModelState.AddModelError("", "Please fill in all required fields.");
                 return BadRequest(ModelState);
             }
-
+            
             var request = new TeacherRequest(model.Name, model.Surname, model.Email, model.SchoolName, model.Note);
             await _teacherRequestRepository.Add(request);
             await _teacherRequestRepository.SaveChanges();

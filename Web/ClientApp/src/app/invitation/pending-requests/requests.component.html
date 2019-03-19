@@ -22,14 +22,15 @@
       </tr>
       </thead>
       <tbody>
-      <tr *ngFor="let request of requests">
+      <tr *ngFor="let request of requests"
+          [ngClass]="getClass(request.accepted)">
         <td style="text-transform:capitalize;">{{request.creationDateString}}</td>
         <td style="text-transform:capitalize;">{{request.name}}</td>
         <td style="text-transform:capitalize;">{{request.surname}}</td>
         <td>{{request.email}}</td>
         <td style="text-transform:capitalize;">{{request.schoolName}}</td>
         <td style="text-transform:capitalize;">{{request.note}}</td>
-        <td>
+        <td *ngIf="request.accepted == undefined">
           <span class="btn glyphicon glyphicon-ok" aria-hidden="true"
                 (click)="openModal(template, request, true)"></span>
           <span class="btn glyphicon glyphicon-edit" aria-hidden="true"

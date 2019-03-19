@@ -7,18 +7,21 @@ export class TeacherRequest {
    * @param email
    * @param schoolName
    * @param note
+   * @param accepted
    */
   constructor(
     name: string,
     surname: string,
     email: string,
     schoolName: string,
-    note: string) {
+    note: string,
+    accepted?: boolean) {
     this._name = name;
     this._surname = surname;
     this._email = email;
     this._schoolName = schoolName;
     this._note = note;
+    this._accepted = accepted;
   }
 
   /**
@@ -119,6 +122,11 @@ export class TeacherRequest {
     return this._creationDate.toLocaleDateString()
   }
 
+  private _accepted?: boolean;
+  get accepted() {
+    return this._accepted;
+  }
+
   /**
    * Static JSON to Object parser
    *
@@ -131,6 +139,7 @@ export class TeacherRequest {
       json.email,
       json.schoolName,
       json.note,
+      json.accepted,
     );
     rec.creationDate = new Date(json.creationDate);
     rec._id = json.id;
@@ -148,7 +157,8 @@ export class TeacherRequest {
       email: this._email,
       schoolName: this._schoolName,
       note: this._note,
-      creationDate: this._creationDate
+      creationDate: this._creationDate,
+      accepted: this._accepted,
     };
   }
 }

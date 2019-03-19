@@ -61,7 +61,7 @@ export class RequestsComponent implements OnInit {
    */
   modalAccepted() {
     if (this.accept) {
-      this.router.navigate(["accept-request"], { queryParams: { requestId: this.clickedItem.id } });
+      this.router.navigate(["accept-request"], {queryParams: {requestId: this.clickedItem.id}});
     } else {
       this._invitationService.deleteTeacher(this.clickedItem.id).subscribe(request => {
         this.removeRequest();
@@ -75,7 +75,21 @@ export class RequestsComponent implements OnInit {
   }
 
   onAanpassenRequest(request: TeacherRequest) {
-      this.router.navigate(["invite-request"], { queryParams: { requestId: request.id } });
+    this.router.navigate(["invite-request"], {queryParams: {requestId: request.id}});
+  }
+
+  public getClass(accepted): string {
+    let classNames = 'alert ';
+
+    if (accepted == undefined) {
+      classNames += 'alert-warning';
+    } else if (accepted) {
+      classNames += 'alert-success';
+    } else {
+      classNames += 'alert-danger';
+    }
+
+    return classNames;
   }
 
   /**

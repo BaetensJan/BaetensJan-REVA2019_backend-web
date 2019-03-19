@@ -107,6 +107,18 @@ namespace Web.Controllers
         {
             var teacherRequest = await _teacherRequestRepository.GetById(teacherRequestId);
 
+            if (teacherRequest == null)
+            {
+                return NotFound();
+            }
+
+            // check if school already exists.
+            var found = await _schoolRepository.GetByName(teacherRequest.SchoolName);
+            if (found != null)
+            {
+                return StatusCode(500, $"School with schoolName {teacherRequest.SchoolName} already exists.");
+            }
+
             // creating the school
             var school = new School(teacherRequest.SchoolName, GetRandomString(8));
             await _schoolRepository.Add(school);
@@ -116,9 +128,9 @@ namespace Web.Controllers
             var password = GetRandomString(8);
             var user = _authenticationManager.CreateApplicationUserObject(teacherRequest.Email, teacherRequest.Email,
                 password);
-            user.School =
-                await _schoolRepository.GetByName(teacherRequest
-                    .SchoolName); // todo teacherRequest should have schoolId
+
+            user.School = school;
+
             var result = await _userManager.CreateAsync(user, password);
 
             if (!result.Succeeded)
@@ -130,18 +142,23 @@ namespace Web.Controllers
 
             if (user.School == null)
             {
+                _schoolRepository.Remove(school);
+                await _userManager.DeleteAsync(user);
                 return StatusCode(500);
             }
 
             // add Teacher to Teacher Role.
             await _userManager.AddToRoleAsync(user, "Teacher");
 
-            // send email to teacher.
-            await SendEmailToTeacher(teacherRequest, password);
-
             // accept TeacherRequest.
             teacherRequest.Accepted = true;
+
+            teacherRequest.ApplicationUserId = user.Id;
+
             await _teacherRequestRepository.SaveChanges();
+            
+            // send email to teacher.
+            await SendEmailToTeacher(teacherRequest, password);
 
             return Ok(
                 new

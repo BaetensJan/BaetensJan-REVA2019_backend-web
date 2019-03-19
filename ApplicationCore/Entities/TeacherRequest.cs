@@ -12,6 +12,7 @@ namespace ApplicationCore.Entities
         public string Note { get; set; } 
         public DateTime CreationDate { get; set; }
         public bool? Accepted { get; set; }
+        public string ApplicationUserId { get; set; }
                
         public TeacherRequest(string name, string surname, string email, string schoolName, string note)
         {
