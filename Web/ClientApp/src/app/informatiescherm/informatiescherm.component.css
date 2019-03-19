@@ -3,7 +3,7 @@
 }
 
 .rechts {
-  width: 60%;
+  width: 75%;
 }
 
 .rechts,
@@ -149,7 +149,7 @@ img {
   left: 690px;
   width: 4px;
   height: 340px;
-  background-color: #3b5998;
+  background-color: #1e7f91;
   -ms-transform: rotate(-44deg); /* IE 9 */
   -webkit-transform: rotate(-44deg); /* Safari */
   transform: rotate(-44deg);
@@ -165,7 +165,7 @@ img {
   left: 450px;
   width: 4px;
   height: 340px;
-  background-color: #3b5998;
+  background-color: #1e7f91;;
   -ms-transform: rotate(44deg); /* IE 9 */
   -webkit-transform: rotate(44deg); /* Safari */
   transform: rotate(44deg);
