@@ -37,9 +37,11 @@ namespace Infrastructure.Repositories
                 g.Assignments = assignments;
             });
 
-            var sch = new School(school.Name, school.Password)
+            var sch = new School(school.Password)
             {
                 Id = school.Id,
+                Name = school.Name,
+                LoginName = school.LoginName,
                 Groups = groups,
             };
 

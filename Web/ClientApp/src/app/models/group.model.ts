@@ -11,7 +11,7 @@ export class Group {
    */
   private readonly _name: string;
 
-  private _schoolName: string;
+  private _schoolLoginName: string;
   /**
    * @ignore
    */
@@ -81,19 +81,19 @@ export class Group {
    * used in groups and assignments overview so that an admin also sees the schoolName
    */
   public get schoolAndGroupName() {
-    return `${this._schoolName} ${this._name}`;
+    return `${this._schoolLoginName}.${this._name}`;
   }
 
   /**
-   * Setter for schoolName
+   * Setter for schoolLoginName
    * used in groups and assignments overview so that an admin also sees the schoolName
    */
-  set schoolName(name: string) {
-    this._schoolName = name;
+  set schoolLoginName(name: string) {
+    this._schoolLoginName = name;
   }
 
-  get schoolName(): string {
-    return this._schoolName;
+  get schoolLoginName(): string {
+    return this._schoolLoginName;
   }
 
   /**

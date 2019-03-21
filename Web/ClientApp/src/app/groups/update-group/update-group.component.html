@@ -144,7 +144,7 @@
       <div class="col-md-offset-10 col-md-2" *ngIf="createGroup">
         <button type="submit"
                 [disabled]='!groupForm.valid || groupMembers.length < 1 || groupMembers.length > 4'
-                class="btn btn-success">Groep aanmaken
+                class="btn btn-success">Creëer groep
         </button>
         <div class='alert alert-danger'
              *ngIf='groupForm.get("groupName").valid

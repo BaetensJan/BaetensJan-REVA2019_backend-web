@@ -101,7 +101,7 @@ export class AssignmentsComponent {
             let group = school.groups[j];
 
             if (group.assignments.length > 0) {
-              group.schoolName = school.name;
+              group.schoolLoginName = school.name;
 
               this._groups.push(group);
             }

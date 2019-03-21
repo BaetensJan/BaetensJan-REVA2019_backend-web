@@ -32,9 +32,15 @@ namespace Web.Controllers
         private readonly IAuthenticationManager _authenticationManager;
         private readonly IEmailSender _emailSender;
 
-        public AuthController(UserManager<ApplicationUser> userManager, IConfiguration configuration,
-            ISchoolRepository schoolRepository, ITeacherRequestRepository teacherRequestRepository,
-            IAuthenticationManager authenticationManager, IEmailSender emailSender)
+        public AuthController
+        (
+            UserManager<ApplicationUser> userManager,
+            IConfiguration configuration,
+            ISchoolRepository schoolRepository,
+            ITeacherRequestRepository teacherRequestRepository,
+            IAuthenticationManager authenticationManager,
+            IEmailSender emailSender
+        )
         {
             _userManager = userManager;
             _configuration = configuration;
@@ -392,16 +398,6 @@ namespace Web.Controllers
             if (!exists)
                 exists = await _teacherRequestRepository.GetByEmail(email) != null;
             return exists ? Ok(new {Email = "alreadyexists"}) : Ok(new {Email = "ok"});
-        }
-
-        [Route("[action]/{school}")]
-        [HttpGet]
-        public async Task<IActionResult> CheckSchool(string school)
-        {
-            var exists = await _schoolRepository.GetByName(school) != null;
-            if (!exists)
-                exists = await _teacherRequestRepository.GetBySchool(school) != null;
-            return exists ? Ok(new {School = "alreadyexists"}) : Ok(new {School = "ok"});
         }
 
         //Todo: dit moet in de AuthenticationManager (wordt ook door groupController gebruikt)

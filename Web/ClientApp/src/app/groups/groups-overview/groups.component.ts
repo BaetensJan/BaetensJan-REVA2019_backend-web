@@ -1,16 +1,18 @@
-import {Component, TemplateRef, ViewChild} from '@angular/core';
+import {Component, TemplateRef} from '@angular/core';
 import {GroupsDataService} from "../groups-data.service";
 import {Group} from "../../models/group.model";
 import {School} from "../../models/school.model";
 import {PageChangedEvent} from 'ngx-bootstrap/pagination';
-import {FormBuilder, FormGroup} from "@angular/forms";
-import {BsModalRef, BsModalService} from "ngx-bootstrap";
+import {AbstractControl, FormBuilder, FormGroup, Validators} from "@angular/forms";
+import {AlertComponent, BsModalRef, BsModalService} from "ngx-bootstrap";
 import {AppShareService} from "../../app-share.service";
 import {SchoolDataService} from "../../schools/school-data.service";
 import {GroupSharedService} from "../group-shared.service";
 import {Router} from "@angular/router";
 import {AuthenticationService} from "../../user/authentication.service";
 import {AssignmentDataService} from "../../assignment/assignment-data.service";
+import {Observable, of as observableOf} from "rxjs";
+import {map} from "rxjs/operators";
 
 @Component({
   selector: 'groups',
@@ -19,16 +21,22 @@ import {AssignmentDataService} from "../../assignment/assignment-data.service";
   animations: []
 })
 export class GroupsComponent {
+  alerts: any[] = [];
 
   modalRef: BsModalRef; // modal that appears, asking for confirmation to remove a member from a group.
   modalMessage: string;
+
+  private _schoolLoginNameForm: FormGroup;
+  get schoolLoginNameForm() {
+    return this._schoolLoginNameForm;
+  }
 
   private _createGroup: boolean = false;
   get createGroup(): boolean {
     return this._createGroup;
   }
 
-  get groupForm(): FormGroup{
+  get groupForm(): FormGroup {
     return this._groupSharedService.groupForm;
   }
 
@@ -39,6 +47,10 @@ export class GroupsComponent {
 
   currentPage; // the current page in the pagination (e.g. page 1, 2 ...)
   private _groups: Group[]; // array containing the groups that fits the filter.
+  get groups(): Group[] {
+    return this._groups;
+  }
+
   private _returnedArray: Group[]; // array containing the groups (maxNumberOfGroupsPerPage) that are shown on the current page.
   /**
    * Getter for groups
@@ -95,16 +107,6 @@ export class GroupsComponent {
     return this._applicationStartDate <= new Date();
   }
 
-  private _filterOnGroupName: boolean = true; // current text in filterOption button
-
-  get filterOnGroupName(): boolean {
-    return this._filterOnGroupName;
-  }
-
-  set filterOnGroupName(value) {
-    this._filterOnGroupName = value;
-  }
-
   private _school: School;
 
   /**
@@ -129,7 +131,7 @@ export class GroupsComponent {
             let school = schools[i];
             for (let j = 0; j < school.groups.length; j++) {
               let group = school.groups[j];
-              group.schoolName = school.name;
+              group.schoolLoginName = school.loginName;
 
               this._groups.push(group);
             }
@@ -141,12 +143,25 @@ export class GroupsComponent {
       this._schoolDataService.getSchool(schoolId).subscribe((school: School) => {
         this._school = school;
 
+        this._schoolLoginNameForm = this.fb.group({
+          schoolLoginName: [
+            this._school.loginName,
+            [
+              Validators.required,
+              Validators.minLength(1),
+              Validators.maxLength(15),
+            ],
+            this.serverSideValidateSchoolLoginName(),
+          ],
+        });
+
         this._groups = this._school.groups;
 
         this.initiateArrays();
       });
     }
-    this._assignmentDataService.getApplicationStartDate().subscribe(value => this._applicationStartDate = new Date(value));
+    this._assignmentDataService.getApplicationStartDate().subscribe(
+      value => this._applicationStartDate = new Date(value));
   }
 
   public createGroupClicked() {
@@ -169,32 +184,17 @@ export class GroupsComponent {
     this.modalRef.hide();
   }
 
-  /**
-   * Shows a message when a group was successfully created.
-   * @param groupName
-   */
-  public add(groupName: string): void {
-    this._appShareService.addAlert(
-      {
-        type: 'success',
-        msg: `De nieuwe groep met groepsnaam ${groupName} werd succesvol toegevoegd.}`,
-        timeout: 5000
-      });
-  }
-
   /** FILTER **/
   public filter(token: string) {
     token = token.toLowerCase();
     if (!token) {
       this._filteredGroups = this._groups;
     } else {
-      if (this._filterOnGroupName) {
-        this._filteredGroups = this._groups.filter((group: Group) => {
-          return group.name.toLowerCase().includes(token);
-        });
-      } else {
-        this._filteredGroups = [];
-        this._groups.forEach((group: Group) => {
+      this._filteredGroups = [];
+      this._groups.forEach((group: Group) => {
+        if (group.name.toLowerCase().includes(token)) {
+          this._filteredGroups.push(group);
+        } else {
           for (let i in group.members) {
             let member = group.members[i];
             if (member.toLowerCase().includes(token)) {
@@ -202,9 +202,8 @@ export class GroupsComponent {
               break;
             }
           }
-          // return group.members.toString().includes(token);
-        });
-      }
+        }
+      });
     }
     this._returnedArray = this._filteredGroups.slice(0, this.maxNumberOfGroupsPerPage);
     this.currentPage = 1; // switches current page in pagination back to page 1
@@ -268,5 +267,58 @@ export class GroupsComponent {
 
   confirm(): void {
     this._groupSharedService.confirm(this);
+  }
+
+  updateSchoolLoginName() {
+    const newSchoolLoginName = this._schoolLoginNameForm.get("schoolLoginName").value;
+
+    this._schoolDataService.updateSchoolLoginName(this._school.id, newSchoolLoginName).subscribe(value => {
+      this._school.loginName = newSchoolLoginName;
+      this.add();
+    });
+  }
+
+  /**
+   * Shows a message when a group was successfully created.
+   * @param groupName
+   */
+  public add(groupName?: string): void {
+
+    const message = groupName ? `De nieuwe groep met groepsnaam ${groupName} werd succesvol toegevoegd.}`
+      : `Login van school succesvol veranderd naar ${this._school.loginName}. (om: ${new Date().toLocaleTimeString()})`;
+
+    this.alerts.push(
+      {
+        type: 'success',
+        msg: message,
+        timeout: 5000
+      });
+  }
+
+  onClosed(dismissedAlert: AlertComponent): void {
+    this.alerts = this.alerts.filter(alert => alert !== dismissedAlert);
+  }
+
+  /**
+   * Checks if schoolName already exists in database
+   */
+  serverSideValidateSchoolLoginName(): (control: AbstractControl) => Observable<{ [p: string]: any }> {
+    return (control: AbstractControl): Observable<{ [key: string]: any }> => {
+
+      if (control.value == this._school.loginName) {
+        return observableOf(null);
+      }
+
+      return this._schoolDataService
+        .checkLoginNameAvailability(control.value)
+        .pipe(
+          map(available => {
+            if (available) {
+              return null;
+            }
+            return {schoolAlreadyExists: true};
+          })
+        );
+    };
   }
 }

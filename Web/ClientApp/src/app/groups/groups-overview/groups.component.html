@@ -1,3 +1,7 @@
+<div *ngFor="let alert of alerts">
+  <alert [type]="alert.type" [dismissOnTimeout]="alert.timeout" (onClosed)="onClosed(alert)">{{ alert.msg }}</alert>
+</div>
+
 <div id="header" class="row">
   <h1 class="col-md-2">Groepen</h1>
   <h3 *ngIf="!appStartDateExpired && applicationStartDate">
@@ -5,35 +9,109 @@
     <strong>{{applicationStartDate.toLocaleDateString()}}</strong></h3>
 </div>
 
-<div class="panel panel-default container-fluid" *ngIf="school" id="app-credentials">
-  <div class="panel-body form-inline">
-    <label style="font-size: 1.2em;">Optie 1: Met deze logingegevens kunnen de leerlingen zelf groepen aanmaken in de
-      app: &nbsp;&nbsp;</label>
-    <div class="form-group">
-      <label for="schoolLogin">Login</label>
-      <input class="form-control" id="schoolLogin" [value]="school.name" disabled>
-    </div>
-    <div class="form-group">
-      <label style="margin-left: 1em;" for="schoolPassword">Paswoord</label>
-      <input class="form-control" id="schoolPassword" [value]="school.password" disabled>
-    </div>
+
+<div class="panel panel-default" *ngIf="school" id="app-credentials">
+  <div class="panel-heading" style="font-size: 1.2em;">
+    <b>
+      Optie 1: Met deze logingegevens kunnen de leerlingen zelf groepen aanmaken in de app:
+    </b>
+  </div>
+  <div class="panel-body">
+    <form (ngSubmit)="updateSchoolLoginName()" [formGroup]="schoolLoginNameForm">
+      <div class="form-inline">
+        <div class="form-group">
+          <label for="schoolLogin">Login</label>
+          <input
+            class="form-control"
+            id="schoolLogin"
+            formControlName='schoolLoginName'
+            type="text">
+
+          <button type="submit" class="btn btn-default">
+            <i class="glyphicon glyphicon-floppy-disk"></i>
+          </button>
+
+          <div class="form-group">
+            <label style="margin-left: 1em;" for="schoolPassword">Paswoord</label>
+            <input class="form-control" id="schoolPassword" [value]="school.password" disabled>
+          </div>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-sm-10 col-md-3 alert alert-danger"
+             *ngIf='schoolLoginNameForm.get("schoolLoginName").errors?.required
+             && schoolLoginNameForm.get("schoolLoginName").touched'>
+          Gelieve een login naam in te vullen.
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="col-sm-10 col-md-3 alert alert-danger"
+             *ngIf='schoolLoginNameForm.get("schoolLoginName").errors?.minlength
+              && schoolLoginNameForm.get("schoolLoginName").touched'>
+          De schoolnaam moet ten
+          minste {{schoolLoginNameForm.get("schoolLoginName").errors?.minlength.requiredLength }}
+          letters bevatten.
+          U heeft momenteel {{schoolLoginNameForm.get("schoolLoginName").errors?.minlength.actualLength}} lettertekens
+          gebruikt.
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="col-sm-10 col-md-3 alert alert-danger"
+             *ngIf='schoolLoginNameForm.get("schoolLoginName").errors?.maxlength
+               && schoolLoginNameForm.get("schoolLoginName").touched'>
+          Dit veld mag maximum {{schoolLoginNameForm.get("schoolLoginName").errors?.maxlength.requiredLength }}
+          letters bevatten.
+          U heeft momenteel {{schoolLoginNameForm.get("schoolLoginName").errors?.maxlength.actualLength}}
+          lettertekens gebruikt.
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="col-sm-10 col-md-3 alert alert-danger"
+             *ngIf='schoolLoginNameForm.get("schoolLoginName").errors?.schoolAlreadyExists
+              && schoolLoginNameForm.get("schoolLoginName").touched'>
+          Deze login naam wordt al gebruikt door een andere school. Gelieve een andere naam te gebruiken.
+        </div>
+      </div>
+    </form>
   </div>
 </div>
 
 
 <div class="panel panel-default">
-  <div class="panel-body">
-    <label style="margin-bottom: 2em; font-size: 1.2em; margin-left: 1em;" *ngIf="!isAdmin">
+  <div class="panel-heading">
+    <b style="font-size: 1.2em;" *ngIf="!isAdmin">
       Optie 2: Via deze weg zijn de groepjes al op voorhand aangemaakt en kunnen de leerlingen meteen aan de slag in de
       app.
       <br/>
       Vergeet niet om de logingegevens (login en paswoord) goed bij te houden en te delen met de groepjes!
-    </label>
+    </b>
+  </div>
 
+  <div class="panel-body">
+
+    <!--Add new group button-->
+    <div class="row">
+      <div id="createGroupButton" style="margin-top: 2em;" class="col-md-1 col-md-offset-10">
+        <button (click)="createGroupClicked()" *ngIf="school"
+                class="btn btn-success">
+          <i [ngClass]="createGroup ? 'glyphicon glyphicon-minus' : 'glyphicon glyphicon-plus'"></i>
+          Groep aanmaken
+        </button>
+      </div>
+    </div>
+    <!--Add new group panel-->
+    <div *ngIf="createGroup">
+      <div class="panel-body">
+        <app-update-group (submit)="onSubmit($event)"></app-update-group>
+      </div>
+    </div>
 
     <!--Search Filter Bar-->
-    <div class="row" *ngIf="returnedArray && returnedArray.length > 0">
-      <div class="col-md-10">
+    <div class="row" *ngIf="groups && groups.length > 0" style="margin-bottom: 1em; margin-top: 2em;">
+      <div class="col-md-12">
         <div class="input-group">
       <span class="input-group-addon">Zoekfilter
        </span>
@@ -41,31 +119,7 @@
                  [(ngModel)]="filterValue">
         </div>
       </div>
-      <div class="col-md-2">
-        <button class="btn btn-info" (click)="filterOnGroupName = !filterOnGroupName">
-          <span class="glyphicon glyphicon-check"></span> {{filterOnGroupName ? "Groepsnaam" : "Groepsleden"}}
-        </button>
-      </div>
     </div>
-
-
-    <!--Add new group button-->
-    <div id="createGroupButton" style="margin-top: 2em;">
-      <button (click)="createGroupClicked()" *ngIf="school"
-              class="btn btn-success">
-        <i [ngClass]="createGroup ? 'glyphicon glyphicon-minus' : 'glyphicon glyphicon-plus'"></i>
-        Groep aanmaken
-      </button>
-    </div>
-
-    <!--Add new group panel-->
-    <div *ngIf="createGroup">
-      <div class="panel-body">
-
-        <app-update-group (submit)="onSubmit($event)"></app-update-group>
-      </div>
-    </div>
-
 
     <!--Overview of groups-->
     <div class="row" *ngIf="returnedArray; else noGroups">
@@ -77,7 +131,7 @@
                 <div class="row">
                   <div class="col-md-7 col-sm-6 col-xs-4">
                     <b>
-                      {{ isAdmin ? group.schoolName + " " + group.name : group.name }}
+                      {{ isAdmin ? group.schoolLoginName + "." + group.name : group.name }}
                     </b>
                   </div>
 
@@ -105,7 +159,7 @@
                 <p style="font-size: 1.2em;"
                    type="text"
                    class="form-control"
-                   id="groepLogin">{{school.name}}<b>.</b>{{group.name}}</p>
+                   id="groepLogin">{{school.loginName}}<b>.</b>{{group.name}}</p>
               </div>
 
               <label>Groepsleden:</label>

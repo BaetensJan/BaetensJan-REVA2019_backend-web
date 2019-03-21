@@ -32,7 +32,7 @@
     <tbody>
     <tr *ngFor="let group of returnedArray; let i = index">
       <th scope="row">{{getIndex(i)}}</th>
-      <td>{{ isAdmin ? group.schoolName + " " + group.name : group.name }}</td>
+      <td>{{ isAdmin ? group.schoolLoginName + "." + group.name : group.name }}</td>
       <td>
         <button (click)="pdfDownload(group)">
           <img id="imageid"

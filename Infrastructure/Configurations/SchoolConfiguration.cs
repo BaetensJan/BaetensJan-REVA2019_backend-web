@@ -10,6 +10,7 @@ namespace Infrastructure.Configurations
         {
             builder.ToTable("School");
             builder.Property(s => s.Name);
+            builder.Property(s => s.LoginName);
             builder.Property(s => s.Password);
             builder.Property(s => s.Start);
             builder.HasMany(s => s.Groups);

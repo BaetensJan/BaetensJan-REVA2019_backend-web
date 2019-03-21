@@ -9,6 +9,7 @@ import {FormsModule, ReactiveFormsModule} from "@angular/forms";
 import {httpInterceptorProviders} from '../../http-interceptors';
 import {AccordionModule, PaginationModule, TypeaheadModule} from "ngx-bootstrap";
 import {GroupsComponent} from "../../groups/groups-overview/groups.component";
+import { AlertModule } from 'ngx-bootstrap/alert';
 
 const routes = [
   {path: 'updateGroup', canActivate: [AuthGuardService], component: UpdateGroupComponent},
@@ -33,7 +34,8 @@ const routes = [
     HttpClientModule,
     CommonModule,
     ReactiveFormsModule,
-    RouterModule.forChild(routes)
+    AlertModule.forRoot(),
+    RouterModule.forChild(routes),
   ],
   providers: [
     httpInterceptorProviders,
