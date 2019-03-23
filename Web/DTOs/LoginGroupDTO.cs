@@ -5,7 +5,7 @@ namespace Web.DTOs
     public class LoginGroupDTO
     {
         [Required]
-        public string SchoolName { get; set; }
+        public string SchoolLoginName { get; set; }
         [Required]
         public string GroupName { get; set; }
         [Required]

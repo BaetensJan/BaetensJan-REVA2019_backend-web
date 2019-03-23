@@ -12,16 +12,13 @@ namespace ApplicationCore.Tests.Services
 {
     public class CategoryManagerTest
     {
-//        private List<Category> _pickedCategories;
-//        private List<Category> _unpickedCategories;
+        private readonly List<Category> _categories;
+        private readonly List<Question> _questions;
+        private readonly List<Assignment> _assignments;
 
-        private List<Category> _categories;
-        private List<Question> _questions;
-        private List<Assignment> _assignments;
-
-        private Mock<IExhibitorRepository> _exhibitorRepo;
-        private Mock<ICategoryRepository> _categoryRepo;
-        private Mock<IQuestionRepository> _questionRepo;
+        private readonly Mock<IExhibitorRepository> _exhibitorRepo;
+        private readonly Mock<ICategoryRepository> _categoryRepo;
+        private readonly Mock<IQuestionRepository> _questionRepo;
 
         public CategoryManagerTest()
         {
@@ -31,7 +28,8 @@ namespace ApplicationCore.Tests.Services
             {
                 new Category
                 {
-                    Id = 1
+                    Id = 1,
+                    Exhibitors = new List<CategoryExhibitor>(),
                 },
                 new Category
                 {
@@ -239,7 +237,7 @@ namespace ApplicationCore.Tests.Services
 
             foreach (var category in categories)
             {
-                Assert.True(ids.Contains(category.Id));
+                Assert.Contains(category.Id, ids);
             }
 
             // check if we have only 3 categories.
@@ -267,9 +265,9 @@ namespace ApplicationCore.Tests.Services
             });
 
             var categories =
-                await new CategoryManager(_categoryRepo.Object, _exhibitorRepo.Object, _questionRepo.Object)
-                    .GetUnpickedCategories(-1, _assignments, true);
-            Assert.Equal(9, categories.ToList()[0].Id);
+                (await new CategoryManager(_categoryRepo.Object, _exhibitorRepo.Object, _questionRepo.Object)
+                    .GetUnpickedCategories(-1, _assignments, true)).ToList();
+            Assert.Equal(9, categories[0].Id);
         }
 
         /**
@@ -288,7 +286,7 @@ namespace ApplicationCore.Tests.Services
                 CategoryExhibitor = new CategoryExhibitor
                 {
                     CategoryId = 1,
-                    ExhibitorId = 1
+                    ExhibitorId = 1,
                 }
             });
 
@@ -298,21 +296,21 @@ namespace ApplicationCore.Tests.Services
                 {
                     new CategoryExhibitor
                     {
-                        Category = _categories[0] // == Category with id 1
+                        Category = _categories[0], // == Category with id 1
                     }
                 }
             }));
 
             var categories =
-                await new CategoryManager(_categoryRepo.Object, _exhibitorRepo.Object, _questionRepo.Object)
-                    .GetUnpickedCategories(1, _assignments, true);
+                (await new CategoryManager(_categoryRepo.Object, _exhibitorRepo.Object, _questionRepo.Object)
+                    .GetUnpickedCategories(1, _assignments, true)).ToList();
 
             // Exhibitor, which only has one Category (with CategoryId 1) with 2 question with.
             // One of these questions (the one we added at the top of this test method) was
             // not answered by the Group yet(so not in list _assignments).
             // The Category (with id 1) of this Question should be returned.
-            Assert.True(categories.ToList().Count == 1);
-            Assert.Equal(1, categories.ToList()[0].Id);
+            Assert.True(categories.Count == 1);
+            Assert.Equal(1, categories[0].Id);
 
             // check if the getById got called
 //            _exhibitorRepo.Verify(repo => repo.GetById(1).IsCompleted);
@@ -339,13 +337,13 @@ namespace ApplicationCore.Tests.Services
             }));
 
             var categories =
-                await new CategoryManager(_categoryRepo.Object, _exhibitorRepo.Object, _questionRepo.Object)
-                    .GetUnpickedCategories(1, _assignments, true);
+                (await new CategoryManager(_categoryRepo.Object, _exhibitorRepo.Object, _questionRepo.Object)
+                    .GetUnpickedCategories(1, _assignments, true)).ToList();
 
             // The only Category of the, by the group chosen, Exhibitor is Category with id 1 (_categories[0])
             // this Category is already added to _assignments, which means it is submitted by the Group already.
             // This means no Categories are left anymore.
-            Assert.True(categories.ToList().Count == 0);
+            Assert.True(categories.Count == 0);
         }
     }
 }

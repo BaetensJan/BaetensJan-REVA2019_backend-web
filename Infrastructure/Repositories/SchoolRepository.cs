@@ -1,5 +1,4 @@
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 using ApplicationCore.Entities;
 using ApplicationCore.Interfaces;
@@ -66,11 +65,18 @@ namespace Infrastructure.Repositories
             return MapSchool(await school);
         }
 
-        public async Task<School> GetByName(string schoolName)
+        public async Task<School> GetBySchoolName(string schoolName)
         {
-            var school = _schools.SingleOrDefaultAsync(s => s.Name.ToLower().Equals(schoolName.ToLower()));
+            var school = _schools.SingleOrDefaultAsync(s => s.Name.Trim().ToLower().Equals(schoolName.ToLower()));
             return await school;
         }
+
+        public async Task<School> GetBySchoolLoginName(string schoolLoginName)
+        {
+            var school = _schools.SingleOrDefaultAsync(s => s.LoginName.Trim().ToLower().Equals(schoolLoginName.ToLower()));
+            return await school;
+        }
+
 
         public Task Add(School school)
         {

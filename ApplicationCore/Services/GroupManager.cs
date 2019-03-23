@@ -55,7 +55,7 @@ namespace ApplicationCore.Services
                 new
                 {
                     startDate,
-                    canStartTour = group.Name == "groep122" || IsValidDate(startDate), // check if group can start Tour based on date.
+                    canStartTour = group.Name == "groep122" || IsValidDate(startDate, DateTime.Now), // check if group can start Tour based on date.
                     hasNoAssignments, // we need this attribute, because numberOfAssignments != numberOfSubmittedAssignments
                     // (and the app only knows the latter) 
                     numberOfSubmittedAssignments,
@@ -70,9 +70,10 @@ namespace ApplicationCore.Services
         /**
          * Check if current date is passed the startDate, which means the Group may start a Tour.
          */
-        private static bool IsValidDate(DateTime startDate)
+        public static bool IsValidDate(DateTime startDate, DateTime dateTimeNow)
         {
-            return DateTime.Compare(DateTime.Now, startDate) > 0; //DateTime.Now "is later than" startDate.
+            return dateTimeNow.Hour > 8 // Check if after 8 o'clock. 
+                   && DateTime.Compare(dateTimeNow, startDate) > 0; // DateTime.Now "is later than" startDate.
         }
     }
 }

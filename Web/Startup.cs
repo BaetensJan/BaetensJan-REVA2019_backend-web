@@ -32,7 +32,8 @@ namespace Web
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IHostingEnvironment env, ApplicationDbContext context /*IServiceProvider serviceProvider*/)            
+        public void Configure(IApplicationBuilder app, IHostingEnvironment env, ApplicationDbContext context,
+            IServiceProvider serviceProvider)            
         {
             if (env.IsDevelopment())
             {
@@ -69,22 +70,22 @@ namespace Web
                     spa.UseAngularCliServer(npmScript: "start");
                 }
             });
-            //CreateRoles(serviceProvider);
+//            CreateRoles(serviceProvider);
         }
 
         private async void CreateRoles(IServiceProvider serviceProvider)
         {
             //initializing custom roles 
-            var RoleManager = serviceProvider.GetRequiredService<RoleManager<IdentityRole>>();
-            string[] roleNames = {"Admin", "Teacher", "Group"};
+            var roleManager = serviceProvider.GetRequiredService<RoleManager<IdentityRole>>();
+            string[] roleNames = {"Admin", "Teacher", "Group", "SuperAdmin", "School"};
             IdentityResult roleResult;
 
             foreach (var roleName in roleNames)
             {
-                var roleExist = await RoleManager.RoleExistsAsync(roleName);
+                var roleExist = await roleManager.RoleExistsAsync(roleName);
                 if (!roleExist)
                 {
-                    roleResult = await RoleManager.CreateAsync(new IdentityRole(roleName));
+                    roleResult = await roleManager.CreateAsync(new IdentityRole(roleName));
                 }
             }
         }

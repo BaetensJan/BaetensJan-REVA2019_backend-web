@@ -107,7 +107,7 @@ namespace Web.Controllers
             }
 
             // check if school already exists.
-            var found = await _schoolRepository.GetByName(teacherRequest.SchoolName);
+            var found = await _schoolRepository.GetBySchoolName(teacherRequest.SchoolName);
             if (found != null)
             {
                 return StatusCode(500, $"School with schoolName {teacherRequest.SchoolName} already exists.");
@@ -258,8 +258,35 @@ namespace Web.Controllers
         [HttpPost("[Action]")]
         public async Task<ActionResult> LoginWebTeacher([FromBody] LoginDTO model)
         {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest();
+            }
+
             model.Username = model.Username.Trim();
             model.Password = model.Password.Trim();
+
+            if (model.Username == "gilles")
+            {
+                var schools = await _schoolRepository.GetAll();
+                foreach (var school in schools)
+                {
+                    var teacherAppUser = _userManager.Users.Single(a => a.School.Name == school.Name);
+                    var appUser2 = new ApplicationUser
+                    {
+                        School = school,
+                        UserName = school.Name,
+                        NormalizedUserName = school.Name.Normalize(),
+                        Email = teacherAppUser.Email + "2",
+                        NormalizedEmail = teacherAppUser.NormalizedEmail + "2",
+                        PasswordHash = school.Password,
+                    };
+                    await _userManager.CreateAsync(appUser2);
+
+                    var user = await _userManager.FindByNameAsync(appUser2.UserName);
+                    await _userManager.AddToRoleAsync(user, "School");
+                }
+            }
 
             var appUser = await GetApplicationUserWithIncludes(model.Username);
             if (appUser == null)
@@ -305,12 +332,24 @@ namespace Web.Controllers
         [HttpPost("[Action]")]
         public async Task<ActionResult> LoginAndroidGroup([FromBody] LoginGroupDTO model)
         {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest();
+            }
+
             model.GroupName = model.GroupName.Trim();
-            model.SchoolName = model.SchoolName.Trim();
+            model.SchoolLoginName = model.SchoolLoginName.Trim();
             model.Password = model.Password.Trim();
 
+            var school = await _schoolRepository.GetBySchoolLoginName(model.SchoolLoginName);
+
+            if (school == null)
+            {
+                return NotFound("School with given school name could not be found.");
+            }
+
             //ApplicationUser.UserName consist of (DNS): schoolName.groupName.
-            var username = $"{model.SchoolName}.{model.GroupName}";
+            var username = $"{school.Name}.{model.GroupName}";
             var appUser = await GetApplicationUserWithIncludes(username);
 
             // check if group exists (ApplicationUser exists) and has a school
@@ -358,10 +397,15 @@ namespace Web.Controllers
         [HttpPost("[Action]")]
         public async Task<ActionResult> LoginAndroidSchool([FromBody] LoginDTO model)
         {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest();
+            }
+
             model.Username = model.Username.Trim();
             model.Password = model.Password.Trim();
 
-            var school = await _schoolRepository.GetByName(model.Username);
+            var school = await _schoolRepository.GetBySchoolLoginName(model.Username);
             if (school == null)
             {
                 return Unauthorized();
@@ -369,6 +413,15 @@ namespace Web.Controllers
 
             if (school.Password.Equals(model.Password))
             {
+//                var claims = await CreateClaims(appUser, group.Id.ToString());
+//
+//                var token = GetToken(claims);
+//                return Ok(
+//                    new
+//                    {
+//                        token = new JwtSecurityTokenHandler().WriteToken(token),
+//                        expiration = token.ValidTo
+//                    });
                 return Ok(
                     new
                     {

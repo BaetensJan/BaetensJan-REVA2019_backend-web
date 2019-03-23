@@ -11,41 +11,11 @@ namespace Infrastructure.Repositories
     {
         private readonly ApplicationDbContext _dbContext;
         private readonly DbSet<Group> _groups;
-        private readonly DbSet<School> _schools;
 
         public GroupRepository(ApplicationDbContext context)
         {
             _dbContext = context;
             _groups = context.Groups;
-            _schools = context.Schools;
-        }
-
-        /**
-         * Gets the group and members.
-         */
-        public Task<List<Group>> GetBasicsBySchoolId(int schoolId)
-        {
-            return _schools.Include(s => s.Groups).Where(s => s.Id == schoolId).Select(s => s.Groups)
-                .FirstOrDefaultAsync();
-        }
-
-        public Task<List<Group>> GetAllBySchoolId(int schoolId)
-        {
-            var groups = _schools.Include(s => s.Groups).ThenInclude(g => g.Assignments).ThenInclude(f => f.Question)
-                .ThenInclude(q => q.CategoryExhibitor)
-                .Where(s => s.Id == schoolId).Select(s => s.Groups).FirstOrDefaultAsync();
-            return groups;
-        }
-
-        public IEnumerable<Group> GetAllBySchoolIdLight(int schoolId)
-        {
-            var groups = _schools.Include(s => s.Groups).ThenInclude(g => g.Assignments).ThenInclude(f => f.Question)
-                .ThenInclude(q => q.CategoryExhibitor).ThenInclude(ce => ce.Exhibitor)
-                .Include(s => s.Groups).ThenInclude(g => g.Assignments).ThenInclude(f => f.Question)
-                .ThenInclude(q => q.CategoryExhibitor).ThenInclude(ce => ce.Category)
-                .SingleOrDefault(s => s.Id == schoolId)
-                ?.Groups.Select(MapGroup);
-            return groups;
         }
 
         public Task<List<Group>> GetAll()
@@ -84,23 +54,14 @@ namespace Infrastructure.Repositories
 
             return group;
         }
-        
+
         public void Update(Group group)
         {
             _groups.Update(group);
         }
 
-        private Group MapGroup(Group group)
+        private static Group MapGroup(Group group)
         {
-//            group?.Assignments?.ForEach(a =>
-//            {
-//                var ce = a.Question?.CategoryExhibitor;
-//                if (ce != null)
-//                {
-//                    ce.Exhibitor.Categories = null;
-//                    ce.Category.Exhibitors = null;
-//                }
-//            });
             var assignments = new List<Assignment>(group.Assignments);
             assignments.ForEach(a =>
             {

@@ -28,15 +28,14 @@
 
 
       <div class="input-group" style="margin-bottom: 1em;">
-        <span class="input-group-addon" id="basic-addon1">
+        <span class="input-group-addon">
           Groepsnaam
         </span>
         <input formControlName='groupName'
                type="text"
                class="form-control"
                placeholder="Naam van nieuwe groep."
-               autocomplete="off"
-               aria-describedby="basic-addon1">
+               autocomplete="off">
       </div>
       <div class='alert alert-danger'
            *ngIf='groupForm.get("groupName").errors?.required && groupForm.get("groupName").touched'>
@@ -66,15 +65,14 @@
       <div *ngIf="createGroup || changePassword">
         <div formGroupName='passwordGroup'>
           <div class="input-group" style="margin-bottom: 1em;">
-            <span class="input-group-addon" id="pw">
+            <span class="input-group-addon">
               Wachtwoord
             </span>
             <input formControlName='groupPassword'
                    autocomplete="off"
                    type="password"
                    class="form-control"
-                   placeholder="Wachtwoord van nieuwe groep."
-                   aria-describedby="pw">
+                   placeholder="Wachtwoord van nieuwe groep.">
           </div>
           <div class='alert alert-danger'
                *ngIf='passwordControl.errors?.passwordTooShort && passwordControl.touched'>
@@ -87,12 +85,11 @@
           </div>
 
           <div class="input-group">
-            <span class="input-group-addon" id="confirmPassword">
+            <span class="input-group-addon">
               Bevestig Wachtwoord
             </span>
-            <input formControlName='confirmPassword'
-                   type="password" class="form-control" placeholder="Bevestig wachtwoord."
-                   aria-describedby="confirmPassword">
+            <input formControlName="confirmPassword"
+                   type="password" class="form-control" placeholder="Bevestig wachtwoord.">
           </div>
           <div class='alert alert-danger'
                *ngIf='groupForm.get("passwordGroup").errors?.passwordsDiffer
@@ -108,10 +105,10 @@
       <div class="form-inline" style="margin-top: 4em;" *ngIf="groupMembers.length < 4; else maxMembersMessage">
         <div class="form-group">
           <div class="input-group">
-            <span class="input-group-addon" id="groupMemberAddon">
+            <span class="input-group-addon">
               Groepslid toevoegen
             </span>
-            <input formControlName="groupMember" type="text" class="form-control" id="groupMember"
+            <input formControlName="groupMember" type="text" class="form-control"
                    placeholder="Naam nieuw groepslid.">
           </div>
         </div>

@@ -1,7 +1,9 @@
 using System.Linq;
 using System.Threading.Tasks;
+using ApplicationCore.Entities;
 using ApplicationCore.Interfaces;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Web.DTOs;
 
@@ -16,13 +18,16 @@ namespace Web.Controllers
     {
         private readonly ISchoolRepository _schoolRepository;
         private readonly ITeacherRequestRepository _teacherRequestRepository;
+        private readonly UserManager<ApplicationUser> _userManager;
 
         public SchoolController
         (
+            UserManager<ApplicationUser> userManager,
             ISchoolRepository schoolRepository,
             ITeacherRequestRepository teacherRequestRepository
         )
         {
+            _userManager = userManager;
             _schoolRepository = schoolRepository;
             _teacherRequestRepository = teacherRequestRepository;
         }
@@ -33,6 +38,40 @@ namespace Web.Controllers
         {
             //var school = _schoolRepository.GetById(schoolId); //Todo: fix error: Process is Terminated due to StackOverFlowException 
             var school = await _schoolRepository.GetByIdLight(schoolId);
+            return Ok(school);
+        }
+
+        //Todo not yet implemented in web.
+        [HttpPut("[action]/{schoolId}")]
+        [Authorize]
+        public async Task<IActionResult> UpdateSchoolPassword([FromBody] SchoolLoginNameDto loginNameDto,
+            [FromRoute] int schoolId)
+        {
+            if (!ModelState.IsValid || string.IsNullOrEmpty(loginNameDto.SchoolLoginName))
+            {
+                return BadRequest();
+            }
+
+            var loginName = loginNameDto.SchoolLoginName.Trim();
+
+            if (loginName?.Length < 1 || loginName?.Length > 16)
+            {
+                return BadRequest("Bad loginName. Min length 1. Max length 15.");
+            }
+
+            var school = await _schoolRepository.GetById(schoolId);
+            if (school == null)
+            {
+                return NotFound();
+            }
+            
+//            school.Password = loginName;
+            await _schoolRepository.SaveChanges();
+            
+            // update password of ApplicationUser of School
+            var schoolAppUser = await _userManager.FindByNameAsync(school.Name);
+            schoolAppUser.PasswordHash = school.Password;
+            
             return Ok(school);
         }
 
@@ -59,17 +98,37 @@ namespace Web.Controllers
                 return NotFound();
             }
 
-            var schools = await _schoolRepository.GetAll();
-            var exists = schools.Any(s => s.LoginName.ToLower().Equals(loginName.ToLower()));
+
+            var exists = await CheckLoginNameExists(loginName);
             if (exists)
             {
                 return StatusCode(500, "There is already a school with that login name.");
             }
-
+            
             school.LoginName = loginName;
             await _schoolRepository.SaveChanges();
 
             return Ok(school);
+        }
+
+        [HttpGet("[action]/{loginName}")]
+        [Authorize]
+        public async Task<IActionResult> CheckLoginName(string loginName)
+        {
+            var exists = await CheckLoginNameExists(loginName);
+            
+            if (exists)
+            {
+                return Ok(new {loginName = "alreadyexists"});
+            }
+
+            return Ok(new {loginName = "ok"});
+        }
+
+        private async Task<bool> CheckLoginNameExists(string schoolLoginName)
+        {
+            var school = await _schoolRepository.GetBySchoolLoginName(schoolLoginName.Trim().ToLower());
+            return school != null;
         }
 
         /**
@@ -86,7 +145,7 @@ namespace Web.Controllers
         [HttpGet("[action]/{schoolName}")]
         public async Task<IActionResult> CheckSchoolName(string schoolName)
         {
-            var exists = await _schoolRepository.GetByName(schoolName) != null
+            var exists = await _schoolRepository.GetBySchoolName(schoolName) != null
                          || await _teacherRequestRepository.GetBySchool(schoolName) != null;
             if (exists)
             {
@@ -94,22 +153,6 @@ namespace Web.Controllers
             }
 
             return Ok(new {schoolName = "ok"});
-        }
-
-        [HttpGet("[action]/{loginName}")]
-        [Authorize]
-        public async Task<IActionResult> CheckLoginName(string loginName)
-        {
-            var schools = await _schoolRepository.GetAll();
-            foreach (var school in schools)
-            {
-                if (school.LoginName.ToLower().Equals(loginName.Trim().ToLower()))
-                {
-                    return Ok(new {loginName = "alreadyexists"});
-                }
-            }
-
-            return Ok(new {loginName = "ok"});
         }
     }
 }

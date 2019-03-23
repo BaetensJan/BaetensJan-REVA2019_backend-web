@@ -9,7 +9,8 @@ namespace ApplicationCore.Interfaces
         Task<List<School>> GetAll();
         Task<School> GetById(int schoolId);
         Task<School> GetByIdLight(int schoolId);
-        Task<School> GetByName(string schoolName);
+        Task<School> GetBySchoolName(string schoolName);
+        Task<School> GetBySchoolLoginName(string schoolLoginName);
         Task Add(School school);
         void Remove(School school);
         Task SaveChanges();

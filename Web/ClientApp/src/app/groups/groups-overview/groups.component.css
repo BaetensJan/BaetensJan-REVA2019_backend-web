@@ -6,14 +6,15 @@
   margin-top: 1.5em;
 }
 
-#app-credentials input {
-  margin-left: 1em;
+.panel-heading{
+  background-color: #f0f9fa !important;
+  color: #1e7f91;
 }
 
-/*#app-credentials label:nth-of-type(1)  {*/
-  /*margin-left: 1em;*/
-/*}*/
+#app-credentials{
+  margin-bottom: 2em;
+}
 
-#createGroupButton {
-  margin-bottom: 1em;
+#app-credentials input {
+  margin-left: 1em;
 }
