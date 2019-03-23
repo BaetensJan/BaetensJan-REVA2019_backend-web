@@ -169,7 +169,7 @@ namespace Web.Controllers
          * Creates a Group and returns a JwtToken.
          */
         [HttpPost("[action]/{schoolId}")]
-//        [Authorize]
+        [Authorize]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
