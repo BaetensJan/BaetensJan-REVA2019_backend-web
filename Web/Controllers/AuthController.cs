@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
 using System.IO;
 using System.Linq;
-using System.Security.Claims;
 using System.Text;
 using System.Text.Encodings.Web;
 using System.Threading.Tasks;
@@ -15,7 +14,6 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
-using Microsoft.IdentityModel.Tokens;
 using Newtonsoft.Json;
 using Web.DTOs;
 
@@ -74,15 +72,13 @@ namespace Web.Controllers
 //                    TODO: uncomment line beneath if you want to create an admin.
 //                    await _userManager.AddToRoleAsync(user, "Admin");
 
-                user = _userManager.Users.SingleOrDefault(u => u.Id == user.Id);
-
-                var claim = await CreateClaims(user);
+                var claim = await _authenticationManager.CreateClaims(user);
 
                 return Ok(
                     new
                     {
                         Username = user.UserName,
-                        Token = GetToken(claim)
+                        Token = _authenticationManager.GetToken(claim)
                     });
             }
 
@@ -114,9 +110,7 @@ namespace Web.Controllers
             }
 
             // creating the school
-            var school = new School(teacherRequest.SchoolName, GetRandomString(8));
-            await _schoolRepository.Add(school);
-            await _schoolRepository.SaveChanges();
+            var school = await CreateSchool(teacherRequest);
 
             // creating teacher consisting of his school
             var password = GetRandomString(8);
@@ -162,6 +156,30 @@ namespace Web.Controllers
                 });
         }
 
+        private async Task<School> CreateSchool(TeacherRequest teacherRequest)
+        {
+            // Create Entity School.
+            var school = new School(teacherRequest.SchoolName, GetRandomString(8));
+            await _schoolRepository.Add(school);
+            await _schoolRepository.SaveChanges();
+
+            // Create ApplicationUser (with Role School) for School.
+            var appUser = new ApplicationUser
+            {
+                School = school,
+                UserName = school.Name,
+                NormalizedUserName = school.Name.Normalize(),
+                Email = teacherRequest.Email + "2",
+                NormalizedEmail = teacherRequest.Email.Normalize() + "2",
+                PasswordHash = school.Password,
+            };
+            await _userManager.CreateAsync(appUser);
+            await _userManager.AddToRoleAsync(await _userManager.FindByNameAsync(school.Name), "School");
+
+            return school;
+        }
+
+
         /**
          * Sends an email to the Teacher when the TeacherRequest has been accepted by admin on web.
          */
@@ -196,41 +214,6 @@ namespace Web.Controllers
                         </footer>", new string[] { });
         }
 
-        /**
-         * Creating the Claim Array for a specific ApplicationUser.
-         * Return: Claim[]
-         */
-        private async Task<Claim[]> CreateClaims(ApplicationUser user, string groupId = null)
-        {
-            // RESPECT THE ORDER OF THE CLAIMS, METHODS WILL GET INFO FROM CLAIMS VIA FIXED INDEXES
-            // todo work with claimtypes, which makes the order unimportant
-            // source: https://stackoverflow.com/questions/22246538/access-claim-values-in-controller-in-mvc-5
-            var roles = await _userManager.GetRolesAsync(user);
-            var isAdmin = roles.Contains("Admin");
-
-            var claims = new List<Claim>()
-            {
-                new Claim(JwtRegisteredClaimNames.Sub,
-                    user.Id),
-                new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
-                new Claim(ClaimTypes.NameIdentifier, user.Id),
-                new Claim("username", user.UserName),
-                new Claim("isAdmin", isAdmin.ToString()),
-            };
-
-            if (groupId != null && roles.Contains("Group"))
-            {
-                claims.Add(new Claim("groupId", groupId));
-            }
-            else if (roles.Contains("Teacher"))
-            {
-                claims.Add(new Claim("schoolName", user.School.Name));
-            }
-
-            claims.AddRange(roles.Select(role => new Claim(ClaimTypes.Role, role)));
-
-            return claims.ToArray();
-        }
 
         /**
          * Creates a public password to login into the application.
@@ -266,29 +249,7 @@ namespace Web.Controllers
             model.Username = model.Username.Trim();
             model.Password = model.Password.Trim();
 
-            if (model.Username == "gilles")
-            {
-                var schools = await _schoolRepository.GetAll();
-                foreach (var school in schools)
-                {
-                    var teacherAppUser = _userManager.Users.Single(a => a.School.Name == school.Name);
-                    var appUser2 = new ApplicationUser
-                    {
-                        School = school,
-                        UserName = school.Name,
-                        NormalizedUserName = school.Name.Normalize(),
-                        Email = teacherAppUser.Email + "2",
-                        NormalizedEmail = teacherAppUser.NormalizedEmail + "2",
-                        PasswordHash = school.Password,
-                    };
-                    await _userManager.CreateAsync(appUser2);
-
-                    var user = await _userManager.FindByNameAsync(appUser2.UserName);
-                    await _userManager.AddToRoleAsync(user, "School");
-                }
-            }
-
-            var appUser = await GetApplicationUserWithIncludes(model.Username);
+            var appUser = await _authenticationManager.GetAppUserWithGroupsIncludedViaUserName(model.Username);
             if (appUser == null)
             {
                 return NotFound(Json("User not found."));
@@ -306,7 +267,7 @@ namespace Web.Controllers
                 return Unauthorized(Json("Not allowed."));
             }
 
-            var claim = await CreateClaims(appUser);
+            var claim = await _authenticationManager.CreateClaims(appUser);
 
             // if user is Teacher, add schoolId to Claims.
             if (appUser.School != null)
@@ -315,7 +276,7 @@ namespace Web.Controllers
                     .ToArray();
             }
 
-            var token = GetToken(claim);
+            var token = _authenticationManager.GetToken(claim);
 
             return Ok(
                 new
@@ -348,9 +309,22 @@ namespace Web.Controllers
                 return NotFound("School with given school name could not be found.");
             }
 
-            //ApplicationUser.UserName consist of (DNS): schoolName.groupName.
-            var username = $"{school.Name}.{model.GroupName}";
-            var appUser = await GetApplicationUserWithIncludes(username);
+            //ApplicationUser.UserName is a concat of: schoolLoginName.groupName. (DNS).
+//            var username = $"{school.LoginName}.{model.GroupName}";
+
+            if (school.Groups == null || school.Groups.Count < 1)
+            {
+                return StatusCode(500, "School has no groups.");
+            }
+
+            var group = school.Groups.SingleOrDefault(g => g.Name.ToLower().Equals(model.GroupName.ToLower()));
+            if (group == null)
+            {
+                return NotFound();
+            }
+
+            var groupApplicationUserId = group.ApplicationUserId;
+            var appUser = await _authenticationManager.GetAppUserWithGroupsIncludedViaId(groupApplicationUserId);
 
             // check if group exists (ApplicationUser exists) and has a school
             // check if password is correct.
@@ -361,16 +335,16 @@ namespace Web.Controllers
                 return Unauthorized();
             }
 
-            var group = appUser.School.Groups.SingleOrDefault(g => g.Name == model.GroupName);
+            group = appUser.School.Groups.SingleOrDefault(g => g.Name == model.GroupName);
 
             if (group == null) // check if group exists
             {
                 return Unauthorized();
             }
 
-            var claims = await CreateClaims(appUser, group.Id.ToString());
+            var claims = await _authenticationManager.CreateClaims(appUser, group.Id.ToString());
 
-            var token = GetToken(claims);
+            var token = _authenticationManager.GetToken(claims);
             return Ok(
                 new
                 {
@@ -382,12 +356,6 @@ namespace Web.Controllers
         private async Task<bool> CheckValidPassword(ApplicationUser applicationUser, string password)
         {
             return await _userManager.CheckPasswordAsync(applicationUser, password);
-        }
-
-        private async Task<ApplicationUser> GetApplicationUserWithIncludes(string username)
-        {
-            return await _userManager.Users.Include(u => u.School).ThenInclude(s => s.Groups)
-                .SingleOrDefaultAsync(u => u.UserName == username);
         }
 
         /**
@@ -411,25 +379,22 @@ namespace Web.Controllers
                 return Unauthorized();
             }
 
-            if (school.Password.Equals(model.Password))
+            if (!school.Password.Equals(model.Password))
             {
-//                var claims = await CreateClaims(appUser, group.Id.ToString());
-//
-//                var token = GetToken(claims);
-//                return Ok(
-//                    new
-//                    {
-//                        token = new JwtSecurityTokenHandler().WriteToken(token),
-//                        expiration = token.ValidTo
-//                    });
-                return Ok(
-                    new
-                    {
-                        SchoolId = school.Id
-                    });
+                return Unauthorized();
             }
 
-            return Unauthorized();
+            var appUser = await _userManager.FindByNameAsync(school.Name);
+
+            var claims = await _authenticationManager.CreateClaims(appUser);
+
+            var token = _authenticationManager.GetToken(claims);
+            return Ok(
+                new
+                {
+                    token = new JwtSecurityTokenHandler().WriteToken(token),
+                    expiration = token.ValidTo
+                });
         }
 
         /**
@@ -451,24 +416,6 @@ namespace Web.Controllers
             if (!exists)
                 exists = await _teacherRequestRepository.GetByEmail(email) != null;
             return exists ? Ok(new {Email = "alreadyexists"}) : Ok(new {Email = "ok"});
-        }
-
-        //Todo: dit moet in de AuthenticationManager (wordt ook door groupController gebruikt)
-        /**
-         * Create Jwt Token via a specific IEnumerable of claims.
-         * Return: JwtSecurityToken
-         */
-        private JwtSecurityToken GetToken(IEnumerable<Claim> claim)
-        {
-            var signInKey = new SymmetricSecurityKey(
-                Encoding.UTF8.GetBytes(_configuration["AppSettings:Secret"]));
-
-            return new JwtSecurityToken(
-                issuer: "http://app.reva.be",
-                audience: "http://app.reva.be",
-                claims: claim,
-                expires: DateTime.UtcNow.AddDays(7),
-                signingCredentials: new SigningCredentials(signInKey, SecurityAlgorithms.HmacSha256));
         }
 
         [Route("[action]")]

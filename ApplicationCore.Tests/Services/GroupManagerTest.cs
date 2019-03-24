@@ -1,9 +1,10 @@
 using System;
-using ApplicationCore.Services;
+using Infrastructure.Services;
 using Xunit;
 
 
 namespace ApplicationCore.Tests.Services
+//todo deze Manager tests moeten prolly in Infrastructure.
 {
     public class GroupManagerTest
     {

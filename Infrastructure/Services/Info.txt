@@ -1,0 +1,7 @@
+ApplicationCore should not contain Business Logic. Rather Interfaces,
+so that if 'Infrastrucutre'-module gets replaced, all interfaces in ApplicationCore
+can be used by the new Infrastructure, so that all methods are implemented and everything
+in 'Web' still works perfectly (without even knowing of the replacement/swap).
+
+So: 'Infrastructure' = Business logic
+'ApplicationCore' = Wall between 'Web' and 'Infrastructure' => dumb as possible (Interfaces).

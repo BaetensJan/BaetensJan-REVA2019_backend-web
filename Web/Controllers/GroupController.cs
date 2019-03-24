@@ -3,17 +3,16 @@ using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
 using System.Security.Claims;
-using System.Text;
 using System.Threading.Tasks;
 using ApplicationCore.Entities;
 using ApplicationCore.Interfaces;
-using ApplicationCore.Services;
+using Infrastructure.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
-using Microsoft.IdentityModel.Tokens;
 using Web.DTOs;
 
 namespace Web.Controllers
@@ -27,18 +26,19 @@ namespace Web.Controllers
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly IAuthenticationManager _authenticationManager;
         private readonly GroupManager _groupManager;
-        private readonly IConfiguration _configuration;
 
-        public GroupController(IGroupRepository repository, UserManager<ApplicationUser> userManager,
-            IAuthenticationManager authenticationManager, ISchoolRepository schoolRepository,
+        public GroupController(
+            IGroupRepository groupRepository,
+            UserManager<ApplicationUser> userManager,
+            IAuthenticationManager authenticationManager,
+            ISchoolRepository schoolRepository,
             IConfiguration configuration)
         {
             _userManager = userManager;
-            _groupManager = new GroupManager(configuration);
-            _groupRepository = repository;
+            _groupManager = new GroupManager(configuration, groupRepository);
+            _groupRepository = groupRepository;
             _authenticationManager = authenticationManager;
             _schoolRepository = schoolRepository;
-            _configuration = configuration;
         }
 
 
@@ -52,31 +52,16 @@ namespace Web.Controllers
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<IActionResult> GroupInfo()
         {
-            string claim;
-            int groupId;
+            var groupSidClaim = User.Claims.SingleOrDefault(c => c.Type == ClaimTypes.GroupSid);
 
-            try
+            if (groupSidClaim == null)
             {
-                // get groupId from jwt token.
-                claim = User.Claims.ElementAt(5).Value;
-            }
-            catch (IndexOutOfRangeException e)
-            {
-                // token has less than 6 items and does not have the groupId Claim.
-                return StatusCode(500, $"Token does not consist of a groupId. {e}");
+                return NotFound("groupId not found in token.");
             }
 
-            try
-            {
-                groupId = Convert.ToInt32(claim);
-            }
-            catch (FormatException formatException)
-            {
-                // System.FormatException: Input string was not in a correct format.
-                return StatusCode(500, $"Token does not consist of a groupId. {formatException}");
-            }
+            var groupId = groupSidClaim.Value;
 
-            var group = await _groupRepository.GetById(groupId);
+            var group = await _groupRepository.GetById(Convert.ToInt32(groupId));
             if (group == null)
             {
                 return NotFound(new {Message = "Group not found or groupId not in token."});
@@ -97,6 +82,114 @@ namespace Web.Controllers
         }
 
         /**
+         * return group with id equal to parameter groupId.
+         */
+        [HttpGet("[action]")]
+        [Authorize]
+        public async Task<IActionResult> Group()
+        {
+            var applicationUserIdClaim = User.Claims.SingleOrDefault(c => c.Type == ClaimTypes.Sid);
+
+            if (applicationUserIdClaim == null)
+            {
+                return NotFound("ApplicationUserId not found in token.");
+            }
+
+            var applicationUserId = applicationUserIdClaim.Value;
+
+            var groupAppUser = await _authenticationManager.GetAppUserWithGroupsIncludedViaId(applicationUserId);
+
+            if (groupAppUser.School.Groups == null)
+            {
+                return NotFound();
+            }
+
+            var group = groupAppUser.School.Groups.SingleOrDefault(g => g.ApplicationUserId == groupAppUser.Id);
+            if (group == null)
+            {
+                return NotFound();
+            }
+
+            return Ok(group);
+        }
+
+        /**
+         * Checks if the groupName already exists.
+         */
+        [HttpGet("[action]/{groupName}")]
+        [Authorize]
+        public async Task<IActionResult> CheckGroupName(string groupName)
+        {
+            var applicationUserIdClaim = User.Claims.SingleOrDefault(c => c.Type == ClaimTypes.Sid);
+
+            if (applicationUserIdClaim == null)
+            {
+                return NotFound("ApplicationUserId not found in token.");
+            }
+
+            var applicationUserId = applicationUserIdClaim.Value;
+
+            var schoolAppUser = await _authenticationManager.GetAppUserWithGroupsIncludedViaId(applicationUserId);
+
+
+            if (schoolAppUser == null)
+            {
+                return NotFound("School in token not found.");
+            }
+
+            if (schoolAppUser.School == null)
+            {
+                return NotFound("ApplicationUser of School has no School.");
+            }
+
+            var foundGroup = "alreadyexists";
+
+            if (schoolAppUser.School.Groups.FindIndex(g => g.Name.ToLower().Equals(groupName.ToLower())) < 0)
+            {
+                foundGroup = "ok";
+            }
+
+            return Ok(new {GroupName = foundGroup});
+        }
+
+        [HttpGet("[action]")]
+        [Authorize]
+        public async Task<IActionResult> Groups()
+        {
+            return Ok(await _groupRepository.GetAllLight());
+        }
+
+        [HttpGet("[action]")]
+        [Authorize]
+        public async Task<IActionResult> GroupsOfSchool()
+        {
+            var applicationUserIdClaim = User.Claims.SingleOrDefault(c => c.Type == ClaimTypes.Sid);
+
+            if (applicationUserIdClaim == null)
+            {
+                return NotFound("ApplicationUserId not found in token.");
+            }
+
+            var applicationUserId = applicationUserIdClaim.Value;
+
+            var schoolAppUser = await _authenticationManager.GetAppUserWithGroupsIncludedViaId(applicationUserId);
+            if (schoolAppUser == null)
+            {
+                return NotFound("ApplicationUser with id from token could not be found.");
+            }
+
+            if (schoolAppUser.School == null)
+            {
+                return NotFound("ApplicationUser of School has no School.");
+            }
+
+            var school = schoolAppUser.School;
+
+            return Ok(school.Groups);
+        }
+
+
+        /**
          * Returns all groups of school with schoolId equal to parameter schoolId.
          */
         [HttpGet("[action]/{schoolId}")]
@@ -112,79 +205,42 @@ namespace Web.Controllers
             return NotFound();
         }
 
-
         /**
-         * Returns group with schoolId equal to parameter schoolId and groupName equal to parameter.
-         * If parameter schoolId is -1, then the schoolId can be extracted out of the token via User.claims.
+         * Creates a Group and returns a JwtToken. Used in android.
          */
-        [HttpGet("[action]/{schoolId}/{groupName}")]
-        [Authorize]
-        public async Task<IActionResult> GetBySchoolIdAndGroupName(int schoolId, string groupName)
-        {
-            var school = await _schoolRepository.GetById(schoolId);
-            if (school == null)
-            {
-                return NotFound("School not found");
-            }
-
-            var group = school.Groups.SingleOrDefault(g => g.Name == groupName);
-            if (group == null)
-            {
-                return NotFound("Group not found in school with school name: " + school.Name);
-            }
-
-            return Ok(group);
-        }
-
-        /**
-         * Checks if the groupName already exists.
-         */
-        [HttpGet("[action]/{schoolId}/{groupName}")]
-        public async Task<IActionResult> CheckGroupName(int schoolId, string groupName)
-        {
-            var school = await _schoolRepository.GetById(schoolId);
-            if (school == null)
-            {
-                return Ok(new {GroupName = "School not found"});
-            }
-
-            var foundGroup = "alreadyexists";
-
-            if (school.Groups.FindIndex(g => g.Name.ToLower().Equals(groupName.ToLower())) < 0)
-            {
-                foundGroup = "ok";
-            }
-
-            return Ok(new {GroupName = foundGroup});
-        }
-
-        [HttpGet("[action]")]
-        [Authorize]
-        public async Task<IActionResult> Groups()
-        {
-            return Ok(await _groupRepository.GetAllLight());
-        }
-
-        /**
-         * Creates a Group and returns a JwtToken.
-         */
-        [HttpPost("[action]/{schoolId}")]
-        [Authorize]
+        [HttpPost("[action]")]
+        [Authorize] //todo only role school
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<ActionResult> CreateGroup([FromBody] GroupDTO model, int schoolId)
+        public async Task<ActionResult> CreateGroup([FromBody] GroupDTO model)
         {
             if (!ModelState.IsValid)
             {
                 return BadRequest();
             }
 
-            var school = await _schoolRepository.GetById(schoolId);
-            if (school == null)
+            var applicationUserIdClaim = User.Claims.SingleOrDefault(c => c.Type == ClaimTypes.Sid);
+
+            if (applicationUserIdClaim == null)
             {
-                return NotFound();
+                return NotFound("ApplicationUserId not found in token.");
             }
+
+            var applicationUserId = applicationUserIdClaim.Value;
+
+            var schoolAppUser = await _authenticationManager.GetAppUserWithGroupsIncludedViaId(applicationUserId);
+            if (schoolAppUser == null)
+            {
+                return NotFound("ApplicationUser with id from token could not be found.");
+            }
+
+            if (schoolAppUser.School == null)
+            {
+                return NotFound("ApplicationUser of School has no School.");
+            }
+
+            var school = schoolAppUser.School;
 
             // check if school already has a group with given groupName.
             var found = school.Groups.SingleOrDefault(g => g.Name.ToLower().Equals(model.Name.ToLower()));
@@ -222,20 +278,19 @@ namespace Web.Controllers
             await _groupRepository.SaveChanges();
 
             // create token.
-            var token = GetToken(groupApplicationUser, group.Id);
+            var claims = await _authenticationManager.CreateClaims(groupApplicationUser, group.Id.ToString());
+            var token = _authenticationManager.GetToken(claims);
 
-            return Ok( //Todo vervangen door return _authenticationManager.GetToken(); (duplicate code van AuthController)
-                    new
-                    {
-//                            Username = user.UserName,
-//                            Token = GetToken(user, group.Id)
-                        token = new JwtSecurityTokenHandler().WriteToken(token),
-                        expiration = token.ValidTo
-                    });
+            return Ok(
+                new
+                {
+                    token = new JwtSecurityTokenHandler().WriteToken(token),
+                    expiration = token.ValidTo
+                });
         }
 
         /**
-         * Creates a Group and returns the created group.
+         * Creates a Group and returns the created group, used in web.
          */
         [HttpPost("[action]/{schoolId}")]
         [Authorize]
@@ -340,30 +395,6 @@ namespace Web.Controllers
             }
 
             school.Groups.Add(group);
-        }
-
-        //Todo: dit moet in de AuthenticationManager (wordt ook door AuthController gebruikt)
-        private JwtSecurityToken GetToken(ApplicationUser user, int groupId)
-        {
-            var claims = new[]
-            {
-                new Claim(JwtRegisteredClaimNames.Sub, user.Email),
-                new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
-                new Claim(ClaimTypes.NameIdentifier, user.Id),
-                new Claim("username", user.UserName),
-                new Claim("isAdmin", false.ToString()),
-                new Claim("group", groupId.ToString())
-            };
-
-            var signInKey = new SymmetricSecurityKey(
-                Encoding.UTF8.GetBytes(_configuration["AppSettings:Secret"]));
-
-            return new JwtSecurityToken(
-                issuer: "http://app.reva.be",
-                audience: "http://app.reva.be",
-                claims: claims,
-                expires: DateTime.UtcNow.AddDays(7),
-                signingCredentials: new SigningCredentials(signInKey, SecurityAlgorithms.HmacSha256));
         }
 
         [HttpPut("[action]/{id}")]

@@ -1,19 +1,32 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Claims;
+using System.Threading.Tasks;
 using ApplicationCore.Entities;
+using ApplicationCore.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 
-namespace ApplicationCore.Services
+//todo add interface of GroupManager to ApplicationCore/Interfaces
+namespace Infrastructure.Services
 {
     public class GroupManager
     {
         private readonly IConfiguration _configuration;
 
-        public GroupManager(IConfiguration configuration)
+        private readonly IGroupRepository _groupRepository;
+//        private readonly UserManager<ApplicationUser> _userManager;
+
+        public GroupManager(
+            IConfiguration configuration,
+            IGroupRepository groupRepository 
+//            UserManager<ApplicationUser> userManager
+        )
         {
             _configuration = configuration;
+            _groupRepository = groupRepository;
+//            _userManager = userManager;
         }
 
         public JsonResult GetGroupInfo(Group group)
@@ -49,13 +62,15 @@ namespace ApplicationCore.Services
             var hasNoAssignments = numberOfAssignments == 0;
 
             var startDate = _configuration.GetValue<DateTime>("StartDate");
-            
+
 
             return new JsonResult(
                 new
                 {
                     startDate,
-                    canStartTour = group.Name == "groep122" || IsValidDate(startDate, DateTime.Now), // check if group can start Tour based on date.
+                    canStartTour =
+                        group.Name == "groep122" ||
+                        IsValidDate(startDate, DateTime.Now), // check if group can start Tour based on date.
                     hasNoAssignments, // we need this attribute, because numberOfAssignments != numberOfSubmittedAssignments
                     // (and the app only knows the latter) 
                     numberOfSubmittedAssignments,
@@ -74,6 +89,20 @@ namespace ApplicationCore.Services
         {
             return dateTimeNow.Hour > 8 // Check if after 8 o'clock. 
                    && DateTime.Compare(dateTimeNow, startDate) > 0; // DateTime.Now "is later than" startDate.
+        }
+
+        public async Task<Group> GetGroup(IEnumerable<Claim> claims)
+        {
+            var groupSidClaim = claims.SingleOrDefault(c => c.Type == ClaimTypes.GroupSid);
+
+            if (groupSidClaim == null)
+            {
+                return null;
+            }
+
+            var groupId = groupSidClaim.Value;
+
+            return await _groupRepository.GetById(Convert.ToInt32(groupId));
         }
     }
 }

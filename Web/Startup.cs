@@ -1,4 +1,5 @@
 using System;
+using ApplicationCore.Entities;
 using Infrastructure;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -32,8 +33,11 @@ namespace Web
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IHostingEnvironment env, ApplicationDbContext context,
-            IServiceProvider serviceProvider)            
+        public void Configure(
+            IApplicationBuilder app,
+            IHostingEnvironment env,
+            ApplicationDbContext context
+            /*IServiceProvider serviceProvider*/)
         {
             if (env.IsDevelopment())
             {
@@ -44,6 +48,7 @@ namespace Web
                 app.UseExceptionHandler("/Error");
                 app.UseHsts();
             }
+
             context.Database.EnsureCreated();
 
             //app.UseHttpsRedirection();
@@ -70,24 +75,31 @@ namespace Web
                     spa.UseAngularCliServer(npmScript: "start");
                 }
             });
-//            CreateRoles(serviceProvider);
+
+//            CreateRoles(app.ApplicationServices);
         }
 
-        private async void CreateRoles(IServiceProvider serviceProvider)
-        {
-            //initializing custom roles 
-            var roleManager = serviceProvider.GetRequiredService<RoleManager<IdentityRole>>();
-            string[] roleNames = {"Admin", "Teacher", "Group", "SuperAdmin", "School"};
-            IdentityResult roleResult;
-
-            foreach (var roleName in roleNames)
-            {
-                var roleExist = await roleManager.RoleExistsAsync(roleName);
-                if (!roleExist)
-                {
-                    roleResult = await roleManager.CreateAsync(new IdentityRole(roleName));
-                }
-            }
-        }
+//        private async void CreateRoles(IServiceProvider serviceProvider)
+//        {
+//            using (var scope = serviceProvider.CreateScope())
+//            {
+//                var provider = scope.ServiceProvider;
+//                var roleManager = provider.GetRequiredService<RoleManager<IdentityRole>>();
+//
+//                //initializing custom roles 
+////            var roleManager = serviceProvider.GetRequiredService<RoleManager<IdentityRole>>();
+//                string[] roleNames = {"Admin", "Teacher", "Group", "SuperAdmin", "School"};
+//                IdentityResult roleResult;
+//
+//                foreach (var roleName in roleNames)
+//                {
+//                    var roleExist = await roleManager.RoleExistsAsync(roleName);
+//                    if (!roleExist)
+//                    {
+//                        roleResult = await roleManager.CreateAsync(new IdentityRole(roleName));
+//                    }
+//                }
+//            }
+//        }
     }
 }

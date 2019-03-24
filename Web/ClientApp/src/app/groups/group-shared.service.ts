@@ -193,7 +193,7 @@ export class GroupSharedService {
       }
 
       return this._groupsDataService
-        .checkGroupNameAvailability(this._schoolId.toString(), control.value)
+        .checkGroupNameAvailability(/*this._schoolId.toString(), */control.value)
         .pipe(map(available => {
             if (available) {
               return null;

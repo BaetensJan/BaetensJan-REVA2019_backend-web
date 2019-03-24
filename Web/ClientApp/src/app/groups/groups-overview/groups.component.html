@@ -123,7 +123,7 @@
     </div>
 
     <!--Overview of groups-->
-    <div class="row" *ngIf="returnedArray; else noGroups">
+    <div class="row" *ngIf="returnedArray && returnedArray.length > 0; else noGroups">
       <div class="col-xs-12 col-12">
         <div class="content-wrapper">
           <accordion [closeOthers]="true">

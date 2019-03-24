@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using ApplicationCore.Entities;
 using ApplicationCore.Interfaces;
 using ApplicationCore.Services;
+using Infrastructure.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
@@ -16,17 +17,17 @@ namespace Web.Controllers
     public class CategoryController : Controller
     {
         private readonly ICategoryRepository _categoryRepository;
-        private readonly IGroupRepository _groupRepository;
         private readonly IConfiguration _configuration;
         private readonly CategoryManager _categoryManager;
+        private readonly GroupManager _groupManager;
 
         public CategoryController(ICategoryRepository categoryRepository, IGroupRepository groupRepository,
             IQuestionRepository questionRepository, IExhibitorRepository exhibitorRepository,
             IConfiguration configuration)
 
         {
+            _groupManager = new GroupManager(configuration, groupRepository); // todo mag via ServiceManager geinjecteerd worden.            
             _categoryRepository = categoryRepository;
-            _groupRepository = groupRepository;
             _configuration = configuration;
             _categoryManager = new CategoryManager(categoryRepository, exhibitorRepository, questionRepository);
         }
@@ -59,8 +60,11 @@ namespace Web.Controllers
         [Authorize]
         public async Task<IActionResult> GetUnpickedCategories(int exhibitorId)
         {
-            var group = await _groupRepository.GetById(Convert.ToInt32(User.Claims.ElementAt(5).Value));
-            var assignments = group.Assignments;
+            var group = await _groupManager.GetGroup(User.Claims);
+            if (group == null)
+            {
+                return NotFound("groupId not found in token.");
+            }            var assignments = group.Assignments;
             
             // Group is doing an extra round if they have submitted more than the amount of questions to be answered
             // in a normal tour.

@@ -150,8 +150,8 @@ export class GroupsDataService {
    * @param schoolId
    * @param groupName
    */
-  checkGroupNameAvailability(schoolId: string, groupName: string): Observable<boolean> {
-    return this.http.get(`${this._appUrl}/CheckGroupName/${schoolId}/${groupName}`).pipe(
+  checkGroupNameAvailability(/*schoolId: string, */groupName: string): Observable<boolean> {
+    return this.http.get(`${this._appUrl}/CheckGroupName/${groupName}`).pipe(
       map((item: any) => {
         if (item.groupName === 'alreadyexists') {
           return false;

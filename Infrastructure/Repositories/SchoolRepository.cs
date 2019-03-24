@@ -73,7 +73,7 @@ namespace Infrastructure.Repositories
 
         public async Task<School> GetBySchoolLoginName(string schoolLoginName)
         {
-            var school = _schools.SingleOrDefaultAsync(s => s.LoginName.Trim().ToLower().Equals(schoolLoginName.ToLower()));
+            var school = _schools.Include(s => s.Groups).SingleOrDefaultAsync(s => s.LoginName.Trim().ToLower().Equals(schoolLoginName.ToLower()));
             return await school;
         }
 

@@ -146,13 +146,29 @@ namespace Web.Controllers
         public async Task<IActionResult> CheckSchoolName(string schoolName)
         {
             var exists = await _schoolRepository.GetBySchoolName(schoolName) != null
-                         || await _teacherRequestRepository.GetBySchool(schoolName) != null;
+                         || await CheckIfUnacceptedSchoolRequestWithSchoolNameExists(schoolName);
             if (exists)
             {
                 return Ok(new {schoolName = "alreadyexists"});
             }
 
             return Ok(new {schoolName = "ok"});
+        }
+
+        private async Task<bool> CheckIfUnacceptedSchoolRequestWithSchoolNameExists(string schoolName)
+        {
+            var teacherRequest = await _teacherRequestRepository.GetBySchool(schoolName);
+            if (teacherRequest == null)
+            {
+                return false;
+            }
+
+            if (teacherRequest.Accepted == false) // Declined request => schoolName is still "open" or "usable".
+                         {
+                return false;
+            }
+
+            return true;
         }
     }
 }

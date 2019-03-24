@@ -1,10 +1,13 @@
 using System;
 using System.Linq;
+using System.Security.Claims;
 using System.Threading.Tasks;
 using ApplicationCore.Entities;
 using ApplicationCore.Interfaces;
 using ApplicationCore.Services;
+using Infrastructure.Services;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Web.DTOs;
@@ -21,7 +24,6 @@ namespace Web.Controllers
         private readonly IAssignmentRepository _assignmentRepository;
         private readonly IAssignmentBackupRepository _assignmentBackupRepository;
         private readonly IExhibitorRepository _exhibitorRepository;
-        private readonly IGroupRepository _groupRepository;
         private readonly IQuestionRepository _questionRepository;
         private readonly ICategoryRepository _categoryRepository;
         private readonly ExhibitorManager _exhibitorManager;
@@ -29,18 +31,24 @@ namespace Web.Controllers
         private readonly IConfiguration _configuration;
         private readonly QuestionManager _questionManager;
         private readonly AssignmentManager _assignmentManager;
+        private readonly GroupManager _groupManager;
+        private readonly UserManager<ApplicationUser> _userManager;
+        private readonly IAuthenticationManager _authenticationManager;
 
         public AssignmentController(IConfiguration configuration,
             IAssignmentRepository assignmentRepository,
+            UserManager<ApplicationUser> userManager,
             IAssignmentBackupRepository assignmentBackupRepository,
             IExhibitorRepository exhibitorRepository,
+            IAuthenticationManager authenticationManager,
             IGroupRepository groupRepository,
             ICategoryRepository categoryRepository,
             IImageWriter imageWriter,
             IQuestionRepository questionRepository)
         {
+            _userManager = userManager;
             _configuration = configuration;
-            _groupRepository = groupRepository;
+            _groupManager = new GroupManager(configuration, groupRepository); // todo mag via ServiceManager geinjecteerd worden.            
             _assignmentRepository = assignmentRepository;
             _assignmentBackupRepository = assignmentBackupRepository;
             _exhibitorRepository = exhibitorRepository;
@@ -49,6 +57,7 @@ namespace Web.Controllers
             _questionRepository = questionRepository;
             _questionManager = new QuestionManager();
             _categoryRepository = categoryRepository;
+            _authenticationManager = authenticationManager;
             _imageWriter = imageWriter;
             _assignmentManager = new AssignmentManager(assignmentRepository);
         }
@@ -70,11 +79,6 @@ namespace Web.Controllers
             });
         }
 
-        public async Task<Group> GetGroup()
-        {
-            return await _groupRepository.GetById(Convert.ToInt32(User.Claims.ElementAt(5).Value));
-        }
-
         /**
         * Gets the closest exhibitor with a certain category, starting from previous exhibitor. (Normal Tour)
         * 
@@ -89,7 +93,12 @@ namespace Web.Controllers
         [Authorize]
         public async Task<IActionResult> CreateAssignment(int categoryId, int previousExhibitorId, bool isExtraRound)
         {
-            var group = await GetGroup();
+            var group = await _groupManager.GetGroup(User.Claims);
+            if (group == null)
+            {
+                return NotFound("groupId not found in token.");
+            }
+
             var questions = await _questionRepository.GetAll();
             var assignments = group.Assignments;
 
@@ -146,8 +155,11 @@ namespace Web.Controllers
             var question = await _questionRepository.GetById(127);
 
             // get group object via schoolId and groupName
-            var group = await GetGroup();
-
+            var group = await _groupManager.GetGroup(User.Claims);
+            if (group == null)
+            {
+                return NotFound("groupId not found in token.");
+            }
             // Create assignment and Add to the groups assignments.
             var assignment = new Assignment(question, true);
 
@@ -190,8 +202,14 @@ namespace Web.Controllers
         public async Task<IActionResult> CreateAssignmentOfExhibitorAndCategory(int categoryId, int exhibitorId)
         {
             var question = await _questionRepository.GetQuestion(categoryId, exhibitorId);
+            
+            var group = await _groupManager.GetGroup(User.Claims);
+            if (group == null)
+            {
+                return NotFound("groupId not found in token.");
+            }
 
-            var assignment = await _assignmentManager.CreateAssignment(question, true, await GetGroup());
+            var assignment = await _assignmentManager.CreateAssignment(question, true, group);
 
             assignment =
                 await _assignmentRepository
@@ -241,12 +259,17 @@ namespace Web.Controllers
             await _assignmentRepository.SaveChanges();
 
             // make backup of assignment
-            var group = await GetGroup();
+            var group = await _groupManager.GetGroup(User.Claims);
+            if (group == null)
+            {
+                return NotFound("groupId not found in token.");
+            }
 
-            await _assignmentBackupRepository.Add(assignment, User.Claims.ElementAt(3).ToString(),
-                group.Name, createdExhibitor);
+            var schoolAppUser = await _authenticationManager.GetAppUserWithGroupsIncludedViaId(group.ApplicationUserId);
+            
+            var schoolName = schoolAppUser.School.Name;
+            await _assignmentBackupRepository.Add(assignment, schoolName, group.Name, createdExhibitor);
 
-//                if (result.Succeeded)
             //TODO: temporary, recursive loop anders:
             assignment = await _assignmentRepository.GetByIdLight(assignment.Id);
             return Ok(assignment);
