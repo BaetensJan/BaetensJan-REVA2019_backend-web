@@ -1,13 +1,11 @@
 <!--Add new group panel-->
 <div class="panel panel-default">
   <div class="panel-body">
-    <h3 style="margin-bottom: 2em;">{{ createGroup ? 'Groep aanmaken' : 'Groep Wijzigen: ' + group.name }}</h3>
+    <h3 style="margin-bottom: 2em;">{{title}}</h3>
 
     <form (ngSubmit)="onSubmit()"
           [formGroup]="groupForm"
-          *ngIf="groupForm"
-          #formDirective="ngForm"
-    >
+          *ngIf="groupForm">
 
 
       <div *ngIf="!createGroup">
@@ -26,12 +24,12 @@
         </button>
       </div>
 
-
-      <div class="input-group" style="margin-bottom: 1em;">
+      <!-- GroupName -->
+      <div class="input-group">
         <span class="input-group-addon">
           Groepsnaam
         </span>
-        <input formControlName='groupName'
+        <input formControlName="groupName"
                type="text"
                class="form-control"
                placeholder="Naam van nieuwe groep."
@@ -51,7 +49,7 @@
         Er bestaat al een groep met deze naam.
       </div>
 
-
+      <!-- Change password -> only in update group -->
       <button
         style="margin-bottom: 1em; margin-top: 2em;"
         *ngIf="!createGroup && !changePassword"
@@ -62,41 +60,42 @@
         Wachtwoord wijzigen
       </button>
 
-      <div *ngIf="createGroup || changePassword">
-        <div formGroupName='passwordGroup'>
-          <div class="input-group" style="margin-bottom: 1em;">
+      <!-- FormGroup for password creation -->
+      <div formGroupName="passwordGroup" *ngIf="createGroup || changePassword" style="margin-top: 1em;">
+        <div class="input-group">
             <span class="input-group-addon">
               Wachtwoord
             </span>
-            <input formControlName='groupPassword'
-                   autocomplete="off"
-                   type="password"
-                   class="form-control"
-                   placeholder="Wachtwoord van nieuwe groep.">
-          </div>
-          <div class='alert alert-danger'
-               *ngIf='passwordControl.errors?.passwordTooShort && passwordControl.touched'>
-            Het wachtwoord moet minimum {{ passwordControl.errors?.passwordTooShort.requiredLength }} karakters
-            bevatten. Momenteel bevat het maar {{passwordControl.errors?.passwordTooShort.actualLength}} karakter(s).
-          </div>
-          <div class='alert alert-danger'
-               *ngIf='passwordControl.errors?.whitespace && passwordControl.touched'>
-            Wachtwoord mag geen spaties (witruimtes) bevatten.
-          </div>
+          <input formControlName="groupPassword"
+                 autocomplete="off"
+                 type="password"
+                 class="form-control"
+                 placeholder="Wachtwoord van nieuwe groep.">
+        </div>
+        <div class='alert alert-danger'
+             *ngIf="passwordGroup.get('groupPassword').errors?.passwordTooShort && passwordGroup.touched">
+          Het wachtwoord moet minimum {{ passwordGroup.get('groupPassword').errors?.passwordTooShort.requiredLength }}
+          karakters bevatten. Momenteel bevat het
+          maar {{passwordGroup.get('groupPassword').errors?.passwordTooShort.actualLength}} karakter(s).
+        </div>
+        <div class='alert alert-danger'
+             *ngIf="passwordGroup.get('groupPassword').errors?.whitespace && passwordGroup.get('groupPassword').touched">
+          Wachtwoord mag geen spaties (witruimtes) bevatten.
+        </div>
 
-          <div class="input-group">
+        <div class="input-group" style="margin-top: 1em;">
             <span class="input-group-addon">
               Bevestig Wachtwoord
             </span>
-            <input formControlName="confirmPassword"
-                   type="password" class="form-control" placeholder="Bevestig wachtwoord.">
-          </div>
-          <div class='alert alert-danger'
-               *ngIf='groupForm.get("passwordGroup").errors?.passwordsDiffer
-                  && groupForm.get("passwordGroup").get("confirmPassword").touched
-               && passwordControl.touched'>
-            De 2 wachtwoorden moeten overeenkomen.
-          </div>
+          <input formControlName="confirmPassword"
+                 type="password"
+                 class="form-control"
+                 placeholder="Bevestig wachtwoord.">
+        </div>
+        <div class='alert alert-danger'
+             *ngIf="passwordGroup.errors?.passwordsDiffer && passwordGroup.get('confirmPassword').touched
+               && passwordGroup.get('confirmPassword').touched">
+          De 2 wachtwoorden moeten overeenkomen.
         </div>
       </div>
 
@@ -113,13 +112,12 @@
           </div>
         </div>
         <button style="margin-left: 0.2em;" type="button" class="btn glyphicon glyphicon-plus-sign"
-                [disabled]='groupForm.get("groupMember").value.length < 1'
+                [disabled]="!validGroupMemberName"
+
                 (click)="addNewMember()"></button>
       </div>
-      <div class='alert alert-danger'
-           *ngIf='groupForm.get("groupMember").touched
-               && groupForm.get("groupMember").errors?.minlength.requiredLength'>
-        De naam moet minimum {{ groupForm.get("groupMember").errors?.minlength.requiredLength }} letters bevatten.
+      <div class="alert alert-danger" *ngIf="!validGroupMemberName">
+        De naam moet minimum {{ groupForm.get('groupMember').errors?.minlength.requiredLength }} letters bevatten.
       </div>
       <ng-template #maxMembersMessage>
         <p style="margin-top: 2em;">U hebt het maximum van 4 groepsleden dat toegelaten is per groep bereikt.</p>

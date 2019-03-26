@@ -283,9 +283,8 @@ export class GroupsComponent {
    * @param groupName
    */
   public add(groupName?: string): void {
-
-    const message = groupName ? `De nieuwe groep met groepsnaam ${groupName} werd succesvol toegevoegd.}`
-      : `Login van school succesvol veranderd naar ${this._school.loginName}. (om: ${new Date().toLocaleTimeString()})`;
+    const message = groupName ? `De nieuwe groep met groepsnaam '${groupName}' werd succesvol toegevoegd.`
+      : `Login van school succesvol veranderd naar '${this._school.loginName}'. (om: ${new Date().toLocaleTimeString()})`;
 
     this.alerts.push(
       {

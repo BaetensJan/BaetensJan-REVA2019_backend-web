@@ -1,20 +1,18 @@
-import {AfterViewInit, Component, EventEmitter, OnInit, Output, ViewChild} from '@angular/core';
+import {Component, EventEmitter, OnInit, Output} from '@angular/core';
 import {GroupSharedService} from "../group-shared.service";
 import {Group} from "../../models/group.model";
-import {FormBuilder, FormControl, FormGroup, NgForm} from "@angular/forms";
+import {FormBuilder, FormGroup} from "@angular/forms";
 import {GroupsDataService} from "../groups-data.service";
 import {Router} from "@angular/router";
 import {BsModalRef, BsModalService} from "ngx-bootstrap";
-import {School} from "../../models/school.model";
 import {SchoolDataService} from "../../schools/school-data.service";
 
 @Component({
-  selector: 'app-update-group',
-  templateUrl: './update-group.component.html',
-  styleUrls: ['./update-group.component.css']
+  selector: 'app-create-or-update-group',
+  templateUrl: './create-or-update-group.component.html',
+  styleUrls: ['./create-or-update-group.component.css']
 })
-export class UpdateGroupComponent implements OnInit, AfterViewInit {
-  @ViewChild('formDirective') private _formDirective: NgForm;
+export class CreateOrUpdateGroupComponent implements OnInit {
 
   private _group: Group;
   public changePassword: boolean = false;
@@ -47,8 +45,8 @@ export class UpdateGroupComponent implements OnInit, AfterViewInit {
     }
   }
 
-  ngAfterViewInit(): void {
-    this._groupSharedService.formDirective = this._formDirective;
+  public get title(): string {
+    return this.createGroup ? 'Groep aanmaken' : `Groep wijzigen: ${this._group.name}`;
   }
 
   get groupMembers(): string[] {
@@ -84,8 +82,8 @@ export class UpdateGroupComponent implements OnInit, AfterViewInit {
     this._groupSharedService.removeMember(memberName);
   }
 
-  get passwordControl(): FormControl {
-    return this._groupSharedService.passwordControl;
+  get passwordGroup(): any {
+    return this._groupSharedService.passwordGroup;
   }
 
 
@@ -102,6 +100,11 @@ export class UpdateGroupComponent implements OnInit, AfterViewInit {
 
   confirm(): void {
     this._groupSharedService.confirm();
+  }
+
+  public get validGroupMemberName(): boolean { //todo make validator for control rather than using this method.
+    const groupMember = this.groupForm.get('groupMember');
+    return groupMember.touched ? groupMember.valid : true;
   }
 
   /**

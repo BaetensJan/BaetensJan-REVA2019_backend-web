@@ -1,6 +1,5 @@
 import {async, ComponentFixture, TestBed} from '@angular/core/testing';
 import {NoopAnimationsModule} from '@angular/platform-browser/animations';
-import {MatPaginatorModule, MatSortModule, MatTableModule} from '@angular/material';
 
 import {GroupsComponent} from './groups.component';
 
@@ -13,9 +12,6 @@ describe('GroupsComponent', () => {
       declarations: [GroupsComponent],
       imports: [
         NoopAnimationsModule,
-        MatPaginatorModule,
-        MatSortModule,
-        MatTableModule,
       ]
     }).compileComponents();
   }));

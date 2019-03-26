@@ -3,8 +3,6 @@ import {HttpClient} from '@angular/common/http';
 import {Observable} from 'rxjs/Observable';
 import {map} from 'rxjs/operators';
 import {Group} from "../models/group.model";
-import {School} from "../models/school.model";
-import {pipe} from "rxjs";
 
 @Injectable({
   providedIn: 'root'
