@@ -120,6 +120,8 @@ namespace Web.Controllers
         [Authorize]
         public async Task<IActionResult> CheckGroupName(string groupName)
         {
+            groupName = groupName.ToLower();
+            
             var applicationUserIdClaim = User.Claims.SingleOrDefault(c => c.Type == ClaimTypes.Sid);
 
             if (applicationUserIdClaim == null)
@@ -144,7 +146,7 @@ namespace Web.Controllers
 
             var foundGroup = "alreadyexists";
 
-            if (schoolAppUser.School.Groups.FindIndex(g => g.Name.ToLower().Equals(groupName.ToLower())) < 0)
+            if (schoolAppUser.School.Groups.FindIndex(g => g.Name.ToLower().Equals(groupName)) < 0)
             {
                 foundGroup = "ok";
             }
@@ -293,7 +295,7 @@ namespace Web.Controllers
          * Creates a Group and returns the created group, used in web.
          */
         [HttpPost("[action]/{schoolId}")]
-        [Authorize]
+        [Authorize] //todo check if Teacher role
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
@@ -402,6 +404,8 @@ namespace Web.Controllers
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<ActionResult> UpdateGroup([FromRoute] int id, [FromBody] GroupUpdateDTO model)
         {
+            model.Name = model.Name.ToLower();
+            
             if (!ModelState.IsValid)
             {
                 return BadRequest();

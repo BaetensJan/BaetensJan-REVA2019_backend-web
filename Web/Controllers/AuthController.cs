@@ -111,6 +111,10 @@ namespace Web.Controllers
 
             // creating the school
             var school = await CreateSchool(teacherRequest);
+            if (school == null)
+            {
+                return StatusCode(500, "School already exists");
+            }
 
             // creating teacher consisting of his school
             var password = GetRandomString(8);
@@ -158,23 +162,35 @@ namespace Web.Controllers
 
         private async Task<School> CreateSchool(TeacherRequest teacherRequest)
         {
+            var exists = await _schoolRepository.GetBySchoolName(teacherRequest.SchoolName);
+            if (exists != null)
+            {
+                return null;
+            }
+
             // Create Entity School.
             var school = new School(teacherRequest.SchoolName, GetRandomString(8));
             await _schoolRepository.Add(school);
             await _schoolRepository.SaveChanges();
 
+            var alreadyExists = await _userManager.FindByNameAsync(school.LoginName);
+            if (alreadyExists != null)
+            {
+                return null;
+            }
+
             // Create ApplicationUser (with Role School) for School.
             var appUser = new ApplicationUser
             {
                 School = school,
-                UserName = school.Name,
-                NormalizedUserName = school.Name.Normalize(),
+                UserName = school.LoginName,
+                NormalizedUserName = school.LoginName.Normalize(),
                 Email = teacherRequest.Email + "2",
                 NormalizedEmail = teacherRequest.Email.Normalize() + "2",
                 PasswordHash = school.Password,
             };
             await _userManager.CreateAsync(appUser);
-            await _userManager.AddToRoleAsync(await _userManager.FindByNameAsync(school.Name), "School");
+            await _userManager.AddToRoleAsync(await _userManager.FindByNameAsync(appUser.UserName), "School");
 
             return school;
         }
@@ -298,53 +314,56 @@ namespace Web.Controllers
                 return BadRequest();
             }
 
-            model.GroupName = model.GroupName.Trim();
-            model.SchoolLoginName = model.SchoolLoginName.Trim();
+            model.GroupName = model.GroupName.Trim().ToLower();
+            model.SchoolLoginName = model.SchoolLoginName.Trim().ToLower();
             model.Password = model.Password.Trim();
 
-            var school = await _schoolRepository.GetBySchoolLoginName(model.SchoolLoginName);
+            var schoolAppUser =
+                await _authenticationManager.GetAppUserWithGroupsIncludedViaUserName(model.SchoolLoginName);
+            if (schoolAppUser == null)
+            {
+                return NotFound("AppUser for school not found.");
+            }
 
-            if (school == null)
+            var school = schoolAppUser.School;
+            if (schoolAppUser.School == null)
             {
                 return NotFound("School with given school name could not be found.");
             }
-
-            //ApplicationUser.UserName is a concat of: schoolLoginName.groupName. (DNS).
-//            var username = $"{school.LoginName}.{model.GroupName}";
 
             if (school.Groups == null || school.Groups.Count < 1)
             {
                 return StatusCode(500, "School has no groups.");
             }
 
-            var group = school.Groups.SingleOrDefault(g => g.Name.ToLower().Equals(model.GroupName.ToLower()));
+            var group = school.Groups.SingleOrDefault(g => g.Name.ToLower().Equals(model.GroupName));
             if (group == null)
             {
                 return NotFound();
             }
 
-            var groupApplicationUserId = group.ApplicationUserId;
-            var appUser = await _authenticationManager.GetAppUserWithGroupsIncludedViaId(groupApplicationUserId);
+            //ApplicationUser.UserName of Group is a concat of: schoolName.groupName. (DNS).
+//            var applicationUserName = school.Name + "." + group.Name;
+            var groupAppUser =
+                await _userManager.FindByIdAsync(group
+                    .ApplicationUserId); // await _userManager.FindByNameAsync(applicationUserName);
 
-            // check if group exists (ApplicationUser exists) and has a school
             // check if password is correct.
+            if (!await CheckValidPassword(groupAppUser, model.Password))
+            {
+                return Unauthorized();
+            }
+
             // check if user is a group
-            if (appUser?.School == null || !await CheckValidPassword(appUser, model.Password)
-                                        || !await _userManager.IsInRoleAsync(appUser, "Group"))
+            if (!await _userManager.IsInRoleAsync(groupAppUser, "Group"))
             {
-                return Unauthorized();
+                Unauthorized();
             }
 
-            group = appUser.School.Groups.SingleOrDefault(g => g.Name == model.GroupName);
-
-            if (group == null) // check if group exists
-            {
-                return Unauthorized();
-            }
-
-            var claims = await _authenticationManager.CreateClaims(appUser, group.Id.ToString());
+            var claims = await _authenticationManager.CreateClaims(groupAppUser, group.Id.ToString());
 
             var token = _authenticationManager.GetToken(claims);
+
             return Ok(
                 new
                 {
@@ -370,23 +389,33 @@ namespace Web.Controllers
                 return BadRequest();
             }
 
-            model.Username = model.Username.Trim();
+            model.Username = model.Username.Trim().ToLower();
             model.Password = model.Password.Trim();
 
-            var school = await _schoolRepository.GetBySchoolLoginName(model.Username);
+            var schoolAppUser = await _authenticationManager.GetAppUserWithSchoolIncludedViaUserName(model.Username);
+            if (schoolAppUser == null)
+            {
+                return NotFound("Appuser of school not found.");
+            }
+
+            var school = schoolAppUser.School;
             if (school == null)
             {
-                return Unauthorized();
+                return NotFound("AppUser of school has no school.");
             }
 
-            if (!school.Password.Equals(model.Password))
+            
+            if (!school.Password.Equals(model.Password)) // todo put pw in appUser of school and check there.
             {
                 return Unauthorized();
             }
+            
+            if (!await _userManager.IsInRoleAsync(schoolAppUser, "School"))
+            {
+                Unauthorized("Not in role school.");
+            }
 
-            var appUser = await _userManager.FindByNameAsync(school.Name);
-
-            var claims = await _authenticationManager.CreateClaims(appUser);
+            var claims = await _authenticationManager.CreateClaims(schoolAppUser);
 
             var token = _authenticationManager.GetToken(claims);
             return Ok(

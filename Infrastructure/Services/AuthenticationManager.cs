@@ -118,6 +118,18 @@ namespace Infrastructure.Services
         {
             return await _userManager.Users.Include(u => u.School).ThenInclude(s => s.Groups)
                 .FirstOrDefaultAsync(u => u.UserName == userName);
+        } 
+        
+        public async Task<ApplicationUser> GetAppUserWithSchoolIncludedViaUserName(string userName)
+        {
+            return await _userManager.Users.Include(u => u.School)
+                .FirstOrDefaultAsync(u => u.UserName == userName);
+        }
+        
+        public async Task<ApplicationUser> GetAppUserWithSchoolIncludedViaId(string applicationUserId)
+        {
+            return await _userManager.Users.Include(u => u.School)
+                .FirstOrDefaultAsync(u => u.Id == applicationUserId);
         }
     }
 }

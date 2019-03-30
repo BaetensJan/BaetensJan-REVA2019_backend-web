@@ -15,5 +15,7 @@ namespace ApplicationCore.Interfaces
         JwtSecurityToken GetToken(IEnumerable<Claim> claim);
         Task<ApplicationUser> GetAppUserWithGroupsIncludedViaId(string applicationUserId);
         Task<ApplicationUser> GetAppUserWithGroupsIncludedViaUserName(string userName);
+        Task<ApplicationUser> GetAppUserWithSchoolIncludedViaUserName(string userName);
+        Task<ApplicationUser> GetAppUserWithSchoolIncludedViaId(string applicationUserId);
     }
 }

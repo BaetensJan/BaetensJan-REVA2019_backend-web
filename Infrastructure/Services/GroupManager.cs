@@ -16,8 +16,7 @@ namespace Infrastructure.Services
         private readonly IConfiguration _configuration;
 
         private readonly IGroupRepository _groupRepository;
-//        private readonly UserManager<ApplicationUser> _userManager;
-
+        
         public GroupManager(
             IConfiguration configuration,
             IGroupRepository groupRepository 

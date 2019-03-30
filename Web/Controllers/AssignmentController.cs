@@ -1,6 +1,5 @@
 using System;
 using System.Linq;
-using System.Security.Claims;
 using System.Threading.Tasks;
 using ApplicationCore.Entities;
 using ApplicationCore.Interfaces;
@@ -32,7 +31,6 @@ namespace Web.Controllers
         private readonly QuestionManager _questionManager;
         private readonly AssignmentManager _assignmentManager;
         private readonly GroupManager _groupManager;
-        private readonly UserManager<ApplicationUser> _userManager;
         private readonly IAuthenticationManager _authenticationManager;
 
         public AssignmentController(IConfiguration configuration,
@@ -46,9 +44,10 @@ namespace Web.Controllers
             IImageWriter imageWriter,
             IQuestionRepository questionRepository)
         {
-            _userManager = userManager;
             _configuration = configuration;
-            _groupManager = new GroupManager(configuration, groupRepository); // todo mag via ServiceManager geinjecteerd worden.            
+            _groupManager =
+                new GroupManager(configuration,
+                    groupRepository); // todo mag via ServiceManager geinjecteerd worden.            
             _assignmentRepository = assignmentRepository;
             _assignmentBackupRepository = assignmentBackupRepository;
             _exhibitorRepository = exhibitorRepository;
@@ -90,7 +89,7 @@ namespace Web.Controllers
         * RETURN an Assignment, containing an Exhibitor object that represent the current, newly assigned Exhibitor.
         */
         [HttpGet("[Action]/{categoryId}/{previousExhibitorId}/{isExtraRound}")]
-        [Authorize]
+        [Authorize] //todo role group
         public async Task<IActionResult> CreateAssignment(int categoryId, int previousExhibitorId, bool isExtraRound)
         {
             var group = await _groupManager.GetGroup(User.Claims);
@@ -147,7 +146,7 @@ namespace Web.Controllers
         * A group has created a new Exhibitor in the Extra Tour, as they didn't find the Exhibitor in the list.
         */
         [HttpGet("[Action]")]
-        [Authorize]
+        [Authorize] //todo role group
         public async Task<IActionResult> CreateAssignmentNewExhibitor([FromBody] CreatedExhibitorDTO createdExhibitor)
         {
             //We take a specific question for this assignment, as an assignment needs a question
@@ -160,6 +159,7 @@ namespace Web.Controllers
             {
                 return NotFound("groupId not found in token.");
             }
+
             // Create assignment and Add to the groups assignments.
             var assignment = new Assignment(question, true);
 
@@ -179,7 +179,9 @@ namespace Web.Controllers
             group.AddAssignment(assignment);
             await _assignmentRepository.SaveChanges();
 
-            assignment = await _assignmentRepository.GetByIdLight(assignment.Id); //Todo temporary, otherwise we have recursive catExh data
+            assignment =
+                await _assignmentRepository
+                    .GetByIdLight(assignment.Id); //Todo temporary, otherwise we have recursive catExh data
 
             assignment.Answer = ""; // empty answer for android (we will re-add the exhibitor information @ submit)
 
@@ -198,11 +200,11 @@ namespace Web.Controllers
         * RETURN an Assignment, containing an Exhibitor object that represent the current, newly assigned Exhibitor.
         */
         [HttpGet("[Action]/{categoryId}/{exhibitorId}")]
-        [Authorize]
+        [Authorize] //todo role group
         public async Task<IActionResult> CreateAssignmentOfExhibitorAndCategory(int categoryId, int exhibitorId)
         {
             var question = await _questionRepository.GetQuestion(categoryId, exhibitorId);
-            
+
             var group = await _groupManager.GetGroup(User.Claims);
             if (group == null)
             {
@@ -222,7 +224,7 @@ namespace Web.Controllers
         * When a group submits an Assignment in the application, this controller method will be called.
         */
         [HttpPost("SubmitAssignment")]
-        [Authorize]
+        [Authorize] //todo role group
         public async Task<IActionResult> Submit([FromBody] AssignmentDTO model)
         {
             if (!ModelState.IsValid)
@@ -258,28 +260,33 @@ namespace Web.Controllers
 
             await _assignmentRepository.SaveChanges();
 
-            // make backup of assignment
-            var group = await _groupManager.GetGroup(User.Claims);
-            if (group == null)
-            {
-                return NotFound("groupId not found in token.");
-            }
-
-            var schoolAppUser = await _authenticationManager.GetAppUserWithGroupsIncludedViaId(group.ApplicationUserId);
-            
-            var schoolName = schoolAppUser.School.Name;
-            await _assignmentBackupRepository.Add(assignment, schoolName, group.Name, createdExhibitor);
+            await CreateBackupAssignment(assignment, createdExhibitor);
 
             //TODO: temporary, recursive loop anders:
             assignment = await _assignmentRepository.GetByIdLight(assignment.Id);
             return Ok(assignment);
         }
 
+        private async Task CreateBackupAssignment(Assignment assignment, bool isCreatedExhibitor)
+        {
+            // make backup of assignment
+            var group = await _groupManager.GetGroup(User.Claims);
+//            if (group == null)
+//            {
+//                return NotFound("groupId not found in token.");
+//            }
+
+            var groupAppUser = await _authenticationManager.GetAppUserWithSchoolIncludedViaId(group.ApplicationUserId);
+
+            var schoolName = groupAppUser.School.Name;
+            await _assignmentBackupRepository.Add(assignment, schoolName, group.Name, isCreatedExhibitor);
+        }
+
         /**
          * If a group decides to cancel the Assignment in the application.
          */
         [HttpDelete("RemoveAssignment/{assignmentId}")]
-        [Authorize]
+        [Authorize] //todo role group
         public async Task<IActionResult> Remove(int assignmentId)
         {
             var assignment = await _assignmentRepository.GetById(assignmentId);

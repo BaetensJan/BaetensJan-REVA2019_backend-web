@@ -80,6 +80,8 @@ namespace Web.Controllers
         public async Task<IActionResult> UpdateSchoolLoginName([FromBody] SchoolLoginNameDto loginNameDto,
             [FromRoute] int schoolId)
         {
+            loginNameDto.SchoolLoginName = loginNameDto.SchoolLoginName.ToLower();
+            
             if (!ModelState.IsValid || string.IsNullOrEmpty(loginNameDto.SchoolLoginName))
             {
                 return BadRequest();
@@ -98,13 +100,19 @@ namespace Web.Controllers
                 return NotFound();
             }
 
-
             var exists = await CheckLoginNameExists(loginName);
             if (exists)
             {
                 return StatusCode(500, "There is already a school with that login name.");
             }
+
+            // update UserName of SchoolAppUser (used for login and retrieval of school ApplicationUser).
+            var schoolAppUser = await _userManager.FindByNameAsync(school.LoginName);
+            schoolAppUser.UserName = loginName;
+            schoolAppUser.NormalizedUserName = loginName.Normalize();
+            await _userManager.UpdateAsync(schoolAppUser);
             
+            // Update school object.
             school.LoginName = loginName;
             await _schoolRepository.SaveChanges();
 
@@ -115,6 +123,8 @@ namespace Web.Controllers
         [Authorize]
         public async Task<IActionResult> CheckLoginName(string loginName)
         {
+            loginName = loginName.ToLower();
+            
             var exists = await CheckLoginNameExists(loginName);
             
             if (exists)
@@ -127,8 +137,10 @@ namespace Web.Controllers
 
         private async Task<bool> CheckLoginNameExists(string schoolLoginName)
         {
-            var school = await _schoolRepository.GetBySchoolLoginName(schoolLoginName.Trim().ToLower());
-            return school != null;
+            var school = await _schoolRepository.GetBySchoolLoginName(schoolLoginName);
+            var schoolAppUser = await _userManager.FindByNameAsync(schoolLoginName);
+            
+            return school != null || schoolAppUser != null;
         }
 
         /**
