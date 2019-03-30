@@ -1,9 +1,8 @@
-import {Injectable, TemplateRef} from '@angular/core';
+import {Injectable} from '@angular/core';
 import {Group} from "../models/group.model";
 import {
   AbstractControl,
   FormBuilder,
-  FormControl,
   FormGroup, NgForm,
   ValidatorFn,
   Validators
@@ -11,7 +10,6 @@ import {
 import {Observable, of} from "rxjs";
 import {map} from "rxjs/operators";
 import {GroupsDataService} from "./groups-data.service";
-import {BsModalService} from "ngx-bootstrap";
 
 function passwordValidator(length: number): ValidatorFn {
   return (control: AbstractControl): { [key: string]: any } => {
@@ -32,15 +30,6 @@ function comparePasswords(control: AbstractControl): { [key: string]: any } {
   return password.value === confirmPassword.value
     ? null
     : {passwordsDiffer: true};
-}
-
-/**
- * Check on whitespaces.
- *
- */
-function noWhitespaceValidator(control: AbstractControl): { [key: string]: any } {
-  const containsWhitespaces = /\s/.test(control.value);
-  return containsWhitespaces ? {whitespace: true} : null;
 }
 
 // function groupMembersCheck(minLength: number, maxLength: number): ValidatorFn {
@@ -70,6 +59,24 @@ export class GroupSharedService {
   };
 
   constructor(private _groupsDataService: GroupsDataService,) {
+  };
+
+  //todo: move to src/common folder
+  /**
+   * Check on whitespaces.
+   *
+   */
+  static noWhitespaceValidator(control: AbstractControl): { [key: string]: any } {
+    const containsWhitespaces = /\s/.test(control.value);
+    return containsWhitespaces ? {whitespace: true} : null;
+  };
+
+  /**
+   * Check if contains dots ('.').
+   */
+  static schoolNamePatternValidator(control: AbstractControl): { [key: string]: any } {
+    const schoolName: string = control.value;
+    return schoolName.indexOf(".") < 0 ? null : {wrongInput: true};
   };
 
   get groupMembers(): string[] {
@@ -135,14 +142,22 @@ export class GroupSharedService {
     const fb = new FormBuilder();
     this.groupForm = fb.group({
         groupName: ['',
-          [Validators.required, Validators.minLength(2)],
-          this.GroupNameAlreadyExists()],
+          [
+            Validators.required,
+            Validators.minLength(2),
+            Validators.maxLength(20),
+            GroupSharedService.schoolNamePatternValidator,
+            GroupSharedService.noWhitespaceValidator,
+          ],
+          this.GroupNameAlreadyExists()
+        ],
         passwordGroup: fb.group(
           {
             groupPassword: [''],
             confirmPassword: [''],
           }),
-        groupMember: ['', Validators.minLength(2)],
+        groupMember: ['', [Validators.minLength(2), Validators.maxLength(20),
+          GroupSharedService.schoolNamePatternValidator]],
         //groupMembers: [this.groupMembers]
       },
       //{validator: groupMembersCheck(0, 4)}
@@ -161,7 +176,7 @@ export class GroupSharedService {
   public setPasswordGroupValidators() {
     this.passwordGroup.setValidators(comparePasswords);
     this.passwordGroup.get('groupPassword').setValidators(
-      [Validators.required, passwordValidator(6), noWhitespaceValidator]);
+      [Validators.required, passwordValidator(6), GroupSharedService.noWhitespaceValidator]);
     this.passwordGroup.get('confirmPassword').setValidators(Validators.required);
   };
 
@@ -224,23 +239,29 @@ export class GroupSharedService {
    * Parameter (optional): the component Object that calls this method.
    * Expected when removing a Group.
    */
-  confirm(component?: any): void {
-    if (component && this.memberToRemove != '') {
+  confirm(): void {
+    if (this.memberToRemove != '') {
       this.removeMember(this.memberToRemove);
-      this.memberToRemove = '';
-    } else {
-      this._groupsDataService.removeGroup(this.groupToRemove).subscribe(value => {
-        component.removeGroup(this.groupToRemove);
-      });
     }
   };
 
   public removeMember(memberToRemove): void {
+    if (!this._createGroup) {
+      this._groupsDataService.removeMember(this._schoolId, this.memberToRemove).subscribe(_ => {
+        this.removeMemberOutOfMembersList(memberToRemove)
+      });
+    } else {
+      this.removeMemberOutOfMembersList(memberToRemove);
+    }
+  };
+
+  private removeMemberOutOfMembersList(memberToRemove: string) {
     const index = this._groupMembers.indexOf(memberToRemove, 0);
     if (index > -1) {
       this._groupMembers.splice(index, 1);
     }
-  };
+    this.memberToRemove = '';
+  }
 
   decline(): void {
     this.memberToRemove = '';
@@ -254,22 +275,5 @@ export class GroupSharedService {
       'password': this.passwordGroup.get('groupPassword').value,
       'members': this._groupMembers
     };
-  };
-
-  /** MODAL / POPUP **/
-  openModal(component: any, modalService: BsModalService, template: TemplateRef<any>, group: Group, memberName?: string): any {
-    let modalMessage;
-
-    if (memberName) {
-      modalMessage = `Ben je zeker dat ${memberName} verwijderd mag worden uit de groep?`;
-
-      this.memberToRemove = memberName;
-    } else { // deleting of a group.
-      this.groupToRemove = group;
-      modalMessage = `Ben je zeker dat de groep met groepsnaam ${group.name} verwijderd mag worden? 
-      De ingediende opdrachten van deze groep worden hierdoor ook verwijderd.`;
-    }
-    component.modalMessage = modalMessage;
-    component.modalRef = modalService.show(template, {class: 'modal-sm'});
   };
 }

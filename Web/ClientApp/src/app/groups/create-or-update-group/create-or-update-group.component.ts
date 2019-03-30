@@ -1,4 +1,4 @@
-import {Component, EventEmitter, OnInit, Output} from '@angular/core';
+import {ChangeDetectorRef, Component, EventEmitter, OnInit, Output, TemplateRef} from '@angular/core';
 import {GroupSharedService} from "../group-shared.service";
 import {Group} from "../../models/group.model";
 import {FormBuilder, FormGroup} from "@angular/forms";
@@ -30,9 +30,10 @@ export class CreateOrUpdateGroupComponent implements OnInit {
   constructor(private _groupSharedService: GroupSharedService,
               private _groupDataService: GroupsDataService,
               private _schoolDataService: SchoolDataService,
-              private modalService: BsModalService,
-              private fb: FormBuilder,
-              private router: Router) {
+              private _modalService: BsModalService,
+              private _fb: FormBuilder,
+              private _router: Router,
+              private cdr: ChangeDetectorRef) {
   }
 
   ngOnInit() {
@@ -68,6 +69,7 @@ export class CreateOrUpdateGroupComponent implements OnInit {
     // when a Teacher clicks on the changePassword button for the first time => set password validators.
     // if (this._changePasswordCounter == 1) {
     this._groupSharedService.setPasswordGroupValidators();
+    this.cdr.detectChanges();
     // }
   }
 
@@ -78,8 +80,15 @@ export class CreateOrUpdateGroupComponent implements OnInit {
   /**
    * Remove member from 'to be created' Group.
    */
-  removeMember(memberName) {
-    this._groupSharedService.removeMember(memberName);
+  openModal(template: TemplateRef<any>, groupMemberName: string) {
+    if (this.createGroup){
+      this._groupSharedService.memberToRemove = groupMemberName;
+      this.openParentModal.emit(true);
+    } else{
+      // this.modalMessage = `Ben je zeker dat groepslid ${this._groupSharedService.memberToRemove}
+      // verwijderd mag worden uit groep?`;
+      // this.modalRef = this._modalService.show(template, {class: 'modal-sm'});
+    }
   }
 
   get passwordGroup(): any {
@@ -87,19 +96,20 @@ export class CreateOrUpdateGroupComponent implements OnInit {
   }
 
 
-  removeGroup(group) {
-    this._groupDataService.removeGroup(group).subscribe(_ => {
-      this.goToGroupsOverview();
-    });
-  }
+  // removeGroup(group) {
+  //   this._groupDataService.removeGroup(group).subscribe(_ => {
+  //     this.goToGroupsOverview();
+  //   });
+  // }
 
   decline(): void {
     this._groupSharedService.decline();
-    this.modalRef.hide();
+      this.modalRef.hide();
   }
 
   confirm(): void {
     this._groupSharedService.confirm();
+    this.modalRef.hide();
   }
 
   public get validGroupMemberName(): boolean { //todo make validator for control rather than using this method.
@@ -112,9 +122,10 @@ export class CreateOrUpdateGroupComponent implements OnInit {
    */
 
   @Output() submit: EventEmitter<Group> = new EventEmitter();
+  @Output() openParentModal: EventEmitter<boolean> = new EventEmitter();
 
   goToGroupsOverview() {
-    this.router.navigate(["group/groups"]);
+    this._router.navigate(["group/groups"]);
   }
 
   /**

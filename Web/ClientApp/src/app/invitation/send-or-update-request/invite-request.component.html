@@ -81,7 +81,7 @@
     </div>
     <div class="row">
       <div class="col-sm-offset-2 col-sm-10 col-md-3 alert alert-danger"
-           *ngIf='user.get("email").errors?.wrongInput && user.get("email").touched'>
+           *ngIf='user.get("email").touched && user.get("email").errors?.wrongInput'>
         Gelieve een geldig emailadres in te vullen.
       </div>
     </div>
@@ -112,7 +112,7 @@
     <div class="col-sm-offset-2 col-sm-10 col-md-3 alert alert-danger"
          *ngIf='user.get("schoolName").errors?.minlength && user.get("schoolName").touched'>
       De schoolnaam moet ten minste {{user.get("schoolName").errors?.minlength.requiredLength }} letters bevatten.
-      U heeft momenteel {{user.get("schoolName").errors?.minlength.actualLength}} lettertekens gebruikt.
+      U heeft momenteel {{user.get("schoolName").errors?.minlength.actualLength}} letterteken(s) gebruikt.
     </div>
   </div>
   <div class="row">
@@ -139,13 +139,19 @@
   </div>
   <div class="row">
     <div class="col-sm-offset-2 col-sm-10 col-md-3 alert alert-danger"
-         *ngIf='user.get("schoolName").errors?.wrongInput && user.get("schoolName").touched'>
-      De schoolnaam mag geen <strong>punt</strong> (<b style="font-weight: bold; font-size: 1.8em;">.</b>) bevatten.
+         *ngIf="user.get('schoolName').touched && user.get('schoolName').errors?.wrongInput">
+      De school naam mag geen <strong>punt</strong> (<b style="font-weight: bold; font-size: 1.8em;">.</b>) bevatten.
     </div>
   </div>
   <div class="row">
     <div class="col-sm-offset-2 col-sm-10 col-md-3 alert alert-danger"
-         *ngIf='user.get("schoolName").errors?.maxlength && user.get("schoolName").touched'>
+         *ngIf="user.get('schoolName').errors?.whitespace && user.get('schoolName').touched">
+      Gelieve geen spaties (witruimtes) te gebruiken.
+    </div>
+  </div>
+  <div class="row">
+    <div class="col-sm-offset-2 col-sm-10 col-md-3 alert alert-danger"
+         *ngIf='user.get("schoolName").touched && user.get("schoolName").errors?.maxlength'>
       Dit veld mag maximum {{user.get("schoolName").errors?.maxlength.requiredLength }} letters bevatten.
       U heeft momenteel {{user.get("schoolName").errors?.maxlength.actualLength}} lettertekens gebruikt.
     </div>

@@ -13,6 +13,7 @@ import {AuthenticationService} from "../../user/authentication.service";
 import {AssignmentDataService} from "../../assignment/assignment-data.service";
 import {Observable, of as observableOf} from "rxjs";
 import {map} from "rxjs/operators";
+import {InviteRequestComponent} from "../../invitation/send-or-update-request/invite-request.component";
 
 @Component({
   selector: 'groups',
@@ -78,7 +79,7 @@ export class GroupsComponent {
    * @param _groupSharedService
    * @param _assignmentDataService
    * @param _schoolDataService
-   * @param fb
+   * @param _fb
    * @param _modalService
    * @param _appShareService
    * @param _authService
@@ -88,7 +89,7 @@ export class GroupsComponent {
               private _groupSharedService: GroupSharedService,
               private _schoolDataService: SchoolDataService,
               private _assignmentDataService: AssignmentDataService,
-              private fb: FormBuilder,
+              private _fb: FormBuilder,
               private _modalService: BsModalService,
               private _appShareService: AppShareService,
               private _authService: AuthenticationService) {
@@ -143,13 +144,15 @@ export class GroupsComponent {
       this._schoolDataService.getSchool(schoolId).subscribe((school: School) => {
         this._school = school;
 
-        this._schoolLoginNameForm = this.fb.group({
+        this._schoolLoginNameForm = this._fb.group({
           schoolLoginName: [
             this._school.loginName,
             [
               Validators.required,
-              Validators.minLength(1),
+              Validators.minLength(2),
               Validators.maxLength(15),
+              GroupSharedService.schoolNamePatternValidator,
+              GroupSharedService.noWhitespaceValidator
             ],
             this.serverSideValidateSchoolLoginName(),
           ],
@@ -173,15 +176,20 @@ export class GroupsComponent {
     this.router.navigate(["/group/updateGroup"]);
   }
 
-  private removeGroup(group: Group) {
-    let index = this._groups.indexOf(group, 0);
-    if (index > -1) {
-      this._groups.splice(index, 1);
-    }
+  private removeGroup() {
+    this._groupsDataService.removeGroup(this._groupSharedService.groupToRemove).subscribe(value => {
 
-    this.initiateArrays();
+      let index = this._groups.indexOf(this._groupSharedService.groupToRemove, 0);
+      if (index > -1) {
+        this._groups.splice(index, 1);
+      }
 
-    this.modalRef.hide();
+      this.initiateArrays();
+
+      this._groupSharedService.groupToRemove = null;
+
+      this.modalRef.hide();
+    });
   }
 
   /** FILTER **/
@@ -209,10 +217,37 @@ export class GroupsComponent {
     this.currentPage = 1; // switches current page in pagination back to page 1
   }
 
-  openModal(template: TemplateRef<any>, groupId: number, memberName?: string) {
-    let group = groupId == -1 ? null : this.findGroupWithId(groupId);
-    this._groupSharedService.openModal(this, this._modalService, template, group, memberName);
+  openModalUpdateLoginName(template: TemplateRef<any>) {
+    const message = `Door het wijzigen van de school login zullen ook groepjes in de app moeten
+    inloggen met deze nieuwe naam. Bijvoorbeeld nu: '${this._school.loginName}.groep1' wordt na de wijziging:
+     '${this._schoolLoginNameForm.get("schoolLoginName").value}.groep1'.
+    Vergeet de groepjes niet op de hoogte te brengen van de nieuwe login.`;
+
+    this.openModal(template, message);
   }
+
+  openModalRemoveMember(template: TemplateRef<any>, removeGroup: boolean) {
+    const message = `Ben je zeker dat ${this._groupSharedService.memberToRemove}
+     verwijderd mag worden uit de groep?`;
+
+    this.openModal(template, message);
+  }
+
+  openModalRemoveGroup(template: TemplateRef<any>, groupId: number) {
+    const group = this.findGroupWithId(groupId);
+    this._groupSharedService.groupToRemove = group;
+
+    const message = `Ben je zeker dat de groep met groepsnaam ${group.name} verwijderd mag worden? 
+      De ingediende opdrachten van deze groep worden hierdoor ook verwijderd.`;
+
+    this.openModal(template, message);
+  }
+
+  /** MODAL / POPUP **/
+  openModal(template: TemplateRef<any>, modalMessage: string) {
+    this.modalMessage = modalMessage;
+    this.modalRef = this._modalService.show(template, {class: 'modal-sm'});
+  };
 
   /**
    * Sorts the groups alphabetically
@@ -262,17 +297,25 @@ export class GroupsComponent {
 
   decline(): void {
     this._groupSharedService.decline();
+    this._schoolLoginNameForm.get("schoolLoginName").setValue(this._school.loginName);
     this.modalRef.hide();
   }
 
   confirm(): void {
-    this._groupSharedService.confirm(this);
+    if (this._groupSharedService.groupToRemove != null) {
+      this.removeGroup()
+    } else if (this._groupSharedService.memberToRemove != '') {
+      this._groupSharedService.confirm();
+    } else {
+      this.updateSchoolLoginName();
+    }
+    this.modalRef.hide();
   }
 
   updateSchoolLoginName() {
     const newSchoolLoginName = this._schoolLoginNameForm.get("schoolLoginName").value;
 
-    this._schoolDataService.updateSchoolLoginName(this._school.id, newSchoolLoginName).subscribe(value => {
+    this._schoolDataService.updateSchoolLoginName(this._school.id, newSchoolLoginName).subscribe(_ => {
       this._school.loginName = newSchoolLoginName;
       this.add();
     });

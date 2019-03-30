@@ -8,6 +8,7 @@ import {InvitationService} from "../invitation.service";
 import {SchoolDataService} from "../../schools/school-data.service";
 import {AuthenticationService} from "../../user/authentication.service";
 import {of as observableOf} from 'rxjs';
+import {GroupSharedService} from "../../groups/group-shared.service";
 
 @Component({
   selector: 'app-invite-request',
@@ -79,9 +80,13 @@ export class InviteRequestComponent implements OnInit {
       ],
       schoolName: [
         '',
-        [Validators.required,
-          Validators.minLength(1), Validators.maxLength(30),
-          this.schoolNamePatternValidator()],
+        [
+          Validators.required,
+          Validators.minLength(2),
+          Validators.maxLength(30),
+          GroupSharedService.schoolNamePatternValidator,
+          GroupSharedService.noWhitespaceValidator,
+        ],
         this.serverSideValidateSchoolName()
       ],
       email: [
@@ -133,13 +138,6 @@ export class InviteRequestComponent implements OnInit {
       );
       let correctInput = regexp.test(email);
       return correctInput ? null : {wrongInput: true};
-    };
-  }
-
-  schoolNamePatternValidator(): ValidatorFn {
-    return (control: AbstractControl): { [key: string]: any } => {
-      const schoolName: string = control.value;
-      return schoolName.indexOf(".") < 0 ? null : {wrongInput: true};
     };
   }
 

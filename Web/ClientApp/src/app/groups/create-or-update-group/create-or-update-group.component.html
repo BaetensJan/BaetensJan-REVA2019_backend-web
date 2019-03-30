@@ -16,9 +16,10 @@
         </button>
 
         <!--Opslaan knop-->
-        <button class="btn btn-success pull-right"
-                type='submit'
-                [disabled]="!groupForm.valid">
+        <button
+          class="btn btn-success pull-right"
+          type="submit"
+          [disabled]="!groupForm.valid">
           <span class="glyphicon glyphicon-floppy-disk"></span>
           Opslaan
         </button>
@@ -45,8 +46,28 @@
         De groepsnaam moet minimum {{groupForm.get("groupName").errors?.minlength.requiredLength }} karakters
         bevatten.
       </div>
+      <div class='alert alert-danger'
+           *ngIf='groupForm.get("groupName").touched
+               && groupForm.get("groupName").errors?.maxlength'>
+        Dit veld mag maximum {{groupForm.get("groupName").errors?.maxlength.requiredLength }}
+        letters bevatten. U heeft momenteel {{groupForm.get("groupName").errors?.maxlength.actualLength}}
+        lettertekens gebruikt.
+      </div>
       <div class='alert alert-danger' *ngIf='groupForm.get("groupName").errors?.groupAlreadyExists'>
         Er bestaat al een groep met deze naam.
+      </div>
+      <div class="row">
+        <div class="col-sm-10 col-md-3 alert alert-danger"
+             *ngIf="groupForm.get('groupName').errors?.wrongInput && groupForm.get('groupName').touched">
+          De school login naam mag geen <strong>punt</strong> (<b style="font-weight: bold; font-size: 1.8em;">.</b>)
+          bevatten.
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-sm-10 col-md-3 alert alert-danger"
+             *ngIf="groupForm.get('groupName').errors?.whitespace && groupForm.get('groupName').touched">
+          Gelieve geen spaties (witruimtes) te gebruiken.
+        </div>
       </div>
 
       <!-- Change password -> only in update group -->
@@ -111,13 +132,26 @@
                    placeholder="Naam nieuw groepslid.">
           </div>
         </div>
-        <button style="margin-left: 0.2em;" type="button" class="btn glyphicon glyphicon-plus-sign"
+        <button style="margin-left: 0.2em;"
+                type="button"
+                class="btn glyphicon glyphicon-plus-sign"
                 [disabled]="!validGroupMemberName"
-
-                (click)="addNewMember()"></button>
-      </div>
-      <div class="alert alert-danger" *ngIf="!validGroupMemberName">
-        De naam moet minimum {{ groupForm.get('groupMember').errors?.minlength.requiredLength }} letters bevatten.
+                (click)="addNewMember()">
+        </button>
+        <div class="row">
+          <div class="col-sm-10 col-md-3 alert alert-danger"
+               *ngIf="groupForm.get('groupMember').errors?.maxlength">
+            Dit veld mag maximum {{ groupForm.get('groupMember').errors?.maxlength.requiredLength }}
+            letters bevatten.
+            U heeft momenteel {{ groupForm.get('groupMember').errors?.maxlength.actualLength}}
+            lettertekens gebruikt.
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-sm-10 col-md-3 alert alert-danger" *ngIf="!validGroupMemberName">
+            De naam moet minimum {{ groupForm.get('groupMember').errors?.minlength.requiredLength }} letters bevatten.
+          </div>
+        </div>
       </div>
       <ng-template #maxMembersMessage>
         <p style="margin-top: 2em;">U hebt het maximum van 4 groepsleden dat toegelaten is per groep bereikt.</p>
@@ -131,14 +165,14 @@
               {{memberName}}
           <i style="margin-left: 0.2em; color: red; cursor: pointer;"
              class="glyphicon glyphicon-remove"
-             (click)="removeMember(memberName)">
+             (click)="openModal(template, memberName)">
               </i>
             </span>
       </div>
 
       <div class="col-md-offset-10 col-md-2" *ngIf="createGroup">
         <button type="submit"
-                [disabled]='!groupForm.valid || groupMembers.length < 1 || groupMembers.length > 4'
+                [disabled]="!groupForm.valid || groupMembers.length < 1 || groupMembers.length > 4"
                 class="btn btn-success">Creëer groep
         </button>
         <div class='alert alert-danger'

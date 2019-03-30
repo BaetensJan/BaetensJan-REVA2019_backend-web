@@ -9,12 +9,6 @@ import {throwError} from "rxjs";
 @Injectable()
 export class AuthenticationService {
   /**
-   * Parser for jwt token when authenticating user
-   *
-   * @param token
-   */
-  public static function
-  /**
    * @ignore
    */
   public redirectUrl: string;
@@ -93,6 +87,11 @@ export class AuthenticationService {
     return !!localToken ? localToken : '';
   }
 
+  /**
+   * Parser for jwt token when authenticating user
+   *
+   * @param token
+   */
   static parseJwt(token) {
     if (!token) {
       return null;

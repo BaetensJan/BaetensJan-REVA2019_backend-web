@@ -17,7 +17,7 @@
     </b>
   </div>
   <div class="panel-body">
-    <form (ngSubmit)="updateSchoolLoginName()" [formGroup]="schoolLoginNameForm">
+    <form [formGroup]="schoolLoginNameForm">
       <div class="form-inline">
         <div class="form-group">
           <label for="schoolLogin">Login</label>
@@ -27,7 +27,10 @@
             formControlName='schoolLoginName'
             type="text">
 
-          <button type="submit" class="btn btn-default">
+          <button class="btn btn-default"
+                  (click)="openModalUpdateLoginName(template)"
+                  [disabled]="!schoolLoginNameForm.valid
+                  || schoolLoginNameForm.get('schoolLoginName').value == school.loginName">
             <i class="glyphicon glyphicon-floppy-disk"></i>
           </button>
 
@@ -39,40 +42,48 @@
       </div>
       <div class="row">
         <div class="col-sm-10 col-md-3 alert alert-danger"
-             *ngIf='schoolLoginNameForm.get("schoolLoginName").errors?.required
-             && schoolLoginNameForm.get("schoolLoginName").touched'>
+             *ngIf="schoolLoginNameForm.get('schoolLoginName').errors?.required
+             && schoolLoginNameForm.get('schoolLoginName').touched">
           Gelieve een login naam in te vullen.
         </div>
       </div>
 
       <div class="row">
         <div class="col-sm-10 col-md-3 alert alert-danger"
-             *ngIf='schoolLoginNameForm.get("schoolLoginName").errors?.minlength
-              && schoolLoginNameForm.get("schoolLoginName").touched'>
+             *ngIf="schoolLoginNameForm.get('schoolLoginName').errors?.minlength">
           De schoolnaam moet ten
-          minste {{schoolLoginNameForm.get("schoolLoginName").errors?.minlength.requiredLength }}
+          minste {{schoolLoginNameForm.get('schoolLoginName').errors?.minlength.requiredLength }}
           letters bevatten.
-          U heeft momenteel {{schoolLoginNameForm.get("schoolLoginName").errors?.minlength.actualLength}} lettertekens
+          U heeft momenteel {{schoolLoginNameForm.get('schoolLoginName').errors?.minlength.actualLength}} lettertekens
           gebruikt.
         </div>
       </div>
-
       <div class="row">
         <div class="col-sm-10 col-md-3 alert alert-danger"
-             *ngIf='schoolLoginNameForm.get("schoolLoginName").errors?.maxlength
-               && schoolLoginNameForm.get("schoolLoginName").touched'>
-          Dit veld mag maximum {{schoolLoginNameForm.get("schoolLoginName").errors?.maxlength.requiredLength }}
+             *ngIf="schoolLoginNameForm.get('schoolLoginName').errors?.maxlength">
+          Dit veld mag maximum {{schoolLoginNameForm.get('schoolLoginName').errors?.maxlength.requiredLength }}
           letters bevatten.
-          U heeft momenteel {{schoolLoginNameForm.get("schoolLoginName").errors?.maxlength.actualLength}}
+          U heeft momenteel {{schoolLoginNameForm.get('schoolLoginName').errors?.maxlength.actualLength}}
           lettertekens gebruikt.
         </div>
       </div>
-
       <div class="row">
         <div class="col-sm-10 col-md-3 alert alert-danger"
-             *ngIf='schoolLoginNameForm.get("schoolLoginName").errors?.schoolAlreadyExists
-              && schoolLoginNameForm.get("schoolLoginName").touched'>
+             *ngIf="schoolLoginNameForm.get('schoolLoginName').errors?.schoolAlreadyExists
+              && schoolLoginNameForm.get('schoolLoginName').touched">
           Deze login naam wordt al gebruikt door een andere school. Gelieve een andere naam te gebruiken.
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-sm-10 col-md-3 alert alert-danger"
+             *ngIf="schoolLoginNameForm.get('schoolLoginName').errors?.wrongInput">
+          De school login naam mag geen <strong>punt</strong> (<b style="font-weight: bold; font-size: 1.8em;">.</b>) bevatten.
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-sm-10 col-md-3 alert alert-danger"
+             *ngIf="schoolLoginNameForm.get('schoolLoginName').errors?.whitespace">
+         Gelieve geen spaties (witruimtes) te gebruiken.
         </div>
       </div>
     </form>
@@ -106,7 +117,8 @@
     <!--Add new group panel-->
     <div *ngIf="createGroup">
       <div class="panel-body">
-        <app-create-or-update-group (submit)="onSubmit($event)"></app-create-or-update-group>
+        <app-create-or-update-group (submit)="onSubmit($event)"
+         (openParentModal)="openModalRemoveMember(template, $event)"></app-create-or-update-group>
       </div>
     </div>
 
@@ -142,12 +154,12 @@
 
                   <div class="col-md-1 col-sm-4 col-xs-4">
                     <i *ngIf="!isAdmin"
-                            (click)="updateGroup(group)" style="margin-right: 1.2em;"
-                            class="glyphicon glyphicon-edit">
+                       (click)="updateGroup(group)" style="margin-right: 1.2em;"
+                       class="glyphicon glyphicon-edit">
                     </i>
 
-                    <i (click)="openModal(template, group.id)"
-                            class="glyphicon glyphicon-remove">
+                    <i (click)="openModalRemoveGroup(template, group.id)"
+                       class="glyphicon glyphicon-remove">
                     </i>
                   </div>
                 </div>
@@ -180,19 +192,19 @@
       <h4>U heeft nog geen groepen aangemaakt. Zodra u groepen aanmaakt zullen deze hier zichtbaar worden.</h4>
     </ng-template>
   </div>
+</div>
 
-  <!-- delete member of group modal -->
-  <ng-template #template>
-    <div class="modal-body text-center">
-      <p>{{modalMessage}}</p>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-success pull-left" (click)="decline()">
-          Nee
-        </button>
-        <button type="button" class="btn btn-danger pull-right" (click)="confirm()">
-          Ja
-        </button>
-      </div>
+<!-- delete member of group modal -->
+<ng-template #template>
+  <div class="modal-body text-center">
+    <p>{{modalMessage}}</p>
+    <div class="modal-footer">
+      <button type="button" class="btn btn-success pull-left" (click)="decline()">
+        Nee
+      </button>
+      <button type="button" class="btn btn-danger pull-right" (click)="confirm()">
+        Ja
+      </button>
     </div>
-  </ng-template>
-
+  </div>
+</ng-template>
