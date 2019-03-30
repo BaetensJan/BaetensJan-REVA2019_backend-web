@@ -81,20 +81,19 @@ export class CreateOrUpdateGroupComponent implements OnInit {
    * Remove member from 'to be created' Group.
    */
   openModal(template: TemplateRef<any>, groupMemberName: string) {
+    this._groupSharedService.memberToRemove = groupMemberName;
+
     if (this.createGroup){
-      this._groupSharedService.memberToRemove = groupMemberName;
       this.openParentModal.emit(true);
     } else{
-      // this.modalMessage = `Ben je zeker dat groepslid ${this._groupSharedService.memberToRemove}
-      // verwijderd mag worden uit groep?`;
-      // this.modalRef = this._modalService.show(template, {class: 'modal-sm'});
+      this.modalMessage = `Ben je zeker dat groepslid ${groupMemberName} verwijderd mag worden uit groep?`;
+      this.modalRef = this._modalService.show(template, {class: 'modal-sm'});
     }
   }
 
   get passwordGroup(): any {
     return this._groupSharedService.passwordGroup;
   }
-
 
   // removeGroup(group) {
   //   this._groupDataService.removeGroup(group).subscribe(_ => {

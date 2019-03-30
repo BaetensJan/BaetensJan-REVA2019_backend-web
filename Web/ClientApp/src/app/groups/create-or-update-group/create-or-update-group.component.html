@@ -164,6 +164,7 @@
               *ngFor="let memberName of groupMembers">
               {{memberName}}
           <i style="margin-left: 0.2em; color: red; cursor: pointer;"
+             *ngIf="groupMembers.length > 1 || createGroup"
              class="glyphicon glyphicon-remove"
              (click)="openModal(template, memberName)">
               </i>

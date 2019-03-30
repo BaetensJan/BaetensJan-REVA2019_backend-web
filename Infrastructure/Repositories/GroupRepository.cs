@@ -94,7 +94,11 @@ namespace Infrastructure.Repositories
         public async Task<Group> RemoveMember(int id, string member)
         {
             var group = await _groups.FirstOrDefaultAsync(x => x.Id == id);
-            if (group == null) return null;
+            if (group?.Members == null || group.Members.Count < 2)
+            {
+                return null;
+            }
+
             group.Members.Remove(member);
             return group;
         }

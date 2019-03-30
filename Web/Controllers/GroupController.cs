@@ -482,7 +482,13 @@ namespace Web.Controllers
         public async Task<IActionResult> RemoveMember(int groupId, string memberName)
         {
             var group = await _groupRepository.RemoveMember(groupId, memberName);
+            if (group == null)
+            {
+                return StatusCode(500, "Group not found or group members length < 2.");
+            }
+            
             await _groupRepository.SaveChanges();
+            
             return Ok(group);
         }
 

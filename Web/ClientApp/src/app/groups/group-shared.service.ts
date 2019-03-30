@@ -44,7 +44,6 @@ function comparePasswords(control: AbstractControl): { [key: string]: any } {
   providedIn: 'root'
 })
 export class GroupSharedService {
-  private _group: Group;
   private _schoolId: number;
 
   public memberToRemove: string = '';
@@ -83,6 +82,7 @@ export class GroupSharedService {
     return this._groupMembers;
   };
 
+  private _group: Group;
   get group(): Group {
     return this._group;
   };
@@ -247,7 +247,7 @@ export class GroupSharedService {
 
   public removeMember(memberToRemove): void {
     if (!this._createGroup) {
-      this._groupsDataService.removeMember(this._schoolId, this.memberToRemove).subscribe(_ => {
+      this._groupsDataService.removeMember(this._group.id, this.memberToRemove).subscribe(_ => {
         this.removeMemberOutOfMembersList(memberToRemove)
       });
     } else {
