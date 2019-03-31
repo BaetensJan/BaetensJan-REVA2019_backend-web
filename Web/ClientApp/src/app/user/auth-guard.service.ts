@@ -21,7 +21,8 @@ export class AuthGuardService implements CanActivate {
         [
           '/group/groups', "/group/updateGroup",
           "/wachtwoord-veranderen", "/opdrachten",
-          "/logout"
+          "/beursplan",
+          "/logout",
         ];
 
       if (pages.includes(state.url)
@@ -36,7 +37,7 @@ export class AuthGuardService implements CanActivate {
             [
               "/categorieen", "/categorie",
               "/exposanten", "/exposant",
-              "/beursplan", "/vragen", "/vraag", "/upload-csv",
+              "/vragen", "/vraag", "/upload-csv",
               "/requests", "/invite-request", "/accept-request"
             ];
 

@@ -9,7 +9,8 @@ namespace ApplicationCore.Entities
         public string Answer { get; set; }
         public CategoryExhibitor CategoryExhibitor { get; set; }
         public DateTime CreationDate { get; set; }
-
+        // number of times this question has been chosen.
+        public int Answered { get; set; }
         public Question(string questionText, string answerText)
         {
             QuestionText = questionText;

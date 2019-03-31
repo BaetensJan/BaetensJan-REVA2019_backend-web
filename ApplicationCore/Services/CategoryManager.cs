@@ -21,7 +21,7 @@ namespace ApplicationCore.Services
             _questionRepo = questionRepository;
         }
 
-        public async Task<IEnumerable<Category>> GetUnpickedCategories(int exhibitorId,
+        public async Task<IEnumerable<Category>> GetCategories(int exhibitorId,
             IEnumerable<Assignment> assignments, bool extraRound)
         {
             // Check if Group is doing a normal tour (number of assignments done < max number of assignments to do)
@@ -51,7 +51,7 @@ namespace ApplicationCore.Services
                 questions = questions.Where(q => q.CategoryExhibitor.ExhibitorId == exhibitorId).ToList();
             }
 
-            return GetUnpickedCategoriesExtraRound(assignments, categories, questions);
+            return GetCategoriesExtraRound(assignments, categories, questions);
         }
 
         /**
@@ -64,8 +64,7 @@ namespace ApplicationCore.Services
 
             foreach (var assignment in assignments)
             {
-                var category =
-                    cats.SingleOrDefault(c => c.Id == assignment.Question.CategoryExhibitor.CategoryId);
+                var category = cats.SingleOrDefault(c => c.Id == assignment.Question.CategoryExhibitor.CategoryId);
                 if (category != null)
                 {
                     cats.Remove(category);
@@ -78,7 +77,7 @@ namespace ApplicationCore.Services
          * Returns a list of categories of which not all questions related to that Category are answered by a
          * Group (check via assignments) yet.
          */
-        public static IEnumerable<Category> GetUnpickedCategoriesExtraRound(IEnumerable<Assignment> assignments,
+        public static IEnumerable<Category> GetCategoriesExtraRound(IEnumerable<Assignment> assignments,
             IEnumerable<Category> categories, IEnumerable<Question> questions)
         {
             var unpickedCategories = new List<Category>();

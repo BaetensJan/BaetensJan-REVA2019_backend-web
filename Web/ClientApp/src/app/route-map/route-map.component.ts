@@ -1,9 +1,9 @@
 import {AfterViewInit, Component, ElementRef, OnInit, ViewChild} from '@angular/core';
 import {ImageDataService} from "../image-data-service/image-data.service";
-import {Subscription} from 'rxjs/Subscription';
-import {Observable} from 'rxjs/Observable';
 import 'rxjs/add/observable/timer';
 import {AppShareService} from "../app-share.service";
+import {Observable} from "rxjs";
+import {AuthenticationService} from "../user/authentication.service";
 
 
 @Component({
@@ -27,19 +27,26 @@ export class RouteMapComponent implements AfterViewInit, OnInit {
   successMessage = "";
   showMessage = false;
   showMessageFail = false;
-  private subscription: Subscription;
-  private timer: Observable<any>;
 
   /**
    * Constructor
    *
    * @param _imageDataService
+   * @param _appShareService
+   * @param _authService
    */
-  constructor(private _imageDataService: ImageDataService, private _appShareService: AppShareService) {
+  constructor(
+    private _imageDataService: ImageDataService,
+    private _appShareService: AppShareService,
+    private _authService: AuthenticationService,) {
   }
 
   ngOnInit() {
     this.loadImage();
+  }
+
+  get isAdmin(): Observable<boolean> {
+    return this._authService.isModerator$;
   }
 
   /**
@@ -47,8 +54,9 @@ export class RouteMapComponent implements AfterViewInit, OnInit {
    */
   uploadFile() {
     let formData = new FormData();
+
     formData.append('file', this.dataURItoBlob(this._routePlanImage));
-    console.log(formData);
+
     this._imageDataService.UpdateRoutePlanImage(formData).subscribe((value: boolean) => {
       if (value == false) {
         this._appShareService.addAlert({
@@ -107,7 +115,7 @@ export class RouteMapComponent implements AfterViewInit, OnInit {
   onSelectFile(event) { // called each time file input changes
     let imageFile = event.target.files[0];
     if (event.target.files && imageFile) {
-      var reader = new FileReader();
+      let reader = new FileReader();
 
       reader.readAsDataURL(imageFile); // read file as data url
 

@@ -63,10 +63,10 @@ namespace Infrastructure.Repositories
             return cat;
         }
         
-        public Task<Category> GetByName(string categoryName)
+        public async Task<Category> GetByName(string categoryName)
         {
             var cat = _categories.SingleOrDefaultAsync(c => c.Name == categoryName);
-            return cat;
+            return await cat;
         }
        
         public Task Add(Category category)

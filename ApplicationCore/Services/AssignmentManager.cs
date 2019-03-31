@@ -23,6 +23,8 @@ namespace ApplicationCore.Services
             exhibitor.GroupsAtExhibitor++;
             exhibitor.TotalNumberOfVisits++;
 
+            question.Answered++;
+
             await _assignmentRepository.SaveChanges();
 
             return assignment;

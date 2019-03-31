@@ -218,7 +218,7 @@ namespace ApplicationCore.Tests.Services
         }
 
         [Fact]
-        public void GetUnpickedCategoriesExtraTourTest()
+        public void GetCategoriesExtraTourTest()
         {
             _questions.Add(new Question // this is a question that also (just as Question2) belongs to Category 2
             {
@@ -229,7 +229,7 @@ namespace ApplicationCore.Tests.Services
                 }
             });
 
-            var categories = CategoryManager.GetUnpickedCategoriesExtraRound(_assignments, _categories, _questions).ToList();
+            var categories = CategoryManager.GetCategoriesExtraRound(_assignments, _categories, _questions).ToList();
 
             // Category with id 2 has 2 questions: one that is already answered/picked (question2) by the Group
             // and one unanswered/unpicked (question10, with Category 2)
@@ -266,7 +266,7 @@ namespace ApplicationCore.Tests.Services
 
             var categories =
                 (await new CategoryManager(_categoryRepo.Object, _exhibitorRepo.Object, _questionRepo.Object)
-                    .GetUnpickedCategories(-1, _assignments, true)).ToList();
+                    .GetCategories(-1, _assignments, true)).ToList();
             Assert.Equal(9, categories[0].Id);
         }
 
@@ -303,7 +303,7 @@ namespace ApplicationCore.Tests.Services
 
             var categories =
                 (await new CategoryManager(_categoryRepo.Object, _exhibitorRepo.Object, _questionRepo.Object)
-                    .GetUnpickedCategories(1, _assignments, true)).ToList();
+                    .GetCategories(1, _assignments, true)).ToList();
 
             // Exhibitor, which only has one Category (with CategoryId 1) with 2 question with.
             // One of these questions (the one we added at the top of this test method) was
@@ -338,7 +338,7 @@ namespace ApplicationCore.Tests.Services
 
             var categories =
                 (await new CategoryManager(_categoryRepo.Object, _exhibitorRepo.Object, _questionRepo.Object)
-                    .GetUnpickedCategories(1, _assignments, true)).ToList();
+                    .GetCategories(1, _assignments, true)).ToList();
 
             // The only Category of the, by the group chosen, Exhibitor is Category with id 1 (_categories[0])
             // this Category is already added to _assignments, which means it is submitted by the Group already.

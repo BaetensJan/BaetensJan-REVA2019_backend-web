@@ -26,7 +26,9 @@ namespace Web.Controllers
             IConfiguration configuration)
 
         {
-            _groupManager = new GroupManager(configuration, groupRepository); // todo mag via ServiceManager geinjecteerd worden.            
+            _groupManager =
+                new GroupManager(configuration,
+                    groupRepository); // todo mag via ServiceManager geinjecteerd worden.            
             _categoryRepository = categoryRepository;
             _configuration = configuration;
             _categoryManager = new CategoryManager(categoryRepository, exhibitorRepository, questionRepository);
@@ -58,18 +60,20 @@ namespace Web.Controllers
          */
         [HttpGet("[action]/{exhibitorId}")]
         [Authorize]
-        public async Task<IActionResult> GetUnpickedCategories(int exhibitorId)
+        public async Task<IActionResult> GetCategories(int exhibitorId)
         {
             var group = await _groupManager.GetGroup(User.Claims);
             if (group == null)
             {
                 return NotFound("groupId not found in token.");
-            }            var assignments = group.Assignments;
-            
+            }
+
+            var assignments = group.Assignments;
+
             // Group is doing an extra round if they have submitted more than the amount of questions to be answered
             // in a normal tour.
-            var extraRound = assignments.Count >= _configuration.GetValue<int>("AmountOfQuestions");
-            return Json(await _categoryManager.GetUnpickedCategories(exhibitorId, assignments, extraRound));
+            var extraRound = assignments?.Count >= _configuration.GetValue<int>("AmountOfQuestions");
+            return Json(await _categoryManager.GetCategories(exhibitorId, assignments, extraRound));
         }
 
         /**
@@ -98,7 +102,7 @@ namespace Web.Controllers
             await _categoryRepository.Add(c);
 
             await _categoryRepository.SaveChanges();
-            
+
             return Ok(c);
         }
 

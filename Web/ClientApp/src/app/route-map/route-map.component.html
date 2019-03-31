@@ -6,14 +6,17 @@
     <h1>Beursplan</h1>
   </div>
 
-  <h3>Beursplan afbeelding wijzigen</h3>
+  <ng-container *ngIf='(isAdmin | async)'>
+    <h3>Beursplan afbeelding wijzigen</h3>
 
-  <div id="upload-image" class="row">
-    <div class="form-group col-md-4">
-      <label for="inputFile">Selecteer uw bestand</label>
-      <input type="file" (change)="onSelectFile($event)" id="inputFile"/>
-      <button (click)="uploadFile()" *ngIf="fileSelected">Upload File</button>
+    <div id="upload-image" class="row">
+      <div class="form-group col-md-4">
+        <label for="inputFile">Selecteer uw bestand</label>
+        <input type="file" (change)="onSelectFile($event)" id="inputFile"/>
+        <button class="btn btn-primary" (click)="uploadFile()" *ngIf="fileSelected">Upload File</button>
+      </div>
     </div>
-  </div>
-  <img class="object-fit-cover" #myImage [src]="routePlanImage" *ngIf="routePlanImage"/>
+  </ng-container>
+
+  <img class="object-fit-cover" #myImage [src]="routePlanImage" *ngIf="routePlanImage" alt="beursplan"/>
 </div>

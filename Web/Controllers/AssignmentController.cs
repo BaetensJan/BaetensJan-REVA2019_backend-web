@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using ApplicationCore.Entities;
@@ -28,14 +29,12 @@ namespace Web.Controllers
         private readonly ExhibitorManager _exhibitorManager;
         private readonly IImageWriter _imageWriter;
         private readonly IConfiguration _configuration;
-        private readonly QuestionManager _questionManager;
         private readonly AssignmentManager _assignmentManager;
         private readonly GroupManager _groupManager;
         private readonly IAuthenticationManager _authenticationManager;
 
         public AssignmentController(IConfiguration configuration,
             IAssignmentRepository assignmentRepository,
-            UserManager<ApplicationUser> userManager,
             IAssignmentBackupRepository assignmentBackupRepository,
             IExhibitorRepository exhibitorRepository,
             IAuthenticationManager authenticationManager,
@@ -45,16 +44,13 @@ namespace Web.Controllers
             IQuestionRepository questionRepository)
         {
             _configuration = configuration;
-            _groupManager =
-                new GroupManager(configuration,
-                    groupRepository); // todo mag via ServiceManager geinjecteerd worden.            
+            // todo mag via ServiceManager geinjecteerd worden.
+            _groupManager = new GroupManager(configuration, groupRepository);
             _assignmentRepository = assignmentRepository;
             _assignmentBackupRepository = assignmentBackupRepository;
             _exhibitorRepository = exhibitorRepository;
-            _exhibitorManager =
-                new ExhibitorManager(exhibitorRepository);
+            _exhibitorManager = new ExhibitorManager(exhibitorRepository);
             _questionRepository = questionRepository;
-            _questionManager = new QuestionManager();
             _categoryRepository = categoryRepository;
             _authenticationManager = authenticationManager;
             _imageWriter = imageWriter;
@@ -98,46 +94,56 @@ namespace Web.Controllers
                 return NotFound("groupId not found in token.");
             }
 
-            var questions = await _questionRepository.GetAll();
             var assignments = group.Assignments;
 
+            List<Question> questions;
             //todo make new relation in db where Category knows its Questions.
-            // Only get Exhibitors of which there exists a Question with given categoryId. 
-            if (previousExhibitorId != -1)
-                questions = questions.Where(q => q.CategoryExhibitor.CategoryId == categoryId &&
-                                                 q.CategoryExhibitor.Exhibitor.Id != previousExhibitorId).ToList();
-            else questions = questions.Where(q => q.CategoryExhibitor.CategoryId == categoryId).ToList();
-
-            // Check if group is doing an Extra Round
-            if (assignments != null && assignments.Count >= _configuration.GetValue<int>("AmountOfQuestions"))
+            //Only get Exhibitors of which there exists a Question with given categoryId. 
+            var extraRound = assignments?.Count >= _configuration.GetValue<int>("AmountOfQuestions");
+            if (previousExhibitorId != -1) // Check if Group has already visited an Exhibitor.
             {
-                questions = _questionManager.UnansweredQuestionsOfCategory(categoryId, assignments, questions);
+                // we check on extraRound, because then groups can re-chose a category,
+                // and we have to avoid that a group gets the same question again.
+                if (extraRound)
+                {
+                    questions = await _questionRepository.GetQuestions(categoryId, previousExhibitorId,
+                        assignments);
+                }
+                else
+                {
+                    questions = await _questionRepository.GetQuestions(categoryId, previousExhibitorId);
+                }
+            }
+            else
+            {
+                // we check on extraRound, because then groups can re-chose a category,
+                // and we have to avoid that a group gets the same question again.
+                if (extraRound)
+                {
+                    questions = await _questionRepository.GetQuestions(categoryId, assignments);
+                }
+                else
+                {
+                    questions = await _questionRepository.GetQuestions(categoryId);
+                }
             }
 
             if (questions.Count < 1)
-                return Ok(new
-                {
-                    Message =
-                        "Alle vragen voor deze Categorie zijn al beantwoord. Deze Categorie mocht niet worden weergegeven" +
-                        " in de CategoryChoiceFragment"
-                });
+            {
+                return StatusCode(500, "Alle vragen voor deze Categorie zijn al beantwoord. " +
+                                       "Deze Categorie mocht niet worden weergegeven in de CategoryChoiceFragment");
+            }
 
-            var potentialExhibitors = questions
-                .Select(e => e.CategoryExhibitor.Exhibitor)
-                .ToList();
+            var potentialExhibitors = questions.Select(e => e.CategoryExhibitor.Exhibitor).ToList();
 
-            // FindNextExhibitor 
-            var exhibitor =
-                await _exhibitorManager.FindNextExhibitor(previousExhibitorId, potentialExhibitors);
+            var exhibitor = await _exhibitorManager.FindNextExhibitor(previousExhibitorId, potentialExhibitors);
 
-            exhibitor.GroupsAtExhibitor++;
-
-            var question = await _questionRepository.GetQuestion(categoryId, exhibitor.Id);
+            var question = questions.Find(q => q.CategoryExhibitor.ExhibitorId == exhibitor.Id);
 
             var newAssignment = await _assignmentManager.CreateAssignment(question, isExtraRound, group);
-            newAssignment =
-                await _assignmentRepository
-                    .GetByIdLight(newAssignment.Id); //Todo temporary, otherwise we have recursive catExh data
+
+            //Todo temporary, otherwise we have recursive catExh data.
+            newAssignment = await _assignmentRepository.GetByIdLight(newAssignment.Id);
 
             return Ok(newAssignment);
         }
@@ -165,6 +171,7 @@ namespace Web.Controllers
 
             // We add the exhibitor information from the group to the Assignment.
             assignment.Answer += $"Exposant naam: {createdExhibitor.Name}";
+
             if (createdExhibitor.categoryId != -1)
             {
                 var category = await _categoryRepository.GetById(createdExhibitor.categoryId);
@@ -177,11 +184,13 @@ namespace Web.Controllers
             }
 
             group.AddAssignment(assignment);
+
+            question.Answered++;
+
             await _assignmentRepository.SaveChanges();
 
-            assignment =
-                await _assignmentRepository
-                    .GetByIdLight(assignment.Id); //Todo temporary, otherwise we have recursive catExh data
+            //Todo temporary, otherwise we have recursive catExh data.
+            assignment = await _assignmentRepository.GetByIdLight(assignment.Id);
 
             assignment.Answer = ""; // empty answer for android (we will re-add the exhibitor information @ submit)
 
@@ -203,19 +212,19 @@ namespace Web.Controllers
         [Authorize] //todo role group
         public async Task<IActionResult> CreateAssignmentOfExhibitorAndCategory(int categoryId, int exhibitorId)
         {
-            var question = await _questionRepository.GetQuestion(categoryId, exhibitorId);
-
             var group = await _groupManager.GetGroup(User.Claims);
             if (group == null)
             {
                 return NotFound("groupId not found in token.");
             }
 
+            var question = await _questionRepository.GetQuestion(categoryId, exhibitorId,
+                group.Assignments.Select(a => a.Question));
+
             var assignment = await _assignmentManager.CreateAssignment(question, true, group);
 
-            assignment =
-                await _assignmentRepository
-                    .GetByIdLight(assignment.Id); //Todo temporary, otherwise we have recursive catExh data
+            //Todo temporary, otherwise we have recursive catExh data.
+            assignment = await _assignmentRepository.GetByIdLight(assignment.Id);
 
             return Ok(assignment);
         }
@@ -264,6 +273,7 @@ namespace Web.Controllers
 
             //TODO: temporary, recursive loop anders:
             assignment = await _assignmentRepository.GetByIdLight(assignment.Id);
+
             return Ok(assignment);
         }
 
@@ -282,20 +292,20 @@ namespace Web.Controllers
             await _assignmentBackupRepository.Add(assignment, schoolName, group.Name, isCreatedExhibitor);
         }
 
-        /**
-         * If a group decides to cancel the Assignment in the application.
-         */
-        [HttpDelete("RemoveAssignment/{assignmentId}")]
-        [Authorize] //todo role group
-        public async Task<IActionResult> Remove(int assignmentId)
-        {
-            var assignment = await _assignmentRepository.GetById(assignmentId);
-            _assignmentRepository.Remove(assignment);
-            await _assignmentRepository.SaveChanges();
-            return Ok(new
-            {
-                AssignmentId = assignment.Id
-            });
-        }
+//        /**
+//         * If a group decides to cancel the Assignment in the application.
+//         */
+//        [HttpDelete("RemoveAssignment/{assignmentId}")]
+//        [Authorize] //todo role group
+//        public async Task<IActionResult> Remove(int assignmentId)
+//        {
+//            var assignment = await _assignmentRepository.GetById(assignmentId);
+//            _assignmentRepository.Remove(assignment);
+//            await _assignmentRepository.SaveChanges();
+//            return Ok(new
+//            {
+//                AssignmentId = assignment.Id
+//            });
+//        }
     }
 }

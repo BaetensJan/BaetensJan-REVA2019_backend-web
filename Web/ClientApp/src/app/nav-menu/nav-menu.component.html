@@ -24,7 +24,7 @@
           </a>
         </li>
 
-        <ng-container *ngIf='!(isLoggedIn | async); else notLoggedIn'>
+        <ng-container *ngIf='!(isLoggedIn | async); else loggedIn'>
           <li [routerLinkActive]='["link-active"]'>
             <a (click)='collapse()' [routerLink]='["invite-request"]'>
               <span class='glyphicon glyphicon-plus'></span> Aanvraag indienen
@@ -32,7 +32,7 @@
           </li>
         </ng-container>
 
-        <ng-template #notLoggedIn>
+        <ng-template #loggedIn>
           <li [routerLinkActive]='["link-active"]'>
             <a (click)='collapse()' [routerLink]='["/group/groups"]'>
               <span class='glyphicon glyphicon-user'></span> Groepen
@@ -41,6 +41,11 @@
           <li [routerLinkActive]='["link-active"]'>
             <a (click)='collapse()' [routerLink]='["opdrachten"]'>
               <span class='glyphicon glyphicon-th-list'></span> Opdrachten
+            </a>
+          </li>
+          <li [routerLinkActive]='["link-active"]'>
+            <a (click)='collapse()' [routerLink]='["beursplan"]'>
+              <span class='glyphicon glyphicon-picture'></span> Beursplan
             </a>
           </li>
         </ng-template>
@@ -58,16 +63,10 @@
             </a>
           </li>
           <li [routerLinkActive]='["link-active"]'>
-            <a (click)='collapse()' [routerLink]='["beursplan"]'>
-              <span class='glyphicon glyphicon-picture'></span> Beursplan
-            </a>
-          </li>
-          <li [routerLinkActive]='["link-active"]'>
             <a (click)='collapse()' [routerLink]='["vragen"]'>
               <span class='glyphicon glyphicon-th-list'></span> Vragen
             </a>
           </li>
-
           <li [routerLinkActive]='["link-active"]'>
             <a (click)='collapse()' [routerLink]='["upload-csv"]'>
               <span class='glyphicon glyphicon-plus'></span> Uploaden CSV
@@ -89,7 +88,7 @@
           </a>
         </li>
 
-        <ng-container *ngIf='!(isLoggedIn | async); else loggedIn'>
+        <ng-container *ngIf='!(isLoggedIn | async); else loggedIn2'>
           <div class='clearfix' style="margin-bottom: 1.5em;"></div>
           <li [routerLinkActive]='["link-active"]'>
             <a (click)='collapse()' [routerLink]='["login"]'>
@@ -98,7 +97,7 @@
           </li>
         </ng-container>
 
-        <ng-template #loggedIn>
+        <ng-template #loggedIn2>
           <div class='clearfix' style="margin-bottom: 1.5em;"></div>
 
           <!-- Start User settings dropdown -->

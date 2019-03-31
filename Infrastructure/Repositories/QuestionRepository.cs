@@ -1,3 +1,4 @@
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -30,13 +31,146 @@ namespace Infrastructure.Repositories
         * Checks if there exists a question for the categoryId & exhibitorId combination.
         * A question is based upon a certain Category and Exhibitor combination.
         */
-        public Task<Question> GetQuestion(int categoryId, int exhibitorId)
+        public async Task<Question> GetQuestion(int categoryId, int exhibitorId, IEnumerable<Question> assignmentQuestions)
         {
-            //TODO there are more than 1 questions related to a specific CategoryExhibitor (which shouldn't be, but is...)
-            //TODO normally this should be done with SingleOrDefaultAsync
-            return _questions.FirstOrDefaultAsync(q =>
-                q.CategoryExhibitor.CategoryId == categoryId && q.CategoryExhibitor.ExhibitorId
-                == exhibitorId);
+            //There are more than 1 questions related to a specific CategoryExhibitor (which shouldn't be, but is...)
+            var questions = await _questions.Where(q => q.CategoryExhibitor.CategoryId == categoryId &&
+                                                        q.CategoryExhibitor.ExhibitorId == exhibitorId).ToListAsync();
+            if (assignmentQuestions != null)
+            {
+                // remove all questions that were already answered by the group.
+                questions = questions.Except(assignmentQuestions).ToList();
+            }
+
+            //We take the least answered question.
+            return questions.OrderBy(q => q.Answered).FirstOrDefault();
+        }
+
+        /**
+        * Returns questions with categoryId equal to parameter categoryId
+        * and exhibitorId different than parameter exhibitorId, that were the least answered.
+        */
+        public async Task<List<Question>> GetQuestions(int categoryId, int exhibitorId)
+        {
+            //There are more than 1 questions related to a specific CategoryExhibitor (which shouldn't be, but is...)
+            // We want to check that the exhibitorId is different so that a group isn't bothering an exhibitor with 2
+            // assignments after each other.
+            var filteredQuestions = await _questions.Where(q => q.CategoryExhibitor.CategoryId == categoryId &&
+                                                                q.CategoryExhibitor.ExhibitorId != exhibitorId)
+                .ToListAsync();
+
+            return LeastAnsweredQuestionList(filteredQuestions);
+        } /**
+        * Returns questions with categoryId equal to parameter categoryId
+        * and exhibitorId different than parameter exhibitorId, that were the least answered.
+        */
+
+        public async Task<List<Question>> GetQuestions(int categoryId, int exhibitorId, List<Assignment> assignments)
+        {
+            //There are more than 1 questions related to a specific CategoryExhibitor (which shouldn't be, but is...)
+            // We want to check that the exhibitorId is different so that a group isn't bothering an exhibitor with 2
+            // assignments after each other.
+            var filteredQuestions = await _questions.Where(q => q.CategoryExhibitor.CategoryId == categoryId &&
+                                                                q.CategoryExhibitor.ExhibitorId != exhibitorId)
+                .ToListAsync();
+
+
+            return LeastAnsweredQuestionList(filteredQuestions, assignments);
+        }
+
+        /**
+        * Returns questions with categoryId equal to parameter categoryId
+        * that were the least answered.
+        */
+        public async Task<List<Question>> GetQuestions(int categoryId)
+        {
+            //There are more than 1 questions related to a specific CategoryExhibitor (which shouldn't be, but is...)
+            var filteredQuestions = await _questions.Where(q => q.CategoryExhibitor.CategoryId == categoryId)
+                .ToListAsync();
+
+
+            return LeastAnsweredQuestionList(filteredQuestions);
+        }
+
+        /**
+        * Returns questions with categoryId equal to parameter categoryId
+        * that were the least answered.
+        */
+        public async Task<List<Question>> GetQuestions(int categoryId, List<Assignment> assignments)
+        {
+            //There are more than 1 questions related to a specific CategoryExhibitor (which shouldn't be, but is...)
+            var filteredQuestions = await _questions.Where(q => q.CategoryExhibitor.CategoryId == categoryId)
+                .ToListAsync();
+
+
+            return LeastAnsweredQuestionList(filteredQuestions, assignments);
+        }
+
+        private static List<Question> LeastAnsweredQuestionList(IEnumerable<Question> filteredQuestions)
+        {
+            //We take the least answered question per Exhibitor (as an Exhibitor can have multiple questions per Category).
+            var questions = new List<Question>();
+            foreach (var question in filteredQuestions)
+            {
+                // Check if there is already a Question for that specific exhibitor.
+                if (!questions.Exists(q => q.CategoryExhibitor.ExhibitorId == question.CategoryExhibitor.ExhibitorId))
+                {
+                    questions.Add(question);
+                }
+                else
+                {
+                    // check if the question for that specific Exhibitor is the least asked question until then.
+                    for (var i = 0; i < questions.Count; i++)
+                    {
+                        var questionTemp = questions[i];
+                        if (questionTemp.CategoryExhibitor.ExhibitorId == question.CategoryExhibitor.ExhibitorId &&
+                            questionTemp.Answered > question.Answered)
+                        {
+                            questions[i] = question;
+                        }
+                    }
+                }
+            }
+
+            return questions;
+        }
+
+        private static List<Question> LeastAnsweredQuestionList(IEnumerable<Question> filteredQuestions,
+            IReadOnlyCollection<Assignment> assignments)
+        {
+            //We take the least answered question per Exhibitor (as an Exhibitor can have multiple questions per Category).
+            var questions = new List<Question>();
+            foreach (var question in filteredQuestions)
+            {
+                // check if Question has already been answered by Group.
+                var alreadyAnswered = assignments.Any(assignment => assignment.Question.Id == question.Id);
+
+                if (alreadyAnswered)
+                {
+                    break;
+                }
+
+                // Check if there is already a Question for that specific exhibitor.
+                if (!questions.Exists(q => q.CategoryExhibitor.ExhibitorId == question.CategoryExhibitor.ExhibitorId))
+                {
+                    questions.Add(question);
+                }
+                else
+                {
+                    // check if the question for that specific Exhibitor is the least asked question until then.
+                    for (var i = 0; i < questions.Count; i++)
+                    {
+                        var questionTemp = questions[i];
+                        if (questionTemp.CategoryExhibitor.ExhibitorId == question.CategoryExhibitor.ExhibitorId &&
+                            questionTemp.Answered > question.Answered)
+                        {
+                            questions[i] = question;
+                        }
+                    }
+                }
+            }
+
+            return questions;
         }
 
         public Task<List<Question>> GetAll()
@@ -46,7 +180,6 @@ namespace Infrastructure.Repositories
                 .Include(q => q.CategoryExhibitor)
                 .ThenInclude(catExh => catExh.Category)
                 .ToListAsync();
-
             return questions;
         }
 
@@ -57,7 +190,6 @@ namespace Infrastructure.Repositories
                 .Include(q => q.CategoryExhibitor).ThenInclude(catExh => catExh.Category)
                 .Select(q => MapQuestion(q))
                 .ToListAsync();
-
             return questions;
         }
 
@@ -128,12 +260,12 @@ namespace Infrastructure.Repositories
         {
             _questions.Remove(question);
         }
-        
+
         public void RemoveAllQuestions(IEnumerable<Question> questions)
         {
             _questions.RemoveRange(questions);
         }
-        
+
         public Task SaveChanges()
         {
             return _dbContext.SaveChangesAsync();
