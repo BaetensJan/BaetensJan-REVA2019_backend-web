@@ -31,11 +31,17 @@ namespace Infrastructure.Repositories
         * Checks if there exists a question for the categoryId & exhibitorId combination.
         * A question is based upon a certain Category and Exhibitor combination.
         */
-        public async Task<Question> GetQuestion(int categoryId, int exhibitorId, IEnumerable<Question> assignmentQuestions)
+        public async Task<Question> GetQuestion(int categoryId, int exhibitorId,
+            IEnumerable<Question> assignmentQuestions)
         {
             //There are more than 1 questions related to a specific CategoryExhibitor (which shouldn't be, but is...)
-            var questions = await _questions.Where(q => q.CategoryExhibitor.CategoryId == categoryId &&
-                                                        q.CategoryExhibitor.ExhibitorId == exhibitorId).ToListAsync();
+            var questions = await _questions
+                .Where(q => q.CategoryExhibitor.CategoryId == categoryId &&
+                            q.CategoryExhibitor.ExhibitorId == exhibitorId)
+                .Include(q => q.CategoryExhibitor)
+                .ThenInclude(categoryExhibitor => categoryExhibitor.Exhibitor)
+                .ToListAsync();
+            
             if (assignmentQuestions != null)
             {
                 // remove all questions that were already answered by the group.
@@ -55,8 +61,11 @@ namespace Infrastructure.Repositories
             //There are more than 1 questions related to a specific CategoryExhibitor (which shouldn't be, but is...)
             // We want to check that the exhibitorId is different so that a group isn't bothering an exhibitor with 2
             // assignments after each other.
-            var filteredQuestions = await _questions.Where(q => q.CategoryExhibitor.CategoryId == categoryId &&
-                                                                q.CategoryExhibitor.ExhibitorId != exhibitorId)
+            var filteredQuestions = await _questions
+                .Where(q => q.CategoryExhibitor.CategoryId == categoryId &&
+                            q.CategoryExhibitor.ExhibitorId != exhibitorId)
+                .Include(q => q.CategoryExhibitor)
+                .ThenInclude(categoryExhibitor => categoryExhibitor.Exhibitor)
                 .ToListAsync();
 
             return LeastAnsweredQuestionList(filteredQuestions);
@@ -70,8 +79,11 @@ namespace Infrastructure.Repositories
             //There are more than 1 questions related to a specific CategoryExhibitor (which shouldn't be, but is...)
             // We want to check that the exhibitorId is different so that a group isn't bothering an exhibitor with 2
             // assignments after each other.
-            var filteredQuestions = await _questions.Where(q => q.CategoryExhibitor.CategoryId == categoryId &&
-                                                                q.CategoryExhibitor.ExhibitorId != exhibitorId)
+            var filteredQuestions = await _questions
+                .Where(q => q.CategoryExhibitor.CategoryId == categoryId &&
+                            q.CategoryExhibitor.ExhibitorId != exhibitorId)
+                .Include(q => q.CategoryExhibitor)
+                .ThenInclude(categoryExhibitor => categoryExhibitor.Exhibitor)
                 .ToListAsync();
 
 
@@ -85,7 +97,10 @@ namespace Infrastructure.Repositories
         public async Task<List<Question>> GetQuestions(int categoryId)
         {
             //There are more than 1 questions related to a specific CategoryExhibitor (which shouldn't be, but is...)
-            var filteredQuestions = await _questions.Where(q => q.CategoryExhibitor.CategoryId == categoryId)
+            var filteredQuestions = await _questions
+                .Where(q => q.CategoryExhibitor.CategoryId == categoryId)
+                .Include(q => q.CategoryExhibitor)
+                .ThenInclude(categoryExhibitor => categoryExhibitor.Exhibitor)
                 .ToListAsync();
 
 
@@ -99,7 +114,10 @@ namespace Infrastructure.Repositories
         public async Task<List<Question>> GetQuestions(int categoryId, List<Assignment> assignments)
         {
             //There are more than 1 questions related to a specific CategoryExhibitor (which shouldn't be, but is...)
-            var filteredQuestions = await _questions.Where(q => q.CategoryExhibitor.CategoryId == categoryId)
+            var filteredQuestions = await _questions
+                .Where(q => q.CategoryExhibitor.CategoryId == categoryId)
+                .Include(q => q.CategoryExhibitor)
+                .ThenInclude(categoryExhibitor => categoryExhibitor.Exhibitor)
                 .ToListAsync();
 
 
@@ -113,7 +131,7 @@ namespace Infrastructure.Repositories
             foreach (var question in filteredQuestions)
             {
                 // Check if there is already a Question for that specific exhibitor.
-                if (!questions.Exists(q => q.CategoryExhibitor.ExhibitorId == question.CategoryExhibitor.ExhibitorId))
+                if (questions.All(q => q.CategoryExhibitor.ExhibitorId != question.CategoryExhibitor.ExhibitorId))
                 {
                     questions.Add(question);
                 }
@@ -147,11 +165,11 @@ namespace Infrastructure.Repositories
 
                 if (alreadyAnswered)
                 {
-                    break;
+                    continue; // don't add the question to the list, because it was already answered by the group.
                 }
 
                 // Check if there is already a Question for that specific exhibitor.
-                if (!questions.Exists(q => q.CategoryExhibitor.ExhibitorId == question.CategoryExhibitor.ExhibitorId))
+                if (questions.All(q => q.CategoryExhibitor.ExhibitorId != question.CategoryExhibitor.ExhibitorId))
                 {
                     questions.Add(question);
                 }

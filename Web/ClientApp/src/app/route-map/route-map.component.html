@@ -13,7 +13,12 @@
       <div class="form-group col-md-4">
         <label for="inputFile">Selecteer uw bestand</label>
         <input type="file" (change)="onSelectFile($event)" id="inputFile"/>
-        <button class="btn btn-primary" (click)="uploadFile()" *ngIf="fileSelected">Upload File</button>
+        <button style="margin-top: 1em;"
+                class="btn btn-primary"
+                (click)="uploadFile()"
+                *ngIf="fileSelected">
+          Upload File
+        </button>
       </div>
     </div>
   </ng-container>

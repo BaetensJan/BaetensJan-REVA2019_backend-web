@@ -99,7 +99,7 @@ namespace Web.Controllers
             List<Question> questions;
             //todo make new relation in db where Category knows its Questions.
             //Only get Exhibitors of which there exists a Question with given categoryId. 
-            var extraRound = assignments?.Count >= _configuration.GetValue<int>("AmountOfQuestions");
+            var extraRound = assignments?.Count >= _configuration.GetValue<int>("AmountOfQuestions") && isExtraRound;
             if (previousExhibitorId != -1) // Check if Group has already visited an Exhibitor.
             {
                 // we check on extraRound, because then groups can re-chose a category,
