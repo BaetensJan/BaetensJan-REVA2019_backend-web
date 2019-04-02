@@ -37,17 +37,25 @@ namespace Infrastructure.Repositories
             // return _assignments.Select(e => AssignmentMap(e)).SingleOrDefaultAsync(c => c.Id == id)?.Result;
         }
 
-        public Task<Assignment> GetByIdLight(int id)
+        public async Task<Assignment> GetByIdLight(int id)
         {
-            return _assignments.Select(e => AssignmentMap(e))
+            var assignment = await _assignments
+                .Include(a => a.Question)
+                .ThenInclude(a=> a.CategoryExhibitor)
+                .ThenInclude(a=>a.Category)
+                
+                .Include(a => a.Question)
+                .ThenInclude(a=> a.CategoryExhibitor)
+                .ThenInclude(a=>a.Exhibitor)
+                
                 .SingleOrDefaultAsync(c => c.Id == id);
+            return AssignmentMap(assignment);
         }
 
         private Assignment AssignmentMap(Assignment e)
         {
-            //Todo question is blijkbaar af en toe null van assignment (al is er wel een questionId in elke assignment object)
-            if (e.Question?.CategoryExhibitor?.Exhibitor != null && e.Question?.CategoryExhibitor?.Category != null)
-            {
+//            if (e.Question?.CategoryExhibitor?.Exhibitor != null && e.Question?.CategoryExhibitor?.Category != null)
+//            {
                 // Abstractie: zorgt ervoor dat enkel de nodige data opgehaald wordt (geen recursieve loop).
                 e.Question = new Question(e.Question.QuestionText, e.Question.Answer)
                 {
@@ -71,11 +79,10 @@ namespace Infrastructure.Repositories
                             Y = e.Question.CategoryExhibitor.Exhibitor.Y,
                             GroupsAtExhibitor = e.Question.CategoryExhibitor.Exhibitor.GroupsAtExhibitor,
                             ExhibitorNumber = e.Question.CategoryExhibitor.Exhibitor.ExhibitorNumber
-                            //Categories = e.CategoryExhibitor.Exhibitor.C,
                         }
                     }
                 };
-            }
+//            }
 
             return new Assignment
             {
