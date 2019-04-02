@@ -256,14 +256,16 @@ namespace Web.Controllers
             {
                 answer = model.Answer;
 
-                var exhibitor =
-                    await _exhibitorRepository.GetById(assignment.Question.CategoryExhibitor.ExhibitorId);
+                var exhibitor = await _exhibitorRepository.GetById(assignment.Question.CategoryExhibitor.ExhibitorId);
                 exhibitor.GroupsAtExhibitor--;
             }
 
             assignment.Answer = answer;
             assignment.Notes = model.Notes;
-            if (!string.IsNullOrEmpty(model.Photo)) assignment.Photo = _imageWriter.WriteBase64ToFile(model.Photo);
+            if (!string.IsNullOrEmpty(model.Photo))
+            {
+                assignment.Photo = _imageWriter.WriteBase64ToFile(model.Photo);
+            }
             assignment.Submitted = true;
             assignment.SubmissionDate = DateTime.Now;
 
