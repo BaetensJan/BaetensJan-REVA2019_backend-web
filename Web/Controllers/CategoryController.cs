@@ -73,7 +73,9 @@ namespace Web.Controllers
             // Group is doing an extra round if they have submitted more than the amount of questions to be answered
             // in a normal tour.
             var extraRound = assignments?.Count >= _configuration.GetValue<int>("AmountOfQuestions");
-            return Json(await _categoryManager.GetCategories(exhibitorId, assignments, extraRound));
+            var categories = await _categoryManager.GetCategories(exhibitorId, assignments, extraRound);
+
+            return Json(categories);
         }
 
         /**

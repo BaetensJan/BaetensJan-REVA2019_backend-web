@@ -32,6 +32,16 @@ namespace ApplicationCore.Entities
             Notes = "";
             CreationDate = DateTime.Now;
         }
+        
+        public Assignment(bool isExtraRound)
+        {
+            Photo = "";
+            Answer = "";
+            Submitted = false;
+            Extra = isExtraRound;
+            Notes = "";
+            CreationDate = DateTime.Now;
+        }
 
         /**
          * Temporary used in AssignmentRepository (for Select Mapping because of recursive CategoryExhibitor mistake) 

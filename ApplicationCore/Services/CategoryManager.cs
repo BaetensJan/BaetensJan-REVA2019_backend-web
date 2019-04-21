@@ -97,7 +97,11 @@ namespace ApplicationCore.Services
                 }
 
                 // not all categoryQuestions were answered by the Group already, so we can add this Category to UnpickedCategories.
-                if (counter < categoryQuestions.Count) unpickedCategories.Add(category);
+                if (counter < categoryQuestions.Count)
+                {
+                    unpickedCategories.Add(category);
+                }
+                
                 counter = 0;
             }
 

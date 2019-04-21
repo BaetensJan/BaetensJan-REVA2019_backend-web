@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using ApplicationCore.Entities;
 using ApplicationCore.Interfaces;
 using ApplicationCore.Services;
+using Infrastructure.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Web.DTOs;
@@ -16,11 +17,17 @@ namespace Web.Controllers
     {
         private readonly ExhibitorManager _exhibitorManager;
         private readonly IExhibitorRepository _exhibitorRepository;
+        private readonly GroupManager _groupManager;
+        private readonly IQuestionRepository _questionRepository;
 
-        public ExhibitorController(IExhibitorRepository exhibitorRepository)
+        public ExhibitorController(IExhibitorRepository exhibitorRepository,
+            IGroupRepository groupRepository,
+            IQuestionRepository questionRepository)
         {
             _exhibitorRepository = exhibitorRepository;
+            _questionRepository = questionRepository;
             _exhibitorManager = new ExhibitorManager(exhibitorRepository);
+            _groupManager = new GroupManager(groupRepository); // todo mag via ServiceManager geinjecteerd worden.
         }
 
         [HttpGet("[action]")]
@@ -29,6 +36,54 @@ namespace Web.Controllers
         {
 //            var exhbs = _exhibitorManager.ExhibitorsLight();
             return Ok(await _exhibitorRepository.All());
+        }
+
+        /**
+         * Returns a list of Exhibitors of which not all questions have been
+         * answered by a Group.
+         */
+        [HttpGet("[action]")]
+        [Authorize]
+        public async Task<IActionResult> ExhibitorsWithUnansweredQuestions()
+        {
+            var group = await _groupManager.GetGroup(User.Claims);
+            if (group == null)
+            {
+                return NotFound("groupId not found in token.");
+            }
+
+            var assignments = group.Assignments;
+            var questions = await _questionRepository.GetAllLight();
+
+            //todo: exhibitor should have a relation with Question, in order to
+            //todo e.g. loop over every assignment and take the assignment.question.categoryExhibitor.exhibitor
+            //todo: and temporary remove that question from that exhibitor.questions and immediately check
+            //todo: if exhibitor.questions.size < 1 (then you know the group has done all the questions of
+            //that particular exhibitor (and thus you should not return it).
+
+            foreach (var assignment in assignments)
+            {
+                    //todo fix
+                    var question = questions.Single(q => q.Id == assignment.Question.Id);
+                    questions.Remove(question);
+            }
+
+            //todo: this might be faster than loop above.
+//            var x = assignments.Select(a => a.Question.Id);
+//            questions.RemoveAll(q => x.Contains(q.Id));
+
+            /**
+             * Selecting the entire Exhibitor object rather than the id would not remove the duplicates,
+             * I suspect this has something to do with the fact that these Exhibitor objects were already
+             * incomplete by the ExhibitorMap in the Select() in the QuestionRepository.
+             */
+            var exhibs = questions.Select(q => q.CategoryExhibitor.Exhibitor);
+            var exhibIdsHashSet = new HashSet<int>(exhibs.Select(exh => exh.Id));
+
+            var exhibitors = new List<Exhibitor>();
+            exhibIdsHashSet.ToList().ForEach(exhId => exhibitors.Add(exhibs.First(exh => exh.Id == exhId)));
+
+            return Ok(exhibitors);
         }
 
         /**
@@ -120,7 +175,6 @@ namespace Web.Controllers
 //            var lcatexb = CreateCategories(exhibitordto.CategoryIds);
             var exh = await _exhibitorManager.UpdateExhibitor(e);
             return Ok(exh);
-         
         }
 
         private static IEnumerable<CategoryExhibitor> CreateCategories(IReadOnlyCollection<int> categoryIdList)

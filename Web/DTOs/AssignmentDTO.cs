@@ -13,9 +13,11 @@ namespace Web.DTOs
 
         public string Photo { get; set; }
         
-        public bool Extra { get; set; }
+//        public bool Extra { get; set; } // extra round
         
-        public QuestionFullDTO Question { get; set; }
+        public bool CreatedExhibitor { get; set; }
+        
+//        public QuestionFullDTO Question { get; set; }
         
     }
     

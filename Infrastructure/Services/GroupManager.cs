@@ -16,10 +16,10 @@ namespace Infrastructure.Services
         private readonly IConfiguration _configuration;
 
         private readonly IGroupRepository _groupRepository;
-        
+
         public GroupManager(
             IConfiguration configuration,
-            IGroupRepository groupRepository 
+            IGroupRepository groupRepository
 //            UserManager<ApplicationUser> userManager
         )
         {
@@ -27,13 +27,19 @@ namespace Infrastructure.Services
             _groupRepository = groupRepository;
 //            _userManager = userManager;
         }
+        
+        public GroupManager(IGroupRepository groupRepository)
+        {
+            _groupRepository = groupRepository;
+        }
 
         public JsonResult GetGroupInfo(Group group)
         {
             if (group.Assignments == null) group.Assignments = new List<Assignment>();
 
-            var previousExhibitorXCoordinate = 0.0;
-            var previousExhibitorYCoordinate = 0.0;
+            // Coordinates of entrance of exposition.
+            var previousExhibitorXCoordinate = 0.0966804979253112;
+            var previousExhibitorYCoordinate = 0.612603305785124;
             var numberOfAssignments = group.Assignments.Count;
 
             if (numberOfAssignments > 1)
@@ -53,11 +59,20 @@ namespace Infrastructure.Services
             if (currentAssignment != null && !currentAssignment.Submitted)
             {
                 numberOfSubmittedAssignments = numberOfAssignments - 1;
-                isCreatedExhibitor =
-                    currentAssignment.WithCreatedExhibitor(
-                        _configuration.GetValue<int>("CreatedExhibitorQuestionId"));
+                
+//                /**
+//                 * Check if Exhibitor created by Group.
+//                 */
+//                if (currentAssignment.Question == null)
+//                {
+//                    isCreatedExhibitor = true;
+//                    currentAssignment.Answer = ""; // we have to temporarily remove the 
+//                    // by the group created exhibitor information that we stored in the answer.
+//                }
+//                    currentAssignment.WithCreatedExhibitor(
+//                        _configuration.GetValue<int>("CreatedExhibitorQuestionId"));
             }
-
+            
             var hasNoAssignments = numberOfAssignments == 0;
 
             var startDate = _configuration.GetValue<DateTime>("StartDate");
@@ -68,7 +83,7 @@ namespace Infrastructure.Services
                 {
                     startDate,
                     canStartTour =
-                        group.Name == "groep122" ||
+                        group.Name == "groep9000" ||
                         IsValidDate(startDate, DateTime.Now), // check if group can start Tour based on date.
                     hasNoAssignments, // we need this attribute, because numberOfAssignments != numberOfSubmittedAssignments
                     // (and the app only knows the latter) 

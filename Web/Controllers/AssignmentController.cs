@@ -151,13 +151,13 @@ namespace Web.Controllers
         /**
         * A group has created a new Exhibitor in the Extra Tour, as they didn't find the Exhibitor in the list.
         */
-        [HttpGet("[Action]")]
+        [HttpPost("[Action]")]
         [Authorize] //todo role group
-        public async Task<IActionResult> CreateAssignmentNewExhibitor([FromBody] CreatedExhibitorDTO createdExhibitor)
+        public async Task<IActionResult> CreateAssignmentNewExhibitor([FromBody] CreatedExhibitorDto createdExhibitor)
         {
             //We take a specific question for this assignment, as an assignment needs a question
             //and we dont want to create new (random) question in the database each time a group start an extra tour.
-            var question = await _questionRepository.GetById(127);
+//            var question = await _questionRepository.GetById(127);
 
             // get group object via schoolId and groupName
             var group = await _groupManager.GetGroup(User.Claims);
@@ -167,14 +167,14 @@ namespace Web.Controllers
             }
 
             // Create assignment and Add to the groups assignments.
-            var assignment = new Assignment(question, true);
+            var assignment = new Assignment(true);
 
             // We add the exhibitor information from the group to the Assignment.
             assignment.Answer += $"Exposant naam: {createdExhibitor.Name}";
 
-            if (createdExhibitor.categoryId != -1)
+            if (createdExhibitor.CategoryId != -1)
             {
-                var category = await _categoryRepository.GetById(createdExhibitor.categoryId);
+                var category = await _categoryRepository.GetById(createdExhibitor.CategoryId);
                 assignment.Answer += $", met Categorie: {category.Name}";
             }
 
@@ -183,16 +183,29 @@ namespace Web.Controllers
                 assignment.Answer += $" en Standnummer: {createdExhibitor.BoothNumber}";
             }
 
-            group.AddAssignment(assignment);
+//            group.AddAssignment(assignment); //todo: need fix for this, we dont want a group
+//todo:  with question null (nor a fake question => getCategories, getExhibitors, ...), but group
+//todo:  needs to remember his assignments for when he logs out (and logs back in => getGroupInfo())
 
-            question.Answered++;
+           var backupAssignment = await CreateBackupAssignment(assignment, true); // todo, when getting
+           assignment.Id = backupAssignment.Id;
+            //todo assignments for school via web -> also get the assignment from backup (where we temporarely
+            //todo save the assignments for - by group created exhibitor- assignments.
 
-            await _assignmentRepository.SaveChanges();
+            /**
+             * Empty answer for android (we will re-add the exhibitor information @ submit)
+             */
+            assignment.Answer = ""; 
 
-            //Todo temporary, otherwise we have recursive catExh data.
-            assignment = await _assignmentRepository.GetByIdLight(assignment.Id);
-
-            assignment.Answer = ""; // empty answer for android (we will re-add the exhibitor information @ submit)
+//            assignment.Question = new Question()
+//            {
+//                Id = 99999,
+//                Answered = 0,
+//                QuestionText =
+//                    "Neem een foto van de stand (een selfie van de groep met exposant op de achtergrond is ook goed).",
+//                Answer = "",
+//                CreationDate = DateTime.Now
+//            };
 
             return Ok(assignment);
         }
@@ -241,73 +254,62 @@ namespace Web.Controllers
                 return BadRequest("Error, the submitted assignment is not valid.");
             }
 
-            var assignment = await _assignmentRepository.GetById(model.Id);
-            var answer = "";
-
-            // Group created Exhibitor in Extra Round
-            var createdExhibitor =
-                assignment.WithCreatedExhibitor(_configuration.GetValue<int>("CreatedExhibitorQuestionId"));
-
-            if (createdExhibitor)
+            if (model.CreatedExhibitor)
             {
-                answer = $"{assignment.Answer}. Antwoord groep: {model.Answer}";
+                var backupAssignment = await _assignmentBackupRepository.GetById(model.Id);
+                backupAssignment.Answer = $"{backupAssignment.Answer}. Antwoord groep: {model.Answer}";
+                //todo assignment and backupassignment need to implement interface in order
+                // to do use both of them in same kind of way. (super class)
+//                UpdateAssignment(new Assignment(), model.Notes, model.Photo);
+
+                backupAssignment.Notes = model.Notes;
+                if (!string.IsNullOrEmpty(model.Photo))
+                {
+                    backupAssignment.Photo = _imageWriter.WriteBase64ToFile(model.Photo);
+                }
+
+                backupAssignment.Submitted = true;
+                backupAssignment.SubmissionDate = DateTime.Now;
+                await _assignmentBackupRepository.SaveChanges();
             }
             else // assignment of normal tour
             {
-                answer = model.Answer;
+                var assignment = await _assignmentRepository.GetById(model.Id);
+                assignment.Answer = model.Answer;
 
                 var exhibitor = await _exhibitorRepository.GetById(assignment.Question.CategoryExhibitor.ExhibitorId);
                 exhibitor.GroupsAtExhibitor--;
+
+                UpdateAssignment(assignment, model.Notes, model.Photo);
+                await _assignmentRepository.SaveChanges();
+
+                await CreateBackupAssignment(assignment, model.CreatedExhibitor);
             }
 
-            assignment.Answer = answer;
-            assignment.Notes = model.Notes;
-            if (!string.IsNullOrEmpty(model.Photo))
-            {
-                assignment.Photo = _imageWriter.WriteBase64ToFile(model.Photo);
-            }
-            assignment.Submitted = true;
-            assignment.SubmissionDate = DateTime.Now;
-
-            await _assignmentRepository.SaveChanges();
-
-            await CreateBackupAssignment(assignment, createdExhibitor);
-
-            //TODO: temporary, recursive loop anders:
-            assignment = await _assignmentRepository.GetByIdLight(assignment.Id);
-
-            return Ok(assignment);
+            return Ok( /*assignment*/);
         }
 
-        private async Task CreateBackupAssignment(Assignment assignment, bool isCreatedExhibitor)
+        private void UpdateAssignment(Assignment assignment, string notes, string photo)
         {
-            // make backup of assignment
-            var group = await _groupManager.GetGroup(User.Claims);
-//            if (group == null)
-//            {
-//                return NotFound("groupId not found in token.");
-//            }
+            assignment.Notes = notes;
+            if (!string.IsNullOrEmpty(photo))
+            {
+                assignment.Photo = _imageWriter.WriteBase64ToFile(photo);
+            }
 
+            assignment.Submitted = true;
+            assignment.SubmissionDate = DateTime.Now;
+        }
+        /**
+         * Make backup of assignment.
+         */
+        private async Task<AssignmentBackup> CreateBackupAssignment(Assignment assignment, bool isCreatedExhibitor)
+        {
+            var group = await _groupManager.GetGroup(User.Claims);
             var groupAppUser = await _authenticationManager.GetAppUserWithSchoolIncludedViaId(group.ApplicationUserId);
 
             var schoolName = groupAppUser.School.Name;
-            await _assignmentBackupRepository.Add(assignment, schoolName, group.Name, isCreatedExhibitor);
+            return await _assignmentBackupRepository.Add(assignment, schoolName, group.Name, isCreatedExhibitor);
         }
-
-//        /**
-//         * If a group decides to cancel the Assignment in the application.
-//         */
-//        [HttpDelete("RemoveAssignment/{assignmentId}")]
-//        [Authorize] //todo role group
-//        public async Task<IActionResult> Remove(int assignmentId)
-//        {
-//            var assignment = await _assignmentRepository.GetById(assignmentId);
-//            _assignmentRepository.Remove(assignment);
-//            await _assignmentRepository.SaveChanges();
-//            return Ok(new
-//            {
-//                AssignmentId = assignment.Id
-//            });
-//        }
     }
 }

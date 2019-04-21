@@ -5,7 +5,9 @@ namespace ApplicationCore.Interfaces
 {
     public interface IAssignmentBackupRepository
     {
-        Task Add(Assignment assignment, string schoolName, string groupName, bool createdExhibitor);
+        Task<AssignmentBackup> Add(Assignment assignment, string schoolName, string groupName, bool createdExhibitor);
+        Task<AssignmentBackup> GetById(int id);
+
         Task SaveChanges();
     }
 }

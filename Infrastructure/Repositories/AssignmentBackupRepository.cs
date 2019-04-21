@@ -17,7 +17,14 @@ namespace Infrastructure.Repositories
             _backupAssignments = dbContext.BackupAssignments;
         }
 
-        public async Task Add(Assignment assignment, string schoolName, string groupName, bool createdExhibitor)
+        public async Task<AssignmentBackup> GetById(int id)
+        {
+            var backupAssignment = await _backupAssignments
+                .SingleOrDefaultAsync(c => c.Id == id);
+            return backupAssignment;
+        }
+        
+        public async Task<AssignmentBackup> Add(Assignment assignment, string schoolName, string groupName, bool createdExhibitor)
         {
             var backupAssignment = new AssignmentBackup
             {
@@ -25,7 +32,9 @@ namespace Infrastructure.Repositories
                 Notes = assignment.Notes,
                 Photo = assignment.Photo,
                 Answer = assignment.Answer,
-                QuestionText = assignment.Question.QuestionText,
+                QuestionText = createdExhibitor ?
+                    "Neem een foto van de stand (een selfie van de groep met exposant op de achtergrond is ook goed)." 
+                : assignment.Question.QuestionText,
                 CreatedExhibitor = createdExhibitor,
                 GroupName = groupName,
                 SchoolName = schoolName,
@@ -36,6 +45,8 @@ namespace Infrastructure.Repositories
 
             await _backupAssignments.AddAsync(backupAssignment);
             await SaveChanges();
+
+            return backupAssignment;
         }
 
         public Task SaveChanges()
