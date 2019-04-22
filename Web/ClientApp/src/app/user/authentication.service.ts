@@ -24,6 +24,10 @@ export class AuthenticationService {
    * Checks if logged in user is an administrator.
    */
   private _isAdmin$: BehaviorSubject<boolean>;
+  /**
+   * Checks if logged in user is a superAdministrator.
+   */
+  private _isSuperAdmin$: BehaviorSubject<boolean>;
 
   /**
    * Constructor
@@ -50,6 +54,11 @@ export class AuthenticationService {
       parsedToken && parsedToken.schoolName
     );
 
+    this.initAdmin(parsedToken);
+    this._isSuperAdmin$ = new BehaviorSubject<boolean>(parsedToken && parsedToken.username == "admin");
+  }
+
+  private initAdmin(parsedToken: any) {
     this._isAdmin$ = new BehaviorSubject<boolean>(parsedToken && JSON.parse(parsedToken.isAdmin.toLowerCase()));
   }
 
@@ -73,6 +82,10 @@ export class AuthenticationService {
 
   get isModerator$(): BehaviorSubject<boolean> {
     return this._isAdmin$;
+  }
+
+  get isSuperAdmin$(): BehaviorSubject<boolean> {
+    return this._isSuperAdmin$;
   }
 
   get isLoggedIn$(): BehaviorSubject<boolean> {
@@ -119,6 +132,7 @@ export class AuthenticationService {
           const token = res.token;
           let parsedToken = AuthenticationService.parseJwt(token);
           this._isAdmin$ = new BehaviorSubject<boolean>(JSON.parse(parsedToken.isAdmin.toLowerCase()));
+          this._isSuperAdmin$ = new BehaviorSubject<boolean>(parsedToken.username == "admin");
 
           this.setTokenAndInitiateAttributes(res.token, username, parsedToken.schoolName);
           return true;
@@ -158,6 +172,7 @@ export class AuthenticationService {
 
       setTimeout(() => this._user$.next(null));
       setTimeout(() => this._isAdmin$.next(null));
+      setTimeout(() => this._isSuperAdmin$.next(null));
       setTimeout(() => this._school$.next(null));
       this.router.navigate(['/']);
     }
@@ -222,5 +237,35 @@ export class AuthenticationService {
     localStorage.setItem(this._tokenKey, token);
     this._user$.next(username);
     this._school$.next(schoolName);
+  }
+
+  getTourStatus(): Observable<boolean> {
+    return this.http.get(`${this._url}/TourStatus`)
+      .pipe(
+        map((res: any) => {
+          return res.isEnabled;
+        }),
+        catchError(err => throwError(new Error('wrong password')))
+      )
+  }
+
+  enableTour(): Observable<boolean> {
+    return this.http.post(`${this._url}/EnableTour`, {EnableTour: true})
+      .pipe(
+        map((res: any) => {
+          return res;
+        }),
+        catchError(err => throwError(new Error('wrong value')))
+      )
+  }
+
+  disableTour(): Observable<boolean> {
+    return this.http.post(`${this._url}/DisableTour`, {EnableTour: false})
+      .pipe(
+        map((res: any) => {
+          return res;
+        }),
+        catchError(err => throwError(new Error('wrong value')))
+      )
   }
 }

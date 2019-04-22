@@ -1,0 +1,9 @@
+<div *ngIf="(isSuperAdmin | async)">
+  <h1>Tour In- of Uitschakelen</h1>
+  <br/>
+
+  <h2>De Rondleiding is op dit moment: <b>{{tourIsActive ? 'actief' : 'uitgeschakeld'}}</b>.</h2>
+  <br/>
+
+ <button class="btn btn-primary" (click)="buttonClicked()">{{enableTourButtonText}}</button>
+</div> <!--END OF PAGE-->

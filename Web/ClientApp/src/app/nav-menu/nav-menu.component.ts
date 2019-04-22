@@ -45,4 +45,8 @@ export class NavMenuComponent {
   get isAdmin(): Observable<boolean> {
     return this._authService.isModerator$;
   }
+
+  get isSuperAdmin(): Observable<boolean> {
+    return this._authService.isSuperAdmin$;
+  }
 }

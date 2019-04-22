@@ -22,6 +22,7 @@ import {ResetPasswordComponent} from "../user/reset-password/reset-password.comp
 import {ChangePasswordComponent} from "../user/change-password/change-password.component";
 import {InviteRequestComponent} from "../invitation/send-or-update-request/invite-request.component";
 import {AcceptRequestComponent} from "../invitation/accept-request/accept-request.component";
+import {EnableTourComponent} from "../enableTour/enableTour.component";
 
 const appRoutes: Routes = [
   {path: 'home', component: HomeComponent},
@@ -74,6 +75,7 @@ const appRoutes: Routes = [
     component: ForgotPasswordConfirmationComponent
   },
   {path: 'reset-wachtwoord', canActivate: [AuthGuardService], component: ResetPasswordComponent},
+  {path: 'enable-tour', canActivate: [AuthGuardService], component: EnableTourComponent},
 
   /**
    * Fallback

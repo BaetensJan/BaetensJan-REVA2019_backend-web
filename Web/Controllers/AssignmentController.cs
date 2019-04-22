@@ -184,10 +184,10 @@ namespace Web.Controllers
             }
 
 //            group.AddAssignment(assignment); //todo: need fix for this, we dont want a group
-//todo:  with question null (nor a fake question => getCategories, getExhibitors, ...), but group
-//todo:  needs to remember his assignments for when he logs out (and logs back in => getGroupInfo())
+//                todo:  with question null (nor a fake question => getCategories, getExhibitors, ...), but group
+//                todo:  needs to remember his assignments for when he logs out (and logs back in => getGroupInfo())
 
-           var backupAssignment = await CreateBackupAssignment(assignment, true); // todo, when getting
+           var backupAssignment = await CreateBackupAssignment(assignment, true, ""); // todo, when getting
            assignment.Id = backupAssignment.Id;
             //todo assignments for school via web -> also get the assignment from backup (where we temporarely
             //todo save the assignments for - by group created exhibitor- assignments.
@@ -195,18 +195,7 @@ namespace Web.Controllers
             /**
              * Empty answer for android (we will re-add the exhibitor information @ submit)
              */
-            assignment.Answer = ""; 
-
-//            assignment.Question = new Question()
-//            {
-//                Id = 99999,
-//                Answered = 0,
-//                QuestionText =
-//                    "Neem een foto van de stand (een selfie van de groep met exposant op de achtergrond is ook goed).",
-//                Answer = "",
-//                CreationDate = DateTime.Now
-//            };
-
+            assignment.Answer = "";
             return Ok(assignment);
         }
 
@@ -247,7 +236,7 @@ namespace Web.Controllers
         */
         [HttpPost("SubmitAssignment")]
         [Authorize] //todo role group
-        public async Task<IActionResult> Submit([FromBody] AssignmentDTO model)
+        public async Task<IActionResult> Submit([FromBody] AssignmentDto model)
         {
             if (!ModelState.IsValid)
             {
@@ -265,7 +254,7 @@ namespace Web.Controllers
                 backupAssignment.Notes = model.Notes;
                 if (!string.IsNullOrEmpty(model.Photo))
                 {
-                    backupAssignment.Photo = _imageWriter.WriteBase64ToFile(model.Photo);
+                    backupAssignment.Photo = model.Photo;
                 }
 
                 backupAssignment.Submitted = true;
@@ -283,7 +272,7 @@ namespace Web.Controllers
                 UpdateAssignment(assignment, model.Notes, model.Photo);
                 await _assignmentRepository.SaveChanges();
 
-                await CreateBackupAssignment(assignment, model.CreatedExhibitor);
+                await CreateBackupAssignment(assignment, model.CreatedExhibitor, model.Photo);
             }
 
             return Ok( /*assignment*/);
@@ -303,13 +292,14 @@ namespace Web.Controllers
         /**
          * Make backup of assignment.
          */
-        private async Task<AssignmentBackup> CreateBackupAssignment(Assignment assignment, bool isCreatedExhibitor)
+        private async Task<AssignmentBackup> CreateBackupAssignment(Assignment assignment, bool isCreatedExhibitor,
+            string photo)
         {
             var group = await _groupManager.GetGroup(User.Claims);
             var groupAppUser = await _authenticationManager.GetAppUserWithSchoolIncludedViaId(group.ApplicationUserId);
 
             var schoolName = groupAppUser.School.Name;
-            return await _assignmentBackupRepository.Add(assignment, schoolName, group.Name, isCreatedExhibitor);
+            return await _assignmentBackupRepository.Add(assignment, schoolName, group.Name, isCreatedExhibitor, photo);
         }
     }
 }

@@ -67,7 +67,7 @@ namespace Web.Controllers
                 return NotFound(new {Message = "Group not found or groupId not in token."});
             }
 
-            var groupInfo = _groupManager.GetGroupInfo(group);
+            var groupInfo = _groupManager.GetGroupInfo(group, await _userManager.FindByNameAsync("admin"));
             return groupInfo;
         }
 

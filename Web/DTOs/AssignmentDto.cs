@@ -1,9 +1,6 @@
-using System.ComponentModel.DataAnnotations;
-using ApplicationCore.Entities;
-
 namespace Web.DTOs
 {
-    public class AssignmentDTO
+    public class AssignmentDto
     {
         public int Id { get; set; }
 

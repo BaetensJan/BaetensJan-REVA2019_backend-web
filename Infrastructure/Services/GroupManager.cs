@@ -27,13 +27,13 @@ namespace Infrastructure.Services
             _groupRepository = groupRepository;
 //            _userManager = userManager;
         }
-        
+
         public GroupManager(IGroupRepository groupRepository)
         {
             _groupRepository = groupRepository;
         }
 
-        public JsonResult GetGroupInfo(Group group)
+        public JsonResult GetGroupInfo(Group group, ApplicationUser admin)
         {
             if (group.Assignments == null) group.Assignments = new List<Assignment>();
 
@@ -59,7 +59,7 @@ namespace Infrastructure.Services
             if (currentAssignment != null && !currentAssignment.Submitted)
             {
                 numberOfSubmittedAssignments = numberOfAssignments - 1;
-                
+
 //                /**
 //                 * Check if Exhibitor created by Group.
 //                 */
@@ -72,19 +72,18 @@ namespace Infrastructure.Services
 //                    currentAssignment.WithCreatedExhibitor(
 //                        _configuration.GetValue<int>("CreatedExhibitorQuestionId"));
             }
-            
+
             var hasNoAssignments = numberOfAssignments == 0;
 
-            var startDate = _configuration.GetValue<DateTime>("StartDate");
+//            var startDate = _configuration.GetValue<DateTime>("StartDate");
+            var canStart = admin.Email.ToLower().Equals("tourIsEnabled".ToLower());
 
-
-            return new JsonResult(
+            var groupInfo = new JsonResult(
                 new
                 {
-                    startDate,
-                    canStartTour =
-                        group.Name == "groep9000" ||
-                        IsValidDate(startDate, DateTime.Now), // check if group can start Tour based on date.
+                    startDate = _configuration.GetValue<string>("StartDate"),
+                    canStartTour = group.Name == "groep9000" || canStart,
+//                        IsValidDate(startDate, DateTime.Now), // check if group can start Tour based on date.
                     hasNoAssignments, // we need this attribute, because numberOfAssignments != numberOfSubmittedAssignments
                     // (and the app only knows the latter) 
                     numberOfSubmittedAssignments,
@@ -94,6 +93,8 @@ namespace Infrastructure.Services
                     previousExhibitorXCoordinate,
                     previousExhibitorYCoordinate
                 });
+
+            return groupInfo;
         }
 
         /**

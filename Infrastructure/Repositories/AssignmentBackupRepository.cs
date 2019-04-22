@@ -24,13 +24,14 @@ namespace Infrastructure.Repositories
             return backupAssignment;
         }
         
-        public async Task<AssignmentBackup> Add(Assignment assignment, string schoolName, string groupName, bool createdExhibitor)
+        public async Task<AssignmentBackup> Add(Assignment assignment, string schoolName, string groupName, bool createdExhibitor,
+            string photo)
         {
             var backupAssignment = new AssignmentBackup
             {
                 Extra = assignment.Extra,
                 Notes = assignment.Notes,
-                Photo = assignment.Photo,
+                Photo = photo,
                 Answer = assignment.Answer,
                 QuestionText = createdExhibitor ?
                     "Neem een foto van de stand (een selfie van de groep met exposant op de achtergrond is ook goed)." 

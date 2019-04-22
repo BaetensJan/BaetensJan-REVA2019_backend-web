@@ -573,5 +573,71 @@ namespace Web.Controllers
             return new FileContentResult(Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(personalData)),
                 "text/json");
         }
+        
+        /**
+         * Enable the tour for everybody via web as admin.
+         */
+        [Authorize]
+        [HttpPost("[action]")]
+        public async Task<IActionResult> EnableTour([FromBody] EnableTourDto model)
+        {
+            var user = await _userManager.GetUserAsync(HttpContext.User);
+            if (user == null)
+            {
+                return NotFound($"Unable to load user with ID '{_userManager.GetUserId(User)}'.");
+            }
+            
+            if (model.EnableTour == false)
+            {
+                return StatusCode(500, "Wrong value");
+            }
+            
+            user.Email = "tourIsEnabled";
+            await _userManager.UpdateAsync(user);
+
+            return Ok();
+        }
+        
+        /**
+         * Disable the tour for everybody via web as admin.
+         */
+        [Authorize]
+        [HttpPost("[action]")]
+        public async Task<IActionResult> DisableTour(EnableTourDto model)
+        {
+            var user = await _userManager.GetUserAsync(HttpContext.User);
+            if (user == null)
+            {
+                return NotFound($"Unable to load user with ID '{_userManager.GetUserId(User)}'.");
+            }
+
+            if (model.EnableTour == true)
+            {
+                return StatusCode(500, "Wrong value");
+            }
+
+            user.Email = "tourIsDisabled";
+            await _userManager.UpdateAsync(user);
+            
+            return Ok();
+        }
+        
+        /**
+         * Returns true if Tour is enabled.
+         */
+        [HttpGet("[action]")]
+        public async Task<IActionResult> TourStatus()
+        {
+            var user = await _userManager.GetUserAsync(HttpContext.User);
+            if (user == null)
+            {
+                return NotFound($"Unable to load user with ID '{_userManager.GetUserId(User)}'.");
+            }
+            
+            return Ok(new
+            {
+                isEnabled = user.Email.ToLower().Equals("tourIsEnabled".ToLower())
+            });
+        }
     }
 }

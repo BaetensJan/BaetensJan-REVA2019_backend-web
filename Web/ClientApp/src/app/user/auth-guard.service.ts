@@ -38,7 +38,8 @@ export class AuthGuardService implements CanActivate {
               "/categorieen", "/categorie",
               "/exposanten", "/exposant",
               "/vragen", "/vraag", "/upload-csv",
-              "/requests", "/invite-request", "/accept-request"
+              "/requests", "/invite-request", "/accept-request",
+              "/enable-tour"
             ];
 
           if (adminPages.includes(state.url)

@@ -45,6 +45,7 @@ import { AcceptRequestComponent } from './invitation/accept-request/accept-reque
 import {InvitationService} from "./invitation/invitation.service";
 import {InviteRequestComponent} from "./invitation/send-or-update-request/invite-request.component";
 import {RequestsComponent} from "./invitation/pending-requests/requests.component";
+import {EnableTourComponent} from "./enableTour/enableTour.component";
 
 @NgModule({
   declarations: [
@@ -55,7 +56,8 @@ import {RequestsComponent} from "./invitation/pending-requests/requests.componen
     UploadCsvComponent,
     AcceptRequestComponent,
     InviteRequestComponent,
-    RequestsComponent
+    RequestsComponent,
+    EnableTourComponent,
   ],
   imports: [
     BrowserModule.withServerTransition({appId: 'ng-cli-universal'}),

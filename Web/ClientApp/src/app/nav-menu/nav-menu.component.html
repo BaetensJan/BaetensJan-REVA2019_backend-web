@@ -72,6 +72,11 @@
               <span class='glyphicon glyphicon-plus'></span> Uploaden CSV
             </a>
           </li>
+          <li [routerLinkActive]='["link-active"]' *ngIf="(isSuperAdmin | async)">
+            <a (click)='collapse()' [routerLink]="['enable-tour']">
+              <span class='glyphicon glyphicon-play'></span> Tour Inschakelen
+            </a>
+          </li>
 
           <ng-container class='clearfix' style="margin-bottom: 1.5em;"></ng-container>
 
