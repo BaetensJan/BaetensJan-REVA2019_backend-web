@@ -404,12 +404,12 @@ namespace Web.Controllers
                 return NotFound("AppUser of school has no school.");
             }
 
-            
+
             if (!school.Password.Equals(model.Password)) // todo put pw in appUser of school and check there.
             {
                 return Unauthorized();
             }
-            
+
             if (!await _userManager.IsInRoleAsync(schoolAppUser, "School"))
             {
                 Unauthorized("Not in role school.");
@@ -447,7 +447,7 @@ namespace Web.Controllers
             return exists ? Ok(new {Email = "alreadyexists"}) : Ok(new {Email = "ok"});
         }
 
-        [Route("[action]")]
+        [Route("[action]")] //todo should not be in AuthController (should be in e.g. QuestionController)
         [HttpPost]
         public async Task<IActionResult> SendQuestion([FromBody] AskQuestionDTO model)
         {
@@ -460,7 +460,8 @@ namespace Web.Controllers
                         <p>
                             {model.Message}
                         </p>", new[] {model.Email});
-            return Ok(true);
+            
+            return Ok(new {succes = true});
         }
 
         [HttpPost("[action]")]
@@ -549,7 +550,7 @@ namespace Web.Controllers
             return BadRequest(errors);
         }
 
-        [HttpPost("[action]")]
+        [HttpPost("[action]")] //todo should not be in AuthController
         public async Task<IActionResult> DownloadPersonalData()
         {
             var user = await _userManager.GetUserAsync(HttpContext.User);
@@ -573,12 +574,12 @@ namespace Web.Controllers
             return new FileContentResult(Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(personalData)),
                 "text/json");
         }
-        
+
         /**
          * Enable the tour for everybody via web as admin.
          */
         [Authorize]
-        [HttpPost("[action]")]
+        [HttpPost("[action]")] //todo should not be in AuthController
         public async Task<IActionResult> EnableTour([FromBody] EnableTourDto model)
         {
             var user = await _userManager.GetUserAsync(HttpContext.User);
@@ -586,23 +587,23 @@ namespace Web.Controllers
             {
                 return NotFound($"Unable to load user with ID '{_userManager.GetUserId(User)}'.");
             }
-            
+
             if (model.EnableTour == false)
             {
                 return StatusCode(500, "Wrong value");
             }
-            
+
             user.Email = "tourIsEnabled";
             await _userManager.UpdateAsync(user);
 
             return Ok();
         }
-        
+
         /**
          * Disable the tour for everybody via web as admin.
          */
         [Authorize]
-        [HttpPost("[action]")]
+        [HttpPost("[action]")] //todo should not be in AuthController
         public async Task<IActionResult> DisableTour(EnableTourDto model)
         {
             var user = await _userManager.GetUserAsync(HttpContext.User);
@@ -618,14 +619,14 @@ namespace Web.Controllers
 
             user.Email = "tourIsDisabled";
             await _userManager.UpdateAsync(user);
-            
+
             return Ok();
         }
-        
+
         /**
          * Returns true if Tour is enabled.
          */
-        [HttpGet("[action]")]
+        [HttpGet("[action]")] //todo should not be in AuthController
         public async Task<IActionResult> TourStatus()
         {
             var user = await _userManager.GetUserAsync(HttpContext.User);
@@ -633,7 +634,7 @@ namespace Web.Controllers
             {
                 return NotFound($"Unable to load user with ID '{_userManager.GetUserId(User)}'.");
             }
-            
+
             return Ok(new
             {
                 isEnabled = user.Email.ToLower().Equals("tourIsEnabled".ToLower())
