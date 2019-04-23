@@ -220,8 +220,8 @@ export class GroupsComponent {
   openModalUpdateLoginName(template: TemplateRef<any>) {
     const message = `Door het wijzigen van de school login zullen ook groepjes in de app moeten
     inloggen met deze nieuwe naam. Bijvoorbeeld nu: '${this._school.loginName}.groep1' wordt na de wijziging:
-     '${this._schoolLoginNameForm.get("schoolLoginName").value}.groep1'.
-    Vergeet de groepjes niet op de hoogte te brengen van de nieuwe login.`;
+     '${this._schoolLoginNameForm.get("schoolLoginName").value}.groep1' (breng de groepen hiervan op de hoogte!).
+     Ben je zeker dat je de naamswijziging wil doorvoeren?`;
 
     this.openModal(template, message);
   }
