@@ -299,7 +299,7 @@ namespace Web.Controllers
             var groupAppUser = await _authenticationManager.GetAppUserWithSchoolIncludedViaId(group.ApplicationUserId);
 
             var schoolName = groupAppUser.School.Name;
-            return await _assignmentBackupRepository.Add(assignment, schoolName, group.Name, isCreatedExhibitor, photo);
+            return await _assignmentBackupRepository.Add(assignment, schoolName, group.Name, isCreatedExhibitor, ""/*photo*/);
         }
     }
 }
