@@ -67,14 +67,13 @@
           <ng-container *ngIf="assignment.photo">
             <div class="form-group">
               <label class="col-sm-1" for="photo">Foto</label>
-              <a target="_blank" [href]="'/images/'+assignment.photo">
                 <img
                   id="photo"
-                  style="margin-left: 1em;"
+                  (click)="openPhotoModal(template, assignment.photo)"
+                  style="margin-left: 1em; cursor: pointer"
                   [src]="'/images/'+assignment.photo"
                   alt="opdracht foto"
                 />
-              </a>
             </div>
           </ng-container>
           <!--<hr style="border-color: #0f0f0f; margin-top: 5em">-->
@@ -83,3 +82,14 @@
     </div>
   </div>
 </div>
+
+<!-- delete member of group modal -->
+<ng-template #template>
+    <img
+      id="modalPhoto"
+      style="width: 500px; height: 500px;"
+      [src]="'/images/'+selectedPhotoUrl"
+      alt="opdracht foto"
+    />
+</ng-template>
+
