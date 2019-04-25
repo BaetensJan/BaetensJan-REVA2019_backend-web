@@ -39,7 +39,8 @@ export class AssignmentDetailComponent implements OnInit {
     this.router.navigate(["/opdrachten"]);
   }
 
-  hideQuestion(questionText: string){
+  hideQuestion(questionText: string) {
     return questionText.includes("foto");
   }
+
 }

@@ -50,7 +50,7 @@ namespace Infrastructure.Repositories
         public async Task<School> GetById(int id)
         {
             var school = _schools.Include(s => s.Groups).ThenInclude(g => g.Assignments).ThenInclude(a => a.Question)
-                .ThenInclude(q => q.CategoryExhibitor)
+                .ThenInclude(q => q.CategoryExhibitor).ThenInclude(ce => ce.Exhibitor)
                 .SingleOrDefaultAsync(c => c.Id == id);
             return await school;
         }
@@ -73,7 +73,8 @@ namespace Infrastructure.Repositories
 
         public async Task<School> GetBySchoolLoginName(string schoolLoginName)
         {
-            var school = _schools.Include(s => s.Groups).SingleOrDefaultAsync(s => s.LoginName.Trim().ToLower().Equals(schoolLoginName.ToLower()));
+            var school = _schools.Include(s => s.Groups)
+                .SingleOrDefaultAsync(s => s.LoginName.Trim().ToLower().Equals(schoolLoginName.ToLower()));
             return await school;
         }
 

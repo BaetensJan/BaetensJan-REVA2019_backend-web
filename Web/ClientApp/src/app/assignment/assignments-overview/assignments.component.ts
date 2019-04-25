@@ -1,15 +1,16 @@
 import * as jsPDF from "jspdf";
-import {ChangeDetectorRef, Component} from "@angular/core";
+import {ChangeDetectorRef, Component, ElementRef, ViewChild} from "@angular/core";
 import * as JSZip from "jszip";
+import * as html2canvas from "html2canvas";
 import {saveAs} from 'file-saver';
 import {Router} from "@angular/router";
-import * as html2canvas from 'html2canvas';
 import {Observable, Observer} from "rxjs";
 import {Group} from "../../models/group.model";
 import {GroupsDataService} from "../../groups/groups-data.service";
 import {PageChangedEvent} from 'ngx-bootstrap/pagination';
 import {School} from "../../models/school.model";
 import {SchoolDataService} from "../../schools/school-data.service";
+import {Assignment} from "../../models/assignment.model";
 
 function parseJwt(token) {
   if (!token) {
@@ -30,6 +31,9 @@ function parseJwt(token) {
   styleUrls: ['./assignments.component.css']
 })
 export class AssignmentsComponent {
+
+  @ViewChild('myAssignmentDiv') myAssignmentDiv: ElementRef;
+
 
   currentPage = 1; // the current page in the pagination (e.g. page 1, 2 ...)
   getIndex(index: number): number {
@@ -151,56 +155,57 @@ export class AssignmentsComponent {
    *
    * @param row
    */
-  pdfDownload(row: Group) {
-    const doc = new jsPDF();
-    doc.text("Groep: " + row.name, 10, 10);
-    doc.text("Aantal bezochte standen: " + row.assignments.length, 10, 20);
-    let i = 0;
-    row.assignments.forEach(f => {
-        if (i == 0) {
-          if (i > 0) {
-            doc.addPage();
-          }
-          doc.text("Stand: " + (i + 1) + " :" + f.question.exhibitor.name, 10, 40);
+  async pdfDownload(row: Group) {
+    let doc = new jsPDF();
+    let page = 1;
 
-          if (!f.extra) {
-            doc.text("Categories: " + f.question.category.name, 10, 50);
-            //doc.text("categories: " + f.exhibitor.categories.map(a => a.name).join(", "), 10, 50);
-            doc.text("Vraag: " + f.question.questionText, 10, 60);
-          }
+    for (let i = 0; i < row.assignments.length; i++) {
+      doc.setPage(page);
+      await this.getImageForAssignment(doc, row.assignments[i], i + 1);
+      page++;
+      doc.addPage("a4", "p");
+    }
+    doc.deletePage(page);
+    await doc.save(`${row.name}.pdf`)
+  }
 
-          doc.text("Antwoord: " + f.answer, 10, 70);
-          doc.text("Notities: " + f.notes, 10, 80);
-          if (f.photo != null) {
-            this.addImage(f.photo, doc); //Todo: dit werkt na de 2x keer klikken, prolly iets met caching te maken.
-            setTimeout(() => {
-              // this.addImage(f.photo, doc);
-            }, 100000);
-          }
-          i++;
-        } else {
-          if (i > 0) {
-            doc.addPage();
-          }
-          if (!f.extra) {
-            doc.text("Stand " + (i + 1) + " :" + f.question.exhibitor.name, 10, 10);
-            doc.text("Categories: " + f.question.category.name, 10, 20);
-            //doc.text("categories: " + f.exhibitor.categories.map(a => a.name).join(", "), 10, 20);
-            doc.text("Vraag: " + f.question.questionText, 10, 50);
-          }
-          doc.text("Antwoord: " + f.answer, 10, 60);
-          doc.text("Notities: " + f.notes, 10, 70);
-          if (f.photo != null) {
-            this.addImage(f.photo, doc); //Todo: dit werkt na de 2x keer klikken, prolly iets met caching te maken.
-            setTimeout(() => {
-              // this.addImage(f.photo, doc);
-            }, 100000);
-          }
-          i++;
-        }
-      }
-    );
-    doc.save(row.name + "_antwoorden.pdf");
+  async getImageForAssignment(doc: jsPDF, assignment: Assignment, index: number) {
+    doc.setFontSize(16);
+    doc.text(20, 20, this.splitText(`Opdracht ${index}`));
+    doc.setFontSize(12);
+    let array = [];
+    array.push('');
+    array.push('');
+    array.push(...this.splitText(`Stand: ${assignment.question.exhibitor.name}`));
+    array.push('');
+    array.push(...this.splitText(`Categorie: ${assignment.question.category.name}`));
+    array.push('');
+    array.push(...this.splitText(`Vraag: ${assignment.question.questionText}`));
+    array.push('');
+    array.push(...this.splitText(`Antwoord van groep: ${assignment.answer}`));
+    array.push('');
+    array.push(...this.splitText(`Model antwoord: ${assignment.question.answer}`));
+    array.push('');
+    array.push(...this.splitText(`Notities: ${assignment.notes}`));
+    array.push('');
+    array.push(...this.splitText(`Foto:`));
+    array.push('');
+    doc.text(20, 20, array);
+    let dataURL = await new Promise((resolve, reject) => {
+      let img = new Image();
+      img.setAttribute('crossOrigin', 'anonymous');
+      img.onload = function () {
+        let canvas = document.createElement('canvas');
+        canvas.width = img.naturalWidth; // or 'width' if you want a special/scaled size
+        canvas.height = img.naturalHeight; // or 'height' if you want a special/scaled size
+
+        canvas.getContext('2d').drawImage(img, 0, 0);
+        resolve(canvas.toDataURL('image/png'));
+      };
+      img.onerror = reject;
+      img.src = `${'/images/' + assignment.photo}`;
+    });
+    doc.addImage(dataURL, 'JPEG', 20, 20 + (array.length * 5), 40, 40);
   }
 
   /**
@@ -231,11 +236,11 @@ export class AssignmentsComponent {
           if (f.photo != null) {
             var data = document.getElementById("imageid");
             html2canvas(data).then(canvas => {
-              var imgconverted = canvas.toDataURL("data:image/png;base64");
+              var imgconverted = canvas.toDataURL("data:image/jpg;base64");
 
               setTimeout(() => {    //<<<---    using ()=> syntax
               }, 300000);
-              doc.addImage(imgconverted, "PNG", 10, 90, 100, 100);
+              doc.addImage(imgconverted, "JPG", 10, 90, 100, 100);
             });
           }
           i++;
@@ -251,13 +256,14 @@ export class AssignmentsComponent {
           doc.text("Antwoord: " + f.answer, 10, 70);
           doc.text("Notities: " + f.notes, 10, 50);
           if (f.photo != null) {
+
             var data = document.getElementById("imageid");
             html2canvas(data).then(canvas => {
-              var imgconverted = canvas.toDataURL("data:image/png;base64");
+              var imgconverted = canvas.toDataURL("data:image/jpg;base64");
 
               setTimeout(() => {    //<<<---    using ()=> syntax
               }, 300000);
-              doc.addImage(imgconverted, "PNG", 10, 90, 100, 100);
+              doc.addImage(imgconverted, "JPG", 10, 90, 100, 100);
             });
           }
           i++;
@@ -329,8 +335,8 @@ export class AssignmentsComponent {
     // This will draw image
     ctx.drawImage(img, 0, 0);
     // Convert the drawn image to Data URL
-    var dataURL = canvas.toDataURL("image/png");
-    return dataURL.replace(/^data:image\/(png|jpg);base64,/, "");
+    var dataURL = canvas.toDataURL("image/jpg");
+    return dataURL.replace(/^data:image\/jpg;base64,/, "");
   }
 
   private addImage(photoURL, doc) {
@@ -340,7 +346,12 @@ export class AssignmentsComponent {
       formData.append('file', imageCanvas);
       let imgconverted = formData.get("file");
 
-      doc.addImage(imgconverted, "PNG", 10, 90, 100, 100);
+      doc.addImage(imgconverted, "JPG", 10, 90, 100, 100);
     });
+  }
+
+  private splitText(text) {
+    let doc = new jsPDF();
+    return doc.splitTextToSize(text, 170);
   }
 }

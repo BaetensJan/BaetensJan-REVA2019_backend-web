@@ -95,8 +95,9 @@ namespace ApplicationCore.Services
          * value that reflects the weight, holding in account the distance and number of groups standing
          * at the exhibitor, as measure of potential.
          */
-        private double GetWeight(Exhibitor exhibitor, double distance, double maxDistance, int maxVisitorsAtExhibitor,
-            int maxTotalVisitors)
+        private double GetWeight(Exhibitor exhibitor, double distance, double maxDistance,
+            double maxVisitorsAtExhibitor,
+            double maxTotalVisitors)
         {
             // every weight is a number between 0 and 1.
             var distanceWeight = distance / maxDistance;

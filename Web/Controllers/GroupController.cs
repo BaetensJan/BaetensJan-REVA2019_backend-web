@@ -121,7 +121,7 @@ namespace Web.Controllers
         public async Task<IActionResult> CheckGroupName(string groupName)
         {
             groupName = groupName.ToLower();
-            
+
             var applicationUserIdClaim = User.Claims.SingleOrDefault(c => c.Type == ClaimTypes.Sid);
 
             if (applicationUserIdClaim == null)
@@ -198,7 +198,7 @@ namespace Web.Controllers
         [Authorize]
         public async Task<IActionResult> Groups(int schoolId)
         {
-            var school = await _schoolRepository.GetById(schoolId);
+            var school = await _schoolRepository.GetByIdLight(schoolId);
             if (school != null)
             {
                 return Ok(school.Groups);
@@ -405,7 +405,7 @@ namespace Web.Controllers
         public async Task<ActionResult> UpdateGroup([FromRoute] int id, [FromBody] GroupUpdateDTO model)
         {
             model.Name = model.Name.ToLower();
-            
+
             if (!ModelState.IsValid)
             {
                 return BadRequest();
@@ -486,9 +486,9 @@ namespace Web.Controllers
             {
                 return StatusCode(500, "Group not found or group members length < 2.");
             }
-            
+
             await _groupRepository.SaveChanges();
-            
+
             return Ok(group);
         }
 
