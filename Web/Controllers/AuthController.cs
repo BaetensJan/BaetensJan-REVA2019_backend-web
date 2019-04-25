@@ -149,7 +149,7 @@ namespace Web.Controllers
             await _teacherRequestRepository.SaveChanges();
 
             // send email to teacher.
-            await SendEmailToTeacher(teacherRequest, password);
+            await SendEmailToTeacher(user, teacherRequest, password);
 
             return Ok(
                 new
@@ -198,33 +198,58 @@ namespace Web.Controllers
         /**
          * Sends an email to the Teacher when the TeacherRequest has been accepted by admin on web.
          */
-        private async Task SendEmailToTeacher(TeacherRequest teacherRequest, string password)
+        private async Task SendEmailToTeacher(ApplicationUser user, TeacherRequest teacherRequest, string password)
         {
             //todo change email once out of sandbox (amazon)
             await _emailSender.SendMailAsync(teacherRequest.Email,
                 "Uw Account voor de REVA app is hier!",
                 $@"
                         <h1>Uw Reva app account werd aangemaakt!</h1>
+                        <h3>Web gedeelte</h3>
                         <p>
-                        Uw login gegevens:
+                        Hier kan u groepen aanmaken en ingediende opdrachten bekijken.
+                            U kan met volgende gegevens inloggen in het web gedeelte
+                            op volgende link: <strong>http://app.reva.be/login</strong>.
+                        </p>                                 
+                        <p>
+                            Gebruikersnaam: {teacherRequest.Email}
                         </p>
                         <p>
-                        Gebruikersnaam: {teacherRequest.Email}
-                        </p>
-                        <p>
-                        Wachtwoord: {password}
+                            Wachtwoord: {password}
                         </p>
                         <br>
-                        <p>U kan met deze gegevens inloggen via volgende link: <strong>http://app.reva.be/login</strong></p>
                         <br>
+                        <h3>App (android) gedeelte</h3>
+                        <p>
+                            Hier kan je als school inloggen om groepen aan te maken.
+                        </p>    
+                        <p>
+                            Of je kan inloggen als groep, als er groepen zijn aangemaakt in het web gedeelte. 
+                        </p>
+                        <br>
+                        <p>
+                            Met volgende gegevens kan u inloggen in de app als school, om groepen zal 
+                            aanmaken in de app):
+                        </p>
+                        <p>
+                            {user.School.LoginName} 
+                        </p>
+                        <p>
+                            {user.School.Password} 
+                        </p>
+                        <br/>
+                        <p>
+                            U kan ook kiezen om groepen in het webplatform aan te maken. Met die gegevens zullen groepen
+                            meteen kunnen inloggen in de app.
+                        </p>
+                        <br/>
                         <b>
-                        Verander uw wachtwoord na inloggen!
+                            Verander uw wachtwoord na inloggen!
                         </b>
                         <br>
                         <br>
                         <br>
                         <footer>
-                        <p>Deze email werd automatisch verzonden! Reageer niet op dit bericht.</p>
                         <p>Contacteer freddy@reva.be bij problemen.</p>
                         </footer>", new string[] { });
         }
@@ -459,7 +484,7 @@ namespace Web.Controllers
                         <p>
                             {model.Message}
                         </p>", new[] {model.Email});
-            
+
             return Ok(new {succes = true});
         }
 

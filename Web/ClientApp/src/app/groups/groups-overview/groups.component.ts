@@ -84,15 +84,16 @@ export class GroupsComponent {
    * @param _appShareService
    * @param _authService
    */
-  constructor(private router: Router,
-              private _groupsDataService: GroupsDataService,
-              private _groupSharedService: GroupSharedService,
-              private _schoolDataService: SchoolDataService,
-              private _assignmentDataService: AssignmentDataService,
-              private _fb: FormBuilder,
-              private _modalService: BsModalService,
-              private _appShareService: AppShareService,
-              private _authService: AuthenticationService) {
+  constructor(
+    private router: Router,
+    private _groupsDataService: GroupsDataService,
+    private _groupSharedService: GroupSharedService,
+    private _schoolDataService: SchoolDataService,
+    private _assignmentDataService: AssignmentDataService,
+    private _fb: FormBuilder,
+    private _modalService: BsModalService,
+    private _appShareService: AppShareService,
+    private _authService: AuthenticationService) {
   }
 
   private _applicationStartDate: Date;

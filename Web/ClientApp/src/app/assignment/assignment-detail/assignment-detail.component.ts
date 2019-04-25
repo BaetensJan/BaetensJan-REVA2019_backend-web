@@ -1,7 +1,8 @@
-import {Component, OnInit} from '@angular/core';
+import {Component, OnInit, TemplateRef} from '@angular/core';
 import {ActivatedRoute, Router} from "@angular/router";
 import {Group} from "../../models/group.model";
 import {GroupsDataService} from "../../groups/groups-data.service";
+import {BsModalRef, BsModalService} from "ngx-bootstrap";
 
 @Component({
   selector: 'app-assignment-detail',
@@ -13,10 +14,14 @@ export class AssignmentDetailComponent implements OnInit {
   private sub: any;
   public group: Group;
   public groupId: number;
+  public selectedPhotoUrl: string;
+  modalRef: BsModalRef; // modal that appears, asking for confirmation to remove a member from a group.
 
-  constructor(private router?: Router,
-              private route?: ActivatedRoute,
-              private _groupsDataService?: GroupsDataService
+  constructor(
+    private _modalService: BsModalService,
+    private router?: Router,
+    private route?: ActivatedRoute,
+    private _groupsDataService?: GroupsDataService,
   ) {
   }
 
@@ -43,4 +48,13 @@ export class AssignmentDetailComponent implements OnInit {
     return questionText.includes("foto");
   }
 
+  // goToBlankPageWithPhoto(photoUrl: string){
+  //   this.router.navigate(['/opdracht-foto'], {queryParams: {photoId: photoUrl}});
+  // }
+
+  /** MODAL / POPUP **/
+  openPhotoModal(template: TemplateRef<any>, assignmentPhotoUrl: string) {
+    this.selectedPhotoUrl = assignmentPhotoUrl;
+    this.modalRef = this._modalService.show(template, {class: 'modal-sm'});
+  };
 }
