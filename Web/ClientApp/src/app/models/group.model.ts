@@ -33,6 +33,7 @@ export class Group {
     if (assignments) assignments.forEach(a => a.question = Question.fromJSON(a.question));
 
     this._assignments = assignments;
+
     if (!members) {
       this._members = [];
     } else this._members = members;
@@ -44,7 +45,12 @@ export class Group {
    * @param json
    */
   static fromJSON(json: any): Group {
-    const rec = new Group(json.name, json.assignments, json.members);
+    const assignments = json.assignments;
+    if (assignments){
+      assignments.sort((a:any, b:any) =>
+        (new Date(a.creationDate).getTime() - new Date(b.creationDate).getTime()))
+    }
+    const rec = new Group(json.name, assignments, json.members);
 
     rec._id = json.id;
     return rec;

@@ -12,9 +12,6 @@ describe('AssignmentsComponent', () => {
       declarations: [AssignmentsComponent],
       imports: [
         NoopAnimationsModule,
-        MatPaginatorModule,
-        MatSortModule,
-        MatTableModule,
       ]
     })
       .compileComponents();
