@@ -1,7 +1,6 @@
 import * as jsPDF from "jspdf";
 import {ChangeDetectorRef, Component, ElementRef, ViewChild} from "@angular/core";
 import * as JSZip from "jszip";
-import * as html2canvas from "html2canvas";
 import {saveAs} from 'file-saver';
 import {Router} from "@angular/router";
 import {Observable, Observer} from "rxjs";
@@ -161,7 +160,7 @@ export class AssignmentsComponent {
 
     for (let i = 0; i < row.assignments.length; i++) {
       doc.setPage(page);
-      await this.getImageForAssignment(doc, row.assignments[i], i + 1);
+      await this.getAssignment(doc, row.assignments[i], i + 1);
       page++;
       doc.addPage("a4", "p");
     }
@@ -169,7 +168,7 @@ export class AssignmentsComponent {
     await doc.save(`${row.name}.pdf`)
   }
 
-  async getImageForAssignment(doc: jsPDF, assignment: Assignment, index: number) {
+  async getAssignment(doc: jsPDF, assignment: Assignment, index: number) {
     doc.setFontSize(16);
     doc.text(20, 20, this.splitText(`Opdracht ${index}`));
     doc.setFontSize(12);
@@ -191,92 +190,52 @@ export class AssignmentsComponent {
     array.push(...this.splitText(`Foto:`));
     array.push('');
     doc.text(20, 20, array);
-    let dataURL = await new Promise((resolve, reject) => {
-      let img = new Image();
-      img.setAttribute('crossOrigin', 'anonymous');
-      img.onload = function () {
-        let canvas = document.createElement('canvas');
-        canvas.width = img.naturalWidth; // or 'width' if you want a special/scaled size
-        canvas.height = img.naturalHeight; // or 'height' if you want a special/scaled size
+    if (assignment.photo) {
+      try {
+        let dataURL = await new Promise((resolve, reject) => {
+          let img = new Image();
+          img.setAttribute('crossOrigin', 'anonymous');
+          img.onload = function () {
+            let canvas = document.createElement('canvas');
+            canvas.width = img.naturalWidth; // or 'width' if you want a special/scaled size
+            canvas.height = img.naturalHeight; // or 'height' if you want a special/scaled size
 
-        canvas.getContext('2d').drawImage(img, 0, 0);
-        resolve(canvas.toDataURL('image/png'));
-      };
-      img.onerror = reject;
-      img.src = `${'/images/' + assignment.photo}`;
-    });
-    doc.addImage(dataURL, 'JPEG', 20, 20 + (array.length * 5), 40, 40);
+            canvas.getContext('2d').drawImage(img, 0, 0);
+            resolve(canvas.toDataURL('image/png'));
+          };
+          img.onerror = reject;
+          img.src = `${'/images/' + assignment.photo}`;
+        });
+        if (dataURL)
+          doc.addImage(dataURL, 'JPEG', 20, 20 + (array.length * 5), 80, 80);
+      } catch (e) {
+      }
+    }
   }
 
   /**
    * Generates pdf files for all groups and download all the pdf's
    */
-  downloadAllPDF() {
-    let teller = 0;
-    var zip = new JSZip();
-    for (let i = 0; i < this._groups.length; i++) {
-      let row = this._groups[teller];
-      const doc = new jsPDF();
-      doc.text("Groep: " + row.name, 10, 10);
-      doc.text("Aantal bezochte standen: " + row.assignments.length, 10, 20);
-      let i = 0;
-      // item.finishedAssignments.forEach(f => {
-      row.assignments.forEach(f => {
-        if (i == 0) {
-          if (i > 0) {
-            doc.addPage();
-          }
-          if (!f.extra) {
-            doc.text("Stand " + (i + 1) + " :" + f.question.exhibitor.name, 10, 40);
-            doc.text("categorie: " + f.question.category.name, 10, 50);
-            doc.text("Vraag: " + f.question.questionText, 10, 60);
-          }
-          doc.text("Antwoord: " + f.answer, 10, 70);
-          doc.text("Notities: " + f.notes, 10, 80);
-          if (f.photo != null) {
-            var data = document.getElementById("imageid");
-            html2canvas(data).then(canvas => {
-              var imgconverted = canvas.toDataURL("data:image/jpg;base64");
+  async downloadAllPDF() {
+    let doc, page, row;
+    let zip = new JSZip();
 
-              setTimeout(() => {    //<<<---    using ()=> syntax
-              }, 300000);
-              doc.addImage(imgconverted, "JPG", 10, 90, 100, 100);
-            });
-          }
-          i++;
-        } else {
-          if (i > 0) {
-            doc.addPage();
-          }
-          if (!f.extra) {
-            doc.text("Stand " + (i + 1) + " :" + f.question.exhibitor.name, 10, 10);
-            doc.text("categorie: " + f.question.category.name, 10, 20);
-            doc.text("Vraag: " + f.question.questionText, 10, 60);
-          }
-          doc.text("Antwoord: " + f.answer, 10, 70);
-          doc.text("Notities: " + f.notes, 10, 50);
-          if (f.photo != null) {
+    for (let j = 0; j < this._groups.length; j++) {
+      doc = new jsPDF();
+      page = 1;
+      row = this._groups[j];
 
-            var data = document.getElementById("imageid");
-            html2canvas(data).then(canvas => {
-              var imgconverted = canvas.toDataURL("data:image/jpg;base64");
-
-              setTimeout(() => {    //<<<---    using ()=> syntax
-              }, 300000);
-              doc.addImage(imgconverted, "JPG", 10, 90, 100, 100);
-            });
-          }
-          i++;
-        }
-      });
-      zip.file(row.name + "_antwoorden.pdf", doc.output());
-
-      teller++;
+      for (let i = 0; i < row.assignments.length; i++) {
+        doc.setPage(page);
+        await this.getAssignment(doc, row.assignments[i], i + 1);
+        page++;
+        doc.addPage("a4", "p");
+      }
+      doc.deletePage(page);
+      await zip.file(row.name + "_antwoorden.pdf", await doc.output('blob'));
     }
-    zip.generateAsync({type: "blob"}).then(function (content) {
-      // see FileSaver.js
-      saveAs(content, "alle_antwoorden.zip");
-    });
+    let content = await zip.generateAsync({type: "blob"});
+    saveAs(content, "alle_antwoorden.zip");
   }
 
   detailAssignment(group: Group) {
