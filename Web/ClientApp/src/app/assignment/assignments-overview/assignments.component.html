@@ -54,6 +54,8 @@
   <pagination *ngIf="filteredGroups" [totalItems]="filteredGroups.length" (pageChanged)="pageChanged($event)"
               [itemsPerPage]=maxNumberOfGroupsPerPage [(ngModel)]="currentPage"></pagination>
 </div>
+<div #myAssignmentDiv></div>
+
 
 <ng-template #noGroups>
   <h3>Er zijn nog geen door groepen ingediende opdrachten.</h3>

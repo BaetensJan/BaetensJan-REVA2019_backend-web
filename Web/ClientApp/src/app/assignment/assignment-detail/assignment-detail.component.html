@@ -13,7 +13,7 @@
     <div class="panel panel-default container-fluid">
       <div class="panel-heading row">
         <div class="col-md-4">
-          <h3 class="panel-title">Opdracht {{i + 1}}<br></h3>
+          <h3 class="panel-title">Opdracht {{i + 1}}</h3>
         </div>
       </div>
       <br><br>
@@ -28,23 +28,23 @@
               <label class="col-sm-1" for="createdExhibitor">Door Groep aangemaakte Exposant: </label>
               <p class="col-sm-10" id="createdExhibitor">Deze Exposant is door de groep aangemaakt in een Extra Ronde,
                 na
-                het normaal verloop van de rondleiding.</p><br>
+                het normaal verloop van de rondleiding.</p>
             </div>
           </div>
           <ng-template #normalAssignment>
             <div class="form-group">
-              <label class="col-sm-1" for="stand">Stand</label>
-              <p class="col-sm-10" id="stand">{{assignment.question.exhibitor.name}}</p><br>
+              <label class="col-sm-2" for="stand">Stand</label>
+              <p class="col-sm-10" id="stand">{{assignment.question.exhibitor.name}}</p>
             </div>
             <div class="form-group">
-              <label class="col-sm-1" for="aantal">Categorie</label>
-              <p class="col-sm-10" id="aantal">{{assignment.question.category.name}}</p><br>
+              <label class="col-sm-2" for="aantal">Categorie</label>
+              <p class="col-sm-10" id="aantal">{{assignment.question.category.name}}</p>
             </div>
           </ng-template>
 
           <div class="form-group">
-            <label class="col-sm-1" for="question">Vraag</label>
-            <p class="col-sm-10" id="question">{{assignment.question.questionText}}</p><br>
+            <label class="col-sm-2" for="question">Vraag</label>
+            <p class="col-sm-10" id="question">{{assignment.question.questionText}}</p>
           </div>
 
           <ng-container *ngIf="!hideQuestion(assignment.question.questionText)">
@@ -54,7 +54,7 @@
             </div>
             <div class="form-group">
               <label class="col-sm-2" for="answer"> Model antwoord</label>
-              <p class="col-sm-10" id="answer">{{assignment.question.answer}}</p><br>
+              <p class="col-sm-10" id="answer">{{assignment.question.answer}}</p>
             </div>
           </ng-container>
 

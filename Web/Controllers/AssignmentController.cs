@@ -85,7 +85,8 @@ namespace Web.Controllers
         * RETURN an Assignment, containing an Exhibitor object that represent the current, newly assigned Exhibitor.
         */
         [HttpGet("[Action]/{categoryId}/{previousExhibitorId}/{isExtraRound}")]
-        [Authorize] //todo role group
+        [Authorize]
+        //todo role group
         public async Task<IActionResult> CreateAssignment(int categoryId, int previousExhibitorId, bool isExtraRound)
         {
             var group = await _groupManager.GetGroup(User.Claims);
@@ -152,7 +153,8 @@ namespace Web.Controllers
         * A group has created a new Exhibitor in the Extra Tour, as they didn't find the Exhibitor in the list.
         */
         [HttpPost("[Action]")]
-        [Authorize] //todo role group
+        [Authorize]
+        //todo role group
         public async Task<IActionResult> CreateAssignmentNewExhibitor([FromBody] CreatedExhibitorDto createdExhibitor)
         {
             //We take a specific question for this assignment, as an assignment needs a question
@@ -187,8 +189,8 @@ namespace Web.Controllers
 //                todo:  with question null (nor a fake question => getCategories, getExhibitors, ...), but group
 //                todo:  needs to remember his assignments for when he logs out (and logs back in => getGroupInfo())
 
-           var backupAssignment = await CreateBackupAssignment(assignment, true, ""); // todo, when getting
-           assignment.Id = backupAssignment.Id;
+            var backupAssignment = await CreateBackupAssignment(assignment, true, ""); // todo, when getting
+            assignment.Id = backupAssignment.Id;
             //todo assignments for school via web -> also get the assignment from backup (where we temporarely
             //todo save the assignments for - by group created exhibitor- assignments.
 
@@ -211,7 +213,8 @@ namespace Web.Controllers
         * RETURN an Assignment, containing an Exhibitor object that represent the current, newly assigned Exhibitor.
         */
         [HttpGet("[Action]/{categoryId}/{exhibitorId}")]
-        [Authorize] //todo role group
+        [Authorize]
+        //todo role group
         public async Task<IActionResult> CreateAssignmentOfExhibitorAndCategory(int categoryId, int exhibitorId)
         {
             var group = await _groupManager.GetGroup(User.Claims);
@@ -235,7 +238,8 @@ namespace Web.Controllers
         * When a group submits an Assignment in the application, this controller method will be called.
         */
         [HttpPost("SubmitAssignment")]
-        [Authorize] //todo role group
+        [Authorize]
+        //todo role group
         public async Task<IActionResult> Submit([FromBody] AssignmentDto model)
         {
             if (!ModelState.IsValid)
@@ -289,6 +293,7 @@ namespace Web.Controllers
             assignment.Submitted = true;
             assignment.SubmissionDate = DateTime.Now;
         }
+
         /**
          * Make backup of assignment.
          */
@@ -299,7 +304,8 @@ namespace Web.Controllers
             var groupAppUser = await _authenticationManager.GetAppUserWithSchoolIncludedViaId(group.ApplicationUserId);
 
             var schoolName = groupAppUser.School.Name;
-            return await _assignmentBackupRepository.Add(assignment, schoolName, group.Name, isCreatedExhibitor, ""/*photo*/);
+            return await _assignmentBackupRepository.Add(assignment, schoolName, group.Name, isCreatedExhibitor,
+                "" /*photo*/);
         }
     }
 }
