@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using ApplicationCore.Entities;
 using ApplicationCore.Interfaces;
@@ -19,7 +20,20 @@ namespace Infrastructure.Repositories
 
         public async Task<List<School>> GetAll()
         {
-            return await _schools.Include(a => a.Groups).ThenInclude(g => g.Assignments).ToListAsync();
+            var schools = _schools.Include(a => a.Groups)
+                .ThenInclude(g => g.Assignments)
+                .ThenInclude(f => f.Question)
+                .ThenInclude(q => q.CategoryExhibitor)
+                .ThenInclude(ce => ce.Exhibitor)
+                
+                .Include(a => a.Groups)
+                .ThenInclude(g => g.Assignments)
+                .ThenInclude(f => f.Question)
+                .ThenInclude(q => q.CategoryExhibitor)
+                .ThenInclude(ce => ce.Category)
+                .Select(s => MapSchool(s)).ToListAsync();
+
+            return await schools;
         }
 
         private static School MapSchool(School school)

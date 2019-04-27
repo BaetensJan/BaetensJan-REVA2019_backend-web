@@ -169,6 +169,7 @@ export class AssignmentsComponent {
   }
 
   async getAssignment(doc: jsPDF, assignment: Assignment, index: number) {
+    console.log(assignment);
     doc.setFontSize(16);
     doc.text(20, 20, this.splitText(`Opdracht ${index}`));
     doc.setFontSize(12);
@@ -192,7 +193,9 @@ export class AssignmentsComponent {
     doc.text(20, 20, array);
     if (assignment.photo) {
       try {
-        let dataURL = await new Promise((resolve, reject) => {
+        let width = 0;
+        let height = 0;
+        let dataURL: any = await new Promise((resolve, reject) => {
           let img = new Image();
           img.setAttribute('crossOrigin', 'anonymous');
           img.onload = function () {
@@ -202,12 +205,18 @@ export class AssignmentsComponent {
 
             canvas.getContext('2d').drawImage(img, 0, 0);
             resolve(canvas.toDataURL('image/png'));
+
+            width = canvas.width;
+            height = canvas.height;
           };
           img.onerror = reject;
           img.src = `${'/images/' + assignment.photo}`;
+
         });
-        if (dataURL)
-          doc.addImage(dataURL, 'JPEG', 20, 20 + (array.length * 5), 80, 80);
+        if (dataURL) {
+          const scale = 100;
+          doc.addImage(dataURL, 'JPEG', 20, 20 + (array.length * 5), width / width * scale, height / width * scale);
+        }
       } catch (e) {
       }
     }

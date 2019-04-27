@@ -28,7 +28,12 @@ export class School {
     this._name = name;
     this._loginName = loginName;
     this._password = password;
-    this._groups = groups;
+    if (groups) {
+      this._groups = [];
+      groups.forEach(g => {
+        this._groups.push(Group.fromJSON(g));
+      });
+    }
     this._start = start ? start : new Date();
   }
 
