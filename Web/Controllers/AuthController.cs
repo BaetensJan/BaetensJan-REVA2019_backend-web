@@ -333,6 +333,7 @@ namespace Web.Controllers
         [HttpPost("[Action]")]
         public async Task<ActionResult> LoginAndroidGroup([FromBody] LoginGroupDTO model)
         {
+            return StatusCode(500, "De beurs is voorbij!"); //todo
             if (!ModelState.IsValid)
             {
                 return BadRequest();
@@ -408,6 +409,8 @@ namespace Web.Controllers
         [HttpPost("[Action]")]
         public async Task<ActionResult> LoginAndroidSchool([FromBody] LoginDTO model)
         {
+            return StatusCode(500, "De beurs is voorbij!"); //todo
+
             if (!ModelState.IsValid)
             {
                 return BadRequest();
